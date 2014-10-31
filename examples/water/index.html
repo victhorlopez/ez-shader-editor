@@ -8,7 +8,7 @@
         <meta property="og:image" content="" />
         -->
 
-        <title>LiteGUI Demo</title>
+        <title>Real Scene</title>
         <style type='text/css'></style>
         <link rel="stylesheet" type="text/css" href="../../lib/litegui/build/litegui.css">
 
@@ -22,31 +22,11 @@
             <script type="text/javascript" src="../../lib/litegui/build/litegui.js"></script>
             <script type="text/javascript" src="../../lib/rendeer/build/rendeer.js"></script>
 
-            <script type="text/javascript" src="js/gui.js"></script>
             <script type="text/javascript" src="js/app.js"></script>
 
             </title>
     </head>
     <body>
-        <div id="wrap"  class="fullscreen">
-            <div id="header" class="ineditor">
-                <div id="menu-bar" class="panel-menubar ineditor"></div>
-                <div id="title-bar">
-                    <h1>LiteGUI</h1>
-                    <div id="login-area">
-                        Logged as <a href="#">Boo</a>
-                    </div>
-                </div>
-            </div>
-            <div id="main-area">
-                <div id="work-area">
-                </div>
-            </div>
-            <script>
-                $(window).load(function () {
-                    APP.init();
-                });
-            </script>
-        </div>
+        <script>APP.init();</script>
     </body>
 </html>
