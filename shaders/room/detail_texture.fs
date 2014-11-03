@@ -11,11 +11,10 @@ varying vec3 v_pos;
 varying vec2 v_coord;
 
 
-//http://blogs.msdn.com/b/shawnhar/archive/2008/11/03/detail-textures.aspx
 void main() 
 {
         normalize(v_normal);
         vec4 tex_color = texture2D(u_ambient_texture, v_coord);
-        vec4 detail_color = texture2D(u_detail_texture, v_coord );
-	gl_FragColor = u_color * tex_color * detail_color * 2.0;
+        //vec4 detail_color = texture2D(u_detail_texture, v_coord );
+	gl_FragColor = u_color * tex_color ;
 }

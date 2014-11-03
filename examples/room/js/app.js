@@ -132,6 +132,7 @@ var APP =
             },
             moveCamera: function (delta)
             {
+                console.log(gl);
                 console.log(APP.scene.root);
                 APP.camera.moveLocal([0.0, 0.0, delta * APP.dt]);
             },
