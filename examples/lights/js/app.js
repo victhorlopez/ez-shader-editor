@@ -61,10 +61,10 @@ var APP =
                 gl.meshes["cylinder"] = GL.Mesh.cylinder();
                 gl.meshes["grid"] = GL.Mesh.grid({size: 1, lines: 10});
                 gl.meshes["man"] = GL.Mesh.fromURL(assets_path+"man.obj");
-                gl.meshes["lee"] = GL.Mesh.fromURL(assets_path+"Lee.obj");
+                gl.meshes["lee"] = GL.Mesh.fromURL(assets_path+"lee/Lee.obj");
                 gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path+"suzanne.obj");
                 gl.textures["checkers"] = GL.Texture.fromURL(assets_path+"textures/checkers.gif", {filter: gl.NEAREST, wrap:gl.REPEAT});
-                gl.textures["lee"] = GL.Texture.fromURL(assets_path+"textures/Lee.jpg");
+                gl.textures["lee"] = GL.Texture.fromURL(assets_path+"lee/Lee.jpg");
 
             },
             createScene: function ()
