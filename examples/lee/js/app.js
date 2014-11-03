@@ -75,17 +75,19 @@ var APP =
 
                 APP.camera = new RD.Camera();
                 APP.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
-                APP.camera.lookAt([100, 100, 100], [0, 0, 0], [0, 1, 0]);
+                APP.camera.lookAt([50, 50, 50], [0, 0, 0], [0, 1, 0]);
 
                 var scale = 10;
                 
                 var lee = new RD.SceneNode();
                 lee.id = "lee";
-                lee.shader = "complex_Tphong";
+                lee.shader = "normal_spec_map";
                 scale *= 0.1;
                 lee.color = [1.0, 1.0, 1.0, 1.0];
                 lee.mesh = "lee";
                 lee.setTexture("color", "lee");
+                lee.setTexture("normal", "lee_normal");
+                lee.setTexture("specular", "lee_spec");
                 lee.position = [0 , scale, 0];
                 lee.scale([scale, scale, scale]);
                 APP.scene.root.addChild(lee);
@@ -108,6 +110,7 @@ var APP =
             {
                 var shaders_path = "../../shaders/";
                 var shaders_phong = shaders_path + "phong/";
+                var shaders_lee = shaders_path + "lee/";
                 APP.createShader("default", shaders_path+"default.vs", shaders_path+"default.fs");
                 APP.createShader("simple_phong", shaders_phong+"simple_phong.vs", shaders_phong+"simple_phong.fs");
                 APP.createShader("simple_Tphong", shaders_phong+"simple_Tphong.vs", shaders_phong+"simple_Tphong.fs");
@@ -116,6 +119,7 @@ var APP =
                 APP.createShader("complex_phong_ml", shaders_phong+"complex_phong_ml.vs", shaders_phong+"complex_phong_ml.fs");
                 APP.createShader("complex_Tphong_ml", shaders_phong+"complex_Tphong_ml.vs", shaders_phong+"complex_Tphong_ml.fs");
                 APP.createShader("water", shaders_path+"water.vs", shaders_path+"water.fs");
+                APP.createShader("normal_spec_map", shaders_lee+"normal_spec_map.vs", shaders_lee+"normal_spec_map.fs");
             },
             // params shader_id, vs_path, fs_path
             createShader: function (shader_id, vs_path, fs_path)
@@ -137,7 +141,7 @@ var APP =
             },
             moveCamera: function (delta)
             {
-                console.log(APP.renderer._uniforms);
+                console.log(APP.renderer);
                 APP.camera.moveLocal([0.0, 0.0, delta * APP.dt]);
             },
             resize: function ()
@@ -172,7 +176,7 @@ var APP =
             {
                 APP.scene.update(APP.dt);
                 APP.setUniforms();
-                //APP.rotateCamera(20 * APP.dt, [0, 1, 0]);
+                APP.rotateCamera(50 * APP.dt, [0, 1, 0]);
 
 
             },
