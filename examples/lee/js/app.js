@@ -59,13 +59,15 @@ var APP =
                 gl.meshes["cylinder"] = GL.Mesh.cylinder();
                 gl.meshes["grid"] = GL.Mesh.grid({size: 1, lines: 10});
                 gl.meshes["man"] = GL.Mesh.fromURL(assets_path+"man.obj");
-                gl.meshes["lee"] = GL.Mesh.fromURL(assets_path+"Lee.obj");
+                gl.meshes["lee"] = GL.Mesh.fromURL(assets_path+"lee/Lee.obj");
                 gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path+"suzanne.obj");
                 gl.meshes["water"] = GL.Mesh.plane({detail:50, xz:true});
                 
                 
                 gl.textures["checkers"] = GL.Texture.fromURL(assets_path+"textures/checkers.gif", {filter: gl.NEAREST, wrap:gl.REPEAT});
-                gl.textures["lee"] = GL.Texture.fromURL(assets_path+"textures/Lee.jpg");
+                gl.textures["lee"] = GL.Texture.fromURL(assets_path+"lee/Lee.jpg");
+                gl.textures["lee_normal"] = GL.Texture.fromURL(assets_path+"lee/Lee_normal.jpg");
+                gl.textures["lee_spec"] = GL.Texture.fromURL(assets_path+"lee/Lee_spec.jpg");
 
             },
             createScene: function ()
@@ -105,13 +107,14 @@ var APP =
             loadShaders: function ()
             {
                 var shaders_path = "../../shaders/";
+                var shaders_phong = shaders_path + "phong/";
                 APP.createShader("default", shaders_path+"default.vs", shaders_path+"default.fs");
-                APP.createShader("simple_phong", shaders_path+"simple_phong.vs", shaders_path+"simple_phong.fs");
-                APP.createShader("simple_Tphong", shaders_path+"simple_Tphong.vs", shaders_path+"simple_Tphong.fs");
-                APP.createShader("complex_phong", shaders_path+"complex_phong.vs", shaders_path+"complex_phong.fs");
-                APP.createShader("complex_Tphong", shaders_path+"complex_Tphong.vs", shaders_path+"complex_Tphong.fs");
-                APP.createShader("complex_phong_ml", shaders_path+"complex_phong_ml.vs", shaders_path+"complex_phong_ml.fs");
-                APP.createShader("complex_Tphong_ml", shaders_path+"complex_Tphong_ml.vs", shaders_path+"complex_Tphong_ml.fs");
+                APP.createShader("simple_phong", shaders_phong+"simple_phong.vs", shaders_phong+"simple_phong.fs");
+                APP.createShader("simple_Tphong", shaders_phong+"simple_Tphong.vs", shaders_phong+"simple_Tphong.fs");
+                APP.createShader("complex_phong", shaders_phong+"complex_phong.vs", shaders_phong+"complex_phong.fs");
+                APP.createShader("complex_Tphong", shaders_phong+"complex_Tphong.vs", shaders_phong+"complex_Tphong.fs");
+                APP.createShader("complex_phong_ml", shaders_phong+"complex_phong_ml.vs", shaders_phong+"complex_phong_ml.fs");
+                APP.createShader("complex_Tphong_ml", shaders_phong+"complex_Tphong_ml.vs", shaders_phong+"complex_Tphong_ml.fs");
                 APP.createShader("water", shaders_path+"water.vs", shaders_path+"water.fs");
             },
             // params shader_id, vs_path, fs_path
@@ -130,7 +133,7 @@ var APP =
             },
             rotateCamera: function (angle, axis)
             {
-                APP.camera.orbit(angle, [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]);
+                APP.camera.orbit(angle, [0.0, 1.0, 0.0]);
             },
             moveCamera: function (delta)
             {

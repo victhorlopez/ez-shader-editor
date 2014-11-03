@@ -101,13 +101,14 @@ var APP =
             loadShaders: function ()
             {
                 var shaders_path = "../../shaders/";
+                var shaders_phong = shaders_path + "phong/";
                 APP.createShader("default", shaders_path+"default.vs", shaders_path+"default.fs");
-                APP.createShader("simple_phong", shaders_path+"simple_phong.vs", shaders_path+"simple_phong.fs");
-                APP.createShader("simple_Tphong", shaders_path+"simple_Tphong.vs", shaders_path+"simple_Tphong.fs");
-                APP.createShader("complex_phong", shaders_path+"complex_phong.vs", shaders_path+"complex_phong.fs");
-                APP.createShader("complex_Tphong", shaders_path+"complex_Tphong.vs", shaders_path+"complex_Tphong.fs");
-                APP.createShader("complex_phong_ml", shaders_path+"complex_phong_ml.vs", shaders_path+"complex_phong_ml.fs");
-                APP.createShader("complex_Tphong_ml", shaders_path+"complex_Tphong_ml.vs", shaders_path+"complex_Tphong_ml.fs");
+                APP.createShader("simple_phong", shaders_phong+"simple_phong.vs", shaders_phong+"simple_phong.fs");
+                APP.createShader("simple_Tphong", shaders_phong+"simple_Tphong.vs", shaders_phong+"simple_Tphong.fs");
+                APP.createShader("complex_phong", shaders_phong+"complex_phong.vs", shaders_phong+"complex_phong.fs");
+                APP.createShader("complex_Tphong", shaders_phong+"complex_Tphong.vs", shaders_phong+"complex_Tphong.fs");
+                APP.createShader("complex_phong_ml", shaders_phong+"complex_phong_ml.vs", shaders_phong+"complex_phong_ml.fs");
+                APP.createShader("complex_Tphong_ml", shaders_phong+"complex_Tphong_ml.vs", shaders_phong+"complex_Tphong_ml.fs");
                 APP.createShader("water", shaders_path+"water.vs", shaders_path+"water.fs");
                 APP.createShader("detail_texture", shaders_path+"room/detail_texture.vs", shaders_path+"room/detail_texture.fs");
             },
