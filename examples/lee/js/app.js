@@ -176,7 +176,7 @@ var APP =
             {
                 APP.scene.update(APP.dt);
                 APP.setUniforms();
-                APP.rotateCamera(50 * APP.dt, [0, 1, 0]);
+                //APP.rotateCamera(50 * APP.dt, [0, 1, 0]);
 
 
             },

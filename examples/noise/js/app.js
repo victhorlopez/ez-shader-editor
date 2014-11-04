@@ -78,19 +78,6 @@ var APP =
                 APP.camera.lookAt([50, 50, 50], [0, 0, 0], [0, 1, 0]);
 
                 var scale = 10;
-                
-                var lee = new RD.SceneNode();
-                lee.id = "lee";
-                lee.shader = "normal_spec_map";
-                scale *= 0.1;
-                lee.color = [1.0, 1.0, 1.0, 1.0];
-                lee.mesh = "lee";
-                lee.setTexture("color", "lee");
-                lee.setTexture("normal", "lee_normal");
-                lee.setTexture("specular", "lee_spec");
-                lee.position = [0 , scale, 0];
-                lee.scale([scale, scale, scale]);
-                APP.scene.root.addChild(lee);
 
 
                 var ball = new RD.SceneNode();
@@ -99,18 +86,36 @@ var APP =
                 ball.color = [0.2, 1, 1, 1];
                 ball.mesh = "sphere";
                 ball.setTexture("color", "checkers");
-                scale *= 10;
                 ball.position = [3*scale, 0, 0];
                 ball.scale([scale, scale, scale]);
                 APP.scene.root.addChild(ball);
 
+                var ball2 = new RD.SceneNode();
+                ball2.id = "sphere";
+                ball2.shader = "noise";
+                ball2.color = [0.2, 1, 1, 1];
+                ball2.mesh = "sphere";
+                ball2.setTexture("color", "checkers");
+                ball2.position = [0, 0, 0];
+                ball2.scale([scale, scale, scale]);
+                APP.scene.root.addChild(ball2);
+
+                var ball3 = new RD.SceneNode();
+                ball3.id = "sphere";
+                ball3.shader = "noise";
+                ball3.color = [0.2, 1, 1, 1];
+                ball3.mesh = "sphere";
+                ball3.setTexture("color", "checkers");
+                ball3.position = [-3*scale, 0, 0];
+                ball3.scale([scale, scale, scale]);
+                APP.scene.root.addChild(ball3);
 
 //                var plane = new RD.SceneNode();
 //                plane.id = "plane";
 //                plane.shader = "noise";
 //                plane.color = [0.2, 1, 1, 1];
-//                plane.mesh = "water";
-//                plane.setTexture("color", "checkers");
+//                plane.mesh = "grid";
+//                //plane.setTexture("color", "checkers");
 //                scale *= 10;
 //                plane.position = [0, 0, 0];
 //                plane.scale([scale, scale, scale]);
@@ -190,7 +195,7 @@ var APP =
             {
                 APP.scene.update(APP.dt);
                 APP.setUniforms();
-                APP.rotateCamera(50 * APP.dt, [0, 1, 0]);
+                //APP.rotateCamera(50 * APP.dt, [0, 1, 0]);
 
 
             },

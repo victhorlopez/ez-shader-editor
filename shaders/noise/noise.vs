@@ -209,7 +209,7 @@ void main()
 {
         v_coord = a_coord;
         // get a turbulent 3d noise using the normal, normal to high freq
-        v_noise = 1.0 *  -.10 * turbulence( .5 * a_normal + u_time * 0.5 );
+        v_noise = 1.0 *  -.10 * turbulence( .5 * a_normal + u_time*0.5 );
         // get a 3d noise using the position, low frequency
         float b = 5.0 * pnoise( 0.05 * a_vertex, vec3( 100.0 ) );
         float displacement = - 10. * v_noise + b;
