@@ -162,7 +162,7 @@ var APP =
             setUniforms: function () {
                 
                 APP.renderer._uniforms["u_time"] = APP.scene.time;
-                APP.renderer._uniforms["u_ambient"] = 0.1;
+                APP.renderer._uniforms["u_ambient"] = 0.5;
                 APP.renderer._uniforms["u_eye"] = APP.camera.position;
                 APP.renderer._uniforms["u_light_dir"] = [1.5, 1.1, 1.4];
                 APP.renderer._uniforms["u_light_color"] = [1.0, 1.0, 1.0, 1.0];

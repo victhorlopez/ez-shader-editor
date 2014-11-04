@@ -70,6 +70,7 @@ var APP =
                 gl.textures["lee_spec"] = GL.Texture.fromURL(assets_path+"lee/Lee_spec.jpg");
 
             },
+
             createScene: function ()
             {
 
@@ -77,38 +78,27 @@ var APP =
                 APP.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
                 APP.camera.lookAt([50, 50, 50], [0, 0, 0], [0, 1, 0]);
 
-                var scale = 10;
 
+                var createBall = function(id, shader_id , color, position, scale)
+                {
+                    var ball = new RD.SceneNode();
+                    ball.id = id;
+                    ball.shader = shader_id;
+                    ball.color = color;
+                    ball.mesh = "sphere";
+                    //ball.setTexture("color", "checkers");
+                    ball.position = position;
+                    ball.scale(scale);
+                    APP.scene.root.addChild(ball);
 
-                var ball = new RD.SceneNode();
-                ball.id = "sphere";
-                ball.shader = "noise";
-                ball.color = [0.2, 1, 1, 1];
-                ball.mesh = "sphere";
-                ball.setTexture("color", "checkers");
-                ball.position = [3*scale, 0, 0];
-                ball.scale([scale, scale, scale]);
-                APP.scene.root.addChild(ball);
+                };
 
-                var ball2 = new RD.SceneNode();
-                ball2.id = "sphere";
-                ball2.shader = "noise";
-                ball2.color = [0.2, 1, 1, 1];
-                ball2.mesh = "sphere";
-                ball2.setTexture("color", "checkers");
-                ball2.position = [0, 0, 0];
-                ball2.scale([scale, scale, scale]);
-                APP.scene.root.addChild(ball2);
+                var scale = 5;
+                createBall("sphere", "noise" , [0, 0, 1, 1], [3*scale, 0, 0], [scale, scale, scale]);
+                createBall("sphere", "noise" , [0.2, 1, 1, 1], [0, 0, 0], [scale, scale, scale]);
+                createBall("sphere", "noise" , [1, 0, 0, 1], [-3*scale, 0, 0], [scale, scale, scale]);
+                createBall("sphere", "simple_phong" , [1, 1, 0, 1], [-6*scale, 0, 0], [scale, scale, scale]);
 
-                var ball3 = new RD.SceneNode();
-                ball3.id = "sphere";
-                ball3.shader = "noise";
-                ball3.color = [0.2, 1, 1, 1];
-                ball3.mesh = "sphere";
-                ball3.setTexture("color", "checkers");
-                ball3.position = [-3*scale, 0, 0];
-                ball3.scale([scale, scale, scale]);
-                APP.scene.root.addChild(ball3);
 
 //                var plane = new RD.SceneNode();
 //                plane.id = "plane";
