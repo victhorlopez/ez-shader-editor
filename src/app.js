@@ -15,8 +15,10 @@ var App =
     camera: null,
     light: null,
     shaders: [],
+    cam_control:null,
+
     init: function () {
-        var container = $(".wtabcontent-Editor");
+        var container = $(".wtabcontent-Scene");
         this.gl = GL.create({width: container.width(), height: container.parent().parent().height() - container.parent().height()});
         this.scene = new RD.Scene();
         this.renderer = new RD.Renderer(gl);
@@ -35,7 +37,7 @@ var App =
 
         gl.captureMouse(true);
         this.renderer.context.onmousewheel = function (e) {
-            App.moveCamera(e.wheelDelta * App.dt * 20);
+            App.cam_control.onMouseEvent(e);
         };
 
         this.renderer.context.onmousedown = function (e) {
@@ -44,10 +46,7 @@ var App =
 
         this.renderer.context.onmousemove = function (e) {
             if (e.dragging) {
-                var sign = e.deltax  > 0 ? 1 : 0;
-                App.rotateCamera(sign * App.dt * 100, [0, -1, 0], App.camera.position);
-                sign = e.deltay  > 0 ? 1 : 0;
-               // App.rotateCamera(sign * App.dt * 10, [-1, 0, 0], [0, 0, 0]);
+                App.cam_control.onMouseEvent(e);
             }
 
         };
@@ -63,7 +62,7 @@ var App =
         gl.meshes["cylinder"] = GL.Mesh.cylinder();
         //gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path + "suzanne.obj");
         gl.meshes["water"] = GL.Mesh.plane({detail: 50, xz: true});
-        gl.meshes["grid"] = GL.Mesh.grid({size: 1, lines: 25});
+        gl.meshes["grid"] = GL.Mesh.grid({size: 1, lines: 20});
 
         //gl.textures["checkers"] = GL.Texture.fromURL(assets_path + "textures/checkers.gif", {filter: gl.NEAREST, wrap: gl.REPEAT});
 
@@ -73,10 +72,10 @@ var App =
         this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
         this.camera.lookAt([100, 100, 100], [0, 0, 0], [0, 1, 0]);
+        this.cam_control = new CameraController(this.camera, {rotation_speed: 100});
+
 
         var scale = 10;
-
-
         var grid = new RD.SceneNode();
         grid.id = "grid";
         grid.mesh = "grid";

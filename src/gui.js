@@ -13,18 +13,23 @@ var UI = {
 
         //create a main container and split it in two
         this.main_area = new LiteGUI.Area("mainarea", {content_id: "canvasarea", autoresize: true, inmediateResize: true});
-        this.main_area.split("horizontal", [null, 200], true);
+        this.main_area.split("horizontal", [500,null], true);
         LiteGUI.add(this.main_area);
 
         this.createMainMenu();
-        this.createRightPanel();
+        this.createLeftPanel();
         this.createMainPanel();
 
     },
-    createRightPanel: function () {
+    createLeftPanel: function () {
         //create a left panel
-        this.side_panel = new LiteGUI.Panel("sidepanel", {title: "Inspector", width: 200});
-        this.side_panel.dockTo(this.main_area.getSection(1), "full"); // section 1 is the right one
+        this.side_panel = new LiteGUI.Panel("sidepanel", {title: "Inspector", width: 500});
+        this.side_panel.dockTo(this.main_area.getSection(0), "full"); // section 1 is the right one
+
+        var tabs = new LiteGUI.Tabs("tabs");
+        var tab = tabs.addTab("SceneTree");
+        tab = tabs.addTab("Test");
+
 
         //create a inspector (widget container)
         var widgets = new LiteGUI.Inspector();
@@ -44,17 +49,18 @@ var UI = {
             dialog.center();
         });
         widgets.addSeparator();
-        this.side_panel.add(widgets);
+        tab.add(widgets);
+        this.side_panel.add(tabs);
 
     },
     createMainPanel: function () {
         //create main panel on the left side
         this.main_panel = new LiteGUI.Panel("mainpanel");
-        this.main_panel.dockTo(this.main_area.getSection(0), "full"); // section 0 is the left one
+        this.main_panel.dockTo(this.main_area.getSection(1), "full"); // section 0 is the left one
 
         //create some tabs
         var tabs = new LiteGUI.Tabs("tabs");
-        tabs.addTab("Editor");
+        tabs.addTab("Scene");
 
         var code_tab = tabs.addTab("Code");
 
