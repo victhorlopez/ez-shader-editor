@@ -15,7 +15,7 @@ var App =
     camera: null,
     light: null,
     shaders: [],
-    cam_control:null,
+    canvas_controller: null,
 
     init: function () {
         var container = $(".wtabcontent-Scene");
@@ -23,6 +23,7 @@ var App =
         this.scene = new RD.Scene();
         this.renderer = new RD.Renderer(gl);
         container.append(gl.canvas);
+        this.canvas_controller = new CanvasController();
 
         // need to fix on load
         this.addExtraAssets();
@@ -37,7 +38,7 @@ var App =
 
         gl.captureMouse(true);
         this.renderer.context.onmousewheel = function (e) {
-            App.cam_control.onMouseEvent(e);
+            App.canvas_controller.onMouseEvent(e);
         };
 
         this.renderer.context.onmousedown = function (e) {
@@ -46,7 +47,7 @@ var App =
 
         this.renderer.context.onmousemove = function (e) {
             if (e.dragging) {
-                App.cam_control.onMouseEvent(e);
+                //App.cam_control.onMouseEvent(e);
             }
 
         };
@@ -58,11 +59,12 @@ var App =
     },
     addExtraAssets: function () {
         var assets_path = "../../assets/";
-        gl.meshes["sphere"] = GL.Mesh.sphere({lat: 64, long: 64});
+        gl.meshes["sphere"] = GL.Mesh.sphere({lat: 64, long: 64, bounding:true});
         gl.meshes["cylinder"] = GL.Mesh.cylinder();
         //gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path + "suzanne.obj");
         gl.meshes["water"] = GL.Mesh.plane({detail: 50, xz: true});
         gl.meshes["grid"] = GL.Mesh.grid({size: 1, lines: 20});
+
 
         //gl.textures["checkers"] = GL.Texture.fromURL(assets_path + "textures/checkers.gif", {filter: gl.NEAREST, wrap: gl.REPEAT});
 
@@ -72,7 +74,7 @@ var App =
         this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
         this.camera.lookAt([100, 100, 100], [0, 0, 0], [0, 1, 0]);
-        this.cam_control = new CameraController(this.camera, {rotation_speed: 100});
+
 
 
         var scale = 10;
@@ -85,6 +87,16 @@ var App =
         scale *= 20;
         grid.scale([scale, scale, scale]);
         this.scene.root.addChild(grid);
+
+        scale = 10;
+        var ball = new RD.SceneNode();
+        ball.id = "sphere";
+        ball.mesh = "sphere";
+        ball.color = [0.3, 0.7, 0.56];
+        ball.position = [0, scale, 0];
+        ball.scale([scale, scale, scale]);
+        this.scene.root.addChild(ball);
+
 
 
     },

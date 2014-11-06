@@ -21,16 +21,16 @@ var UI = {
         this.createMainPanel();
 
     },
-    createLeftPanel: function () {
-        //create a left panel
-        this.side_panel = new LiteGUI.Panel("sidepanel", {title: "Inspector", width: 500});
-        this.side_panel.dockTo(this.main_area.getSection(0), "full"); // section 1 is the right one
-
-        var tabs = new LiteGUI.Tabs("tabs");
-        var tab = tabs.addTab("SceneTree");
-        tab = tabs.addTab("Test");
-
-
+    createSceneTreeTab: function (in_tab) {
+//        var widgets = new LiteGUI.Inspector();
+//        widgets.addTitle("Scene Nodes");
+//        widgets.
+//        widgets.addTree("Nodes", ["hola", "adeu"] );
+        console.log(in_tab);
+        var tree = new LiteGUI.Tree("SceneTree", { id:"scene-root-node", content:"root"});
+        in_tab.add(tree);
+    },
+    createTestTab: function(in_tab){
         //create a inspector (widget container)
         var widgets = new LiteGUI.Inspector();
         widgets.addTitle("Dialogs");
@@ -49,7 +49,21 @@ var UI = {
             dialog.center();
         });
         widgets.addSeparator();
-        tab.add(widgets);
+        in_tab.add(widgets);
+    },
+    createLeftPanel: function () {
+        //create a left panel
+        this.side_panel = new LiteGUI.Panel("sidepanel", {title: "Inspector", width: 500});
+        this.side_panel.dockTo(this.main_area.getSection(0), "full"); // section 1 is the right one
+
+        var tabs = new LiteGUI.Tabs("leftpanel-tabs");
+        var tab = tabs.addTab("SceneTree");
+        this.createSceneTreeTab(tab);
+
+        tab = tabs.addTab("Test");
+        this.createTestTab(tab);
+
+
         this.side_panel.add(tabs);
 
     },
