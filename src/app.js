@@ -8,7 +8,6 @@ var App =
 {
     scene: null,
     renderer: null,
-    gl: null,
     last: 0,
     now: 0,
     dt: 0.0,
@@ -19,11 +18,11 @@ var App =
 
     init: function () {
         var container = $(".wtabcontent-Scene");
-        this.gl = GL.create({width: container.width(), height: container.parent().parent().height() - container.parent().height()});
+        gl = GL.create({width: container.width(), height: container.parent().parent().height() - container.parent().height()});
         this.scene = new RD.Scene();
         this.renderer = new RD.Renderer(gl);
         container.append(gl.canvas);
-        this.canvas_controller = new CanvasController();
+
 
         // need to fix on load
         this.addExtraAssets();
@@ -42,14 +41,11 @@ var App =
         };
 
         this.renderer.context.onmousedown = function (e) {
-
+            App.canvas_controller.onMouseEvent(e);
         };
 
         this.renderer.context.onmousemove = function (e) {
-            if (e.dragging) {
-                //App.cam_control.onMouseEvent(e);
-            }
-
+            App.canvas_controller.onMouseEvent(e);
         };
 
         gl.captureKeys();
@@ -59,7 +55,7 @@ var App =
     },
     addExtraAssets: function () {
         var assets_path = "../../assets/";
-        gl.meshes["sphere"] = GL.Mesh.sphere({lat: 64, long: 64, bounding:true});
+        gl.meshes["sphere"] = GL.Mesh.sphere({lat: 64, long: 64, bounding: true});
         gl.meshes["cylinder"] = GL.Mesh.cylinder();
         //gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path + "suzanne.obj");
         gl.meshes["water"] = GL.Mesh.plane({detail: 50, xz: true});
@@ -73,8 +69,8 @@ var App =
 
         this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
-        this.camera.lookAt([100, 100, 100], [0, 0, 0], [0, 1, 0]);
-
+        this.camera.lookAt([10, 10, 10], [0, 0, 0], [0, 1, 0]);
+        this.canvas_controller = new CanvasController();
 
 
         var scale = 10;
@@ -88,7 +84,7 @@ var App =
         grid.scale([scale, scale, scale]);
         this.scene.root.addChild(grid);
 
-        scale = 10;
+        scale = 1;
         var ball = new RD.SceneNode();
         ball.id = "sphere";
         ball.mesh = "sphere";
@@ -97,6 +93,13 @@ var App =
         ball.scale([scale, scale, scale]);
         this.scene.root.addChild(ball);
 
+        var cube = new RD.SceneNode();
+        cube.id = "cube";
+        cube.mesh = "cube";
+        cube.color = [0.3, 0.7, 0.56];
+        cube.position = [2*scale, scale, 0];
+        cube.scale([scale, scale, scale]);
+        this.scene.root.addChild(cube);
 
 
     },
@@ -105,7 +108,7 @@ var App =
     },
     moveCamera: function (delta) {
         console.log(this.renderer._uniforms);
-        this.camera.orbitDistanceFactor(1 + delta * -0.05 * 0.1  );
+        this.camera.orbitDistanceFactor(1 + delta * -0.05 * 0.1);
 
     },
     resize: function () {
@@ -115,7 +118,7 @@ var App =
         var h = $(parent).height();
         if (w == 0 || h == 0)
             return;
-        if (w == this.gl.canvas.width && h == this.gl.canvas.height)
+        if (w == gl.canvas.width && h == gl.canvas.height)
             return;
 
         gl.canvas.width = w;
