@@ -26,6 +26,11 @@ ObjectController.prototype.rotate = function (angle_in_deg, axis) {
 //}
 
 ObjectController.prototype.setObject = function (obj) {
+    this.removeBounding();
+    if(this._obj && !this._obj.selected){
+        this._obj.selected = true;
+        this.createBounding();
+    }
     this._obj = obj;
     return this;
 }
@@ -50,7 +55,6 @@ CameraController.prototype.handleMouseWheel = function (e) {
 
 CameraController.prototype.handleMouseMove = function (e) {
     if (e.dragging) {
-        console.log(gl);
         var delta = e.deltax > this._delta_threshold || e.deltax < -this._delta_threshold ? e.deltax: 0;
         this._obj.orbit( App.dt * delta * this._rotation_speed, [0, -1, 0], [0, 0, 0]);
         this._obj.updateMatrices();
@@ -65,7 +69,11 @@ CameraController.prototype.handleMouseDown = function (e) {
 
 function NodeController(obj, options) {
     this._constructor(obj, options);
-
+    this._node_temp = new RD.SceneNode();
+    this._node_temp.id = "bounding";
+    this._node_temp.mesh = "bounding";
+    this._node_temp.primitive = gl.LINES;
+    this._node_temp.color = [0.3, 0.7, 0.56];
 }
 extendClass(NodeController, ObjectController);
 
@@ -78,6 +86,18 @@ NodeController.prototype.handleMouseMove = function (e) {
 }
 
 NodeController.prototype.handleMouseDown = function (e) {
-    console.log("hola");
     this._obj.color = [Math.random(), Math.random(), Math.random()];
+}
+
+NodeController.prototype.createBounding = function () {
+
+    this._node_temp.scale = this._obj._scale;
+    this._obj.addChild(this._node_temp);
+}
+
+NodeController.prototype.removeBounding = function () {
+
+    this._obj.removeChild(this._node_temp);
+
+
 }

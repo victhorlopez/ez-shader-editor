@@ -55,9 +55,11 @@ var App =
     },
     addExtraAssets: function () {
         var assets_path = "../../assets/";
-        this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64, bounding: true}));
+        this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64}));
         this.renderer.addMesh("cylinder",GL.Mesh.cylinder());
         this.renderer.addMesh("grid", GL.Mesh.grid({size: 1, lines: 20}));
+        this.renderer.addMesh("box", GL.Mesh.box({size: 1}));
+        this.renderer.addMesh("bounding", GL.Mesh.boundingFrame({size: 1}));
         //gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path + "suzanne.obj");
 
 
@@ -93,8 +95,8 @@ var App =
         this.scene.root.addChild(ball);
 
         var cube = new RD.SceneNode();
-        cube.id = "cube";
-        cube.mesh = "cube";
+        cube.id = "box";
+        cube.mesh = "box";
         cube.color = [0.3, 0.7, 0.56];
         cube.position = [2*scale, scale, 0];
         cube.scale([scale, scale, scale]);
