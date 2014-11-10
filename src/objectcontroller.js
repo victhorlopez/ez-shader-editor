@@ -6,6 +6,7 @@ ObjectController.prototype._constructor = function (obj, options) {
     this._obj = obj;
     this._rotation_speed = options && options.rotation_speed || 10.0;
     this._move_speed = options && options.move_speed || 10.0;
+
 }
 
 ObjectController.prototype.move = function (v) {
@@ -31,6 +32,7 @@ ObjectController.prototype.setObject = function (obj) {
 
 function CameraController(obj, options) {
     this._constructor(obj, options);
+    this._delta_threshold = 1.0;
 }
 extendClass(CameraController, ObjectController);
 
@@ -48,12 +50,13 @@ CameraController.prototype.handleMouseWheel = function (e) {
 
 CameraController.prototype.handleMouseMove = function (e) {
     if (e.dragging) {
-        var sign = e.deltax > 0 ? 1 : e.deltax < 0 ? -1 : 0;
-        this._obj.orbit(sign * App.dt * this._rotation_speed, [0, -1, 0], [0, 0, 0]);
+        console.log(gl);
+        var delta = e.deltax > this._delta_threshold || e.deltax < -this._delta_threshold ? e.deltax: 0;
+        this._obj.orbit( App.dt * delta * this._rotation_speed, [0, -1, 0], [0, 0, 0]);
         this._obj.updateMatrices();
-        sign = e.deltay > 0 ? -1 : e.deltay < 0 ? 1 : 0;
-        var right = this._obj.getLocalVector([1, 0, 0]);
-        this._obj.orbit(sign * App.dt * this._rotation_speed, right, [0, 0, 0]);
+        delta = e.deltay > this._delta_threshold || e.deltay < -this._delta_threshold ? e.deltay: 0;
+        var right = this._obj.getLocalVector([-1, 0, 0]);
+        this._obj.orbit( App.dt * delta * this._rotation_speed, right, [0, 0, 0]);
     }
 }
 CameraController.prototype.handleMouseDown = function (e) {

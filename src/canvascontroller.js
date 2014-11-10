@@ -1,6 +1,6 @@
 function CanvasController() {
-    this._camera_controller = new CameraController(App.camera, {rotation_speed: 100});
-    this._node_controller = new NodeController(null, {rotation_speed: 100});
+    this._camera_controller = new CameraController(App.camera, {rotation_speed: 5});
+    this._node_controller = new NodeController(null, {rotation_speed: 10});
 }
 
 CanvasController.prototype.onMouseEvent = function (e) {
@@ -14,9 +14,9 @@ CanvasController.prototype.onMouseEvent = function (e) {
             controller = this._camera_controller;
         }
 
-        console.log(e);
+
         if (e.eventType == "mousewheel") {
-            controller.handleMouseWheel(e);
+            this._camera_controller.handleMouseWheel(e);
         }
         if (e.eventType == "mousemove") {
             controller.handleMouseMove(e);

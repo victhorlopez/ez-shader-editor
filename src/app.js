@@ -55,11 +55,10 @@ var App =
     },
     addExtraAssets: function () {
         var assets_path = "../../assets/";
-        gl.meshes["sphere"] = GL.Mesh.sphere({lat: 64, long: 64, bounding: true});
-        gl.meshes["cylinder"] = GL.Mesh.cylinder();
+        this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64, bounding: true}));
+        this.renderer.addMesh("cylinder",GL.Mesh.cylinder());
+        this.renderer.addMesh("grid", GL.Mesh.grid({size: 1, lines: 20}));
         //gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path + "suzanne.obj");
-        gl.meshes["water"] = GL.Mesh.plane({detail: 50, xz: true});
-        gl.meshes["grid"] = GL.Mesh.grid({size: 1, lines: 20});
 
 
         //gl.textures["checkers"] = GL.Texture.fromURL(assets_path + "textures/checkers.gif", {filter: gl.NEAREST, wrap: gl.REPEAT});
