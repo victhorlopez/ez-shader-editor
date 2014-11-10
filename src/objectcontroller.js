@@ -25,15 +25,6 @@ ObjectController.prototype.rotate = function (angle_in_deg, axis) {
 //    }
 //}
 
-ObjectController.prototype.setObject = function (obj) {
-    this.removeBounding();
-    if(this._obj && !this._obj.selected){
-        this._obj.selected = true;
-        this.createBounding();
-    }
-    this._obj = obj;
-    return this;
-}
 
 function CameraController(obj, options) {
     this._constructor(obj, options);
@@ -64,7 +55,7 @@ CameraController.prototype.handleMouseMove = function (e) {
     }
 }
 CameraController.prototype.handleMouseDown = function (e) {
-
+    console.log(e);
 }
 
 function NodeController(obj, options) {
@@ -86,18 +77,21 @@ NodeController.prototype.handleMouseMove = function (e) {
 }
 
 NodeController.prototype.handleMouseDown = function (e) {
+    if(this._obj)
+        this.removeBounding();
+    this._obj = e.obj;
+    this.createBounding();
+
     this._obj.color = [Math.random(), Math.random(), Math.random()];
+
 }
 
 NodeController.prototype.createBounding = function () {
-
+    console.log(gl);
     this._node_temp.scale = this._obj._scale;
     this._obj.addChild(this._node_temp);
 }
 
 NodeController.prototype.removeBounding = function () {
-
     this._obj.removeChild(this._node_temp);
-
-
 }

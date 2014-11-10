@@ -8,7 +8,7 @@ CanvasController.prototype.onMouseEvent = function (e) {
         var obj = this.getNodeOnMouse(e.canvasx, e.canvasy);
         var controller = null;
         if (obj) {
-            this._node_controller.setObject(obj);
+            e.obj = obj;
             controller = this._node_controller;
         } else {
             controller = this._camera_controller;
