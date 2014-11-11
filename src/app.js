@@ -71,7 +71,7 @@ var App =
 
         this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
-        this.camera.lookAt([10, 10, 10], [0, 0, 0], [0, 1, 0]);
+        this.camera.lookAt([0, 10, 10], [0, 0, 0], [0, 1, 0]);
         this.canvas_controller = new CanvasController();
 
 

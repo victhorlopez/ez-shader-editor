@@ -5,8 +5,8 @@ function ObjectController(obj, options) {
 ObjectController.prototype._constructor = function (obj, options) {
     this._obj = obj;
     this._rotation_speed = options && options.rotation_speed || 10.0;
-    this._move_speed = options && options.move_speed || 0.1;
-
+    this._move_speed = options && options.move_speed || 20.0;
+    this._zoom_speed = options && options.move_speed || 0.1;
 }
 
 ObjectController.prototype.move = function (v) {
@@ -32,8 +32,7 @@ CameraController.prototype.orbitDistanceFactor = function (f, center) {
 }
 
 CameraController.prototype.handleMouseWheel = function (e) {
-    console.log(1 + e.wheelDelta * App.dt * -this._move_speed );
-    this._obj.orbitDistanceFactor(1 + e.wheelDelta * App.dt * -this._move_speed );
+    this._obj.orbitDistanceFactor(1 + e.wheelDelta * App.dt * -this._zoom_speed );
 }
 
 CameraController.prototype.orbit = function (e) {
@@ -54,16 +53,23 @@ CameraController.prototype.rotate = function (e) {
 
 }
 
+CameraController.prototype.move = function (e) {
+
+    this._obj.moveLocal( [-e.deltax * App.dt, e.deltay * App.dt, 0]);
+
+
+}
 
 CameraController.prototype.handleMouseMove = function (e) {
     if (e.dragging)  {
+
         if(e.leftButton) {
             this.orbit(e);
         } else if(e.rightButton){
             this.rotate(e);
+        } else {
+            this.move(e);
         }
-
-
     }
 }
 
