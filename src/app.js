@@ -57,7 +57,7 @@ var App =
         var assets_path = "../old/assets/";
         this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64, size:0.5}));
         this.renderer.addMesh("cylinder",GL.Mesh.cylinder());
-        this.renderer.addMesh("grid", GL.Mesh.grid({size: 1, lines: 20}));
+        this.renderer.addMesh("grid", GL.Mesh.grid({size: 1, lines: 50}));
         this.renderer.addMesh("box", GL.Mesh.box({size: 1}));
         this.renderer.addMesh("bounding", GL.Mesh.boundingFrame({size: 1}));
         this.renderer.addMesh("monkey", GL.Mesh.fromURL(assets_path + "suzanne.obj"));

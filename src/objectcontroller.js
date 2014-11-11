@@ -5,7 +5,7 @@ function ObjectController(obj, options) {
 ObjectController.prototype._constructor = function (obj, options) {
     this._obj = obj;
     this._rotation_speed = options && options.rotation_speed || 10.0;
-    this._move_speed = options && options.move_speed || 10.0;
+    this._move_speed = options && options.move_speed || 0.1;
 
 }
 
@@ -16,15 +16,6 @@ ObjectController.prototype.move = function (v) {
 ObjectController.prototype.rotate = function (angle_in_deg, axis) {
     obj.rotate(angle_in_deg, axis);
 }
-
-//ObjectController.prototype.onMouseEvent = function(e){
-//    if(e.eventType == "mousewheel"){
-//        this.handleMouseWheel(e);
-//    } else if (e.eventType == "mousemove"){
-//        this.handleMouseMove(e);
-//    }
-//}
-
 
 function CameraController(obj, options) {
     this._constructor(obj, options);
@@ -41,17 +32,38 @@ CameraController.prototype.orbitDistanceFactor = function (f, center) {
 }
 
 CameraController.prototype.handleMouseWheel = function (e) {
-    this._obj.orbitDistanceFactor(1 + e.wheelDelta * App.dt * this._move_speed * -0.05 * 0.1);
+    console.log(1 + e.wheelDelta * App.dt * -this._move_speed );
+    this._obj.orbitDistanceFactor(1 + e.wheelDelta * App.dt * -this._move_speed );
 }
 
+CameraController.prototype.orbit = function (e) {
+    var delta = e.deltax > this._delta_threshold || e.deltax < -this._delta_threshold ? e.deltax : 0;
+    this._obj.orbit(App.dt * delta * this._rotation_speed, [0, -1, 0]);
+    this._obj.updateMatrices();
+    delta = e.deltay > this._delta_threshold || e.deltay < -this._delta_threshold ? e.deltay : 0;
+    var right = this._obj.getLocalVector([-1, 0, 0]);
+    this._obj.orbit(App.dt * delta * this._rotation_speed, right);
+}
+
+CameraController.prototype.rotate = function (e) {
+    var delta = e.deltax > this._delta_threshold || e.deltax < -this._delta_threshold ? e.deltax : 0;
+    this._obj.rotate(App.dt * -delta * this._rotation_speed, [0, 1, 0], [0, 0, 0]);
+    delta = e.deltay > this._delta_threshold || e.deltay < -this._delta_threshold ? e.deltay : 0;
+    var right = this._obj.getLocalVector([1, 0, 0]);
+    this._obj.rotate(App.dt * -delta * this._rotation_speed, right, [0, 0, 0]);
+
+}
+
+
 CameraController.prototype.handleMouseMove = function (e) {
-    if (e.dragging) {
-        var delta = e.deltax > this._delta_threshold || e.deltax < -this._delta_threshold ? e.deltax : 0;
-        this._obj.orbit(App.dt * delta * this._rotation_speed, [0, -1, 0], [0, 0, 0]);
-        this._obj.updateMatrices();
-        delta = e.deltay > this._delta_threshold || e.deltay < -this._delta_threshold ? e.deltay : 0;
-        var right = this._obj.getLocalVector([-1, 0, 0]);
-        this._obj.orbit(App.dt * delta * this._rotation_speed, right, [0, 0, 0]);
+    if (e.dragging)  {
+        if(e.leftButton) {
+            this.orbit(e);
+        } else if(e.rightButton){
+            this.rotate(e);
+        }
+
+
     }
 }
 
