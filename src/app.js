@@ -54,13 +54,14 @@ var App =
 
     },
     addExtraAssets: function () {
-        var assets_path = "../../assets/";
-        this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64}));
+        var assets_path = "../old/assets/";
+        this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64, size:0.5}));
         this.renderer.addMesh("cylinder",GL.Mesh.cylinder());
         this.renderer.addMesh("grid", GL.Mesh.grid({size: 1, lines: 20}));
         this.renderer.addMesh("box", GL.Mesh.box({size: 1}));
         this.renderer.addMesh("bounding", GL.Mesh.boundingFrame({size: 1}));
-        //gl.meshes["monkey"] = GL.Mesh.fromURL(assets_path + "suzanne.obj");
+        this.renderer.addMesh("monkey", GL.Mesh.fromURL(assets_path + "suzanne.obj"));
+
 
 
         //gl.textures["checkers"] = GL.Texture.fromURL(assets_path + "textures/checkers.gif", {filter: gl.NEAREST, wrap: gl.REPEAT});
@@ -85,12 +86,12 @@ var App =
         grid.scale([scale, scale, scale]);
         this.scene.root.addChild(grid);
 
-        scale = 0.5;
+        scale = 1.0;
         var ball = new RD.SceneNode();
         ball.id = "sphere";
         ball.mesh = "sphere";
         ball.color = [0.3, 0.7, 0.56];
-        ball.position = [0, scale, 0];
+        ball.position = [0, scale*0.5, 0];
         ball.scale([scale, scale, scale]);
         this.scene.root.addChild(ball);
 
@@ -102,6 +103,14 @@ var App =
         cube.position = [2*scale, scale*0.5, 0];
         cube.scale([scale, scale, scale]);
         this.scene.root.addChild(cube);
+
+        var monkey = new RD.SceneNode();
+        monkey.id = "monkey";
+        monkey.mesh = "monkey";
+        monkey.color = [0.3, 0.7, 0.56];
+        monkey.position = [-2*scale, scale, 0];
+        monkey.scale([scale, scale, scale]);
+        this.scene.root.addChild(monkey);
 
 
     },
