@@ -46,12 +46,12 @@ CameraController.prototype.handleMouseWheel = function (e) {
 
 CameraController.prototype.handleMouseMove = function (e) {
     if (e.dragging) {
-        var delta = e.deltax > this._delta_threshold || e.deltax < -this._delta_threshold ? e.deltax: 0;
-        this._obj.orbit( App.dt * delta * this._rotation_speed, [0, -1, 0], [0, 0, 0]);
+        var delta = e.deltax > this._delta_threshold || e.deltax < -this._delta_threshold ? e.deltax : 0;
+        this._obj.orbit(App.dt * delta * this._rotation_speed, [0, -1, 0], [0, 0, 0]);
         this._obj.updateMatrices();
-        delta = e.deltay > this._delta_threshold || e.deltay < -this._delta_threshold ? e.deltay: 0;
+        delta = e.deltay > this._delta_threshold || e.deltay < -this._delta_threshold ? e.deltay : 0;
         var right = this._obj.getLocalVector([-1, 0, 0]);
-        this._obj.orbit( App.dt * delta * this._rotation_speed, right, [0, 0, 0]);
+        this._obj.orbit(App.dt * delta * this._rotation_speed, right, [0, 0, 0]);
     }
 }
 
@@ -77,7 +77,7 @@ NodeController.prototype.handleMouseMove = function (e) {
 }
 
 NodeController.prototype.handleMouseDown = function (e) {
-    if(this._obj)
+    if (this._obj)
         this.removeBounding();
     this._obj = e.obj;
     this.createBounding();
@@ -86,8 +86,18 @@ NodeController.prototype.handleMouseDown = function (e) {
 
 }
 
+
+NodeController.prototype.getScaleFactors = function () {
+    var mesh = gl.meshes[this._obj.mesh];
+    var min = BBox.getMin(mesh.bounding);
+    var max = BBox.getMax(mesh.bounding);
+    return [max[0]-min[0], max[1]-min[1], max[2]-min[2]];
+}
+
+
 NodeController.prototype.createBounding = function () {
-    this._node_temp.scale = this._obj._scale;
+    this._node_temp._scale.set(this.getScaleFactors());
+    this._node_temp.updateLocalMatrix();
     this._obj.addChild(this._node_temp);
 }
 
