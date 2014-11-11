@@ -85,7 +85,7 @@ var App =
         grid.scale([scale, scale, scale]);
         this.scene.root.addChild(grid);
 
-        scale = 1;
+        scale = 0.5;
         var ball = new RD.SceneNode();
         ball.id = "sphere";
         ball.mesh = "sphere";
@@ -94,11 +94,12 @@ var App =
         ball.scale([scale, scale, scale]);
         this.scene.root.addChild(ball);
 
+        scale = 1.0;
         var cube = new RD.SceneNode();
         cube.id = "box";
         cube.mesh = "box";
         cube.color = [0.3, 0.7, 0.56];
-        cube.position = [2*scale, scale, 0];
+        cube.position = [2*scale, scale*0.5, 0];
         cube.scale([scale, scale, scale]);
         this.scene.root.addChild(cube);
 
@@ -108,7 +109,6 @@ var App =
         this.camera.orbit(angle, axis, center);
     },
     moveCamera: function (delta) {
-        console.log(this.renderer._uniforms);
         this.camera.orbitDistanceFactor(1 + delta * -0.05 * 0.1);
 
     },

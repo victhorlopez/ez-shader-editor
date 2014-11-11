@@ -5,7 +5,7 @@ function CanvasController() {
 
 CanvasController.prototype.onMouseEvent = function (e) {
 
-        var obj = this.getNodeOnMouse(e.canvasx, e.canvasy);
+        var obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
         var controller = null;
         if (obj) {
             e.obj = obj;

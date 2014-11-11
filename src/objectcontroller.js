@@ -54,8 +54,8 @@ CameraController.prototype.handleMouseMove = function (e) {
         this._obj.orbit( App.dt * delta * this._rotation_speed, right, [0, 0, 0]);
     }
 }
+
 CameraController.prototype.handleMouseDown = function (e) {
-    console.log(e);
 }
 
 function NodeController(obj, options) {
@@ -87,7 +87,6 @@ NodeController.prototype.handleMouseDown = function (e) {
 }
 
 NodeController.prototype.createBounding = function () {
-    console.log(gl);
     this._node_temp.scale = this._obj._scale;
     this._obj.addChild(this._node_temp);
 }
