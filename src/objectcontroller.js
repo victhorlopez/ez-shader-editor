@@ -83,6 +83,13 @@ function NodeController(obj, options) {
     this._node_temp.mesh = "bounding";
     this._node_temp.primitive = gl.LINES;
     this._node_temp.color = [0.3, 0.7, 0.56];
+    // the attributes the ui must show
+    this._ui_attributes = [
+        "color",
+        "position"
+    ]
+
+
 }
 extendClass(NodeController, ObjectController);
 
@@ -99,8 +106,7 @@ NodeController.prototype.handleMouseDown = function (e) {
         this.removeBounding();
     this._obj = e.obj;
     this.createBounding();
-
-    this._obj.color = [Math.random(), Math.random(), Math.random()];
+    this.addUIAttributes();
 
 }
 
@@ -121,4 +127,8 @@ NodeController.prototype.createBounding = function () {
 
 NodeController.prototype.removeBounding = function () {
     this._obj.removeChild(this._node_temp);
+}
+
+NodeController.prototype.addUIAttributes = function () {
+    UI.createAttributesTab();
 }

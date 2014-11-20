@@ -1,6 +1,8 @@
 var UI = {
     main_area: null,
     side_panel: null,
+    side_panel_tabs: null,
+    main_panel_tabs: null,
     main_panel: null,
     main_menu: null,
 
@@ -13,7 +15,7 @@ var UI = {
 
         //create a main container and split it in two
         this.main_area = new LiteGUI.Area("mainarea", {content_id: "canvasarea", autoresize: true, inmediateResize: true});
-        this.main_area.split("horizontal", [500,null], true);
+        this.main_area.split("horizontal", [500, null], true);
         LiteGUI.add(this.main_area);
 
         this.createMainMenu();
@@ -21,16 +23,25 @@ var UI = {
         this.createMainPanel();
 
     },
-    createSceneTreeTab: function (in_tab) {
-//        var widgets = new LiteGUI.Inspector();
-//        widgets.addTitle("Scene Nodes");
-//        widgets.
-//        widgets.addTree("Nodes", ["hola", "adeu"] );
-        console.log(in_tab);
-        var tree = new LiteGUI.Tree("SceneTree", { id:"scene-root-node", content:"root"});
-        in_tab.add(tree);
+    createAttributesTab: function () {
+        var tab = this.side_panel_tabs.getTab("Attributes");
+        tab.content.innerHTML = "";
+        var widgets = new LiteGUI.Inspector();
+        var node = App.canvas_controller.getSelectedNode();
+        widgets.addColor("Color", node.color,  {
+            callback: function(color) {
+                node.color = color;
+            }});
+        tab.add(widgets);
+
     },
-    createTestTab: function(in_tab){
+    createSceneTreeTab: function () {
+
+        var tab = this.side_panel_tabs.addTab("SceneTree");
+        var tree = new LiteGUI.Tree("SceneTree", { id: "scene-root-node", content: "root"});
+        tab.add(tree);
+    },
+    createTestTab: function () {
         //create a inspector (widget container)
         var widgets = new LiteGUI.Inspector();
         widgets.addTitle("Dialogs");
@@ -49,22 +60,21 @@ var UI = {
             dialog.center();
         });
         widgets.addSeparator();
-        in_tab.add(widgets);
+        var tab = this.side_panel_tabs.addTab("Test");
+        tab.add(widgets);
     },
     createLeftPanel: function () {
         //create a left panel
         this.side_panel = new LiteGUI.Panel("sidepanel", {title: "Inspector", width: 500});
         this.side_panel.dockTo(this.main_area.getSection(0), "full"); // section 1 is the right one
 
-        var tabs = new LiteGUI.Tabs("leftpanel-tabs");
-        var tab = tabs.addTab("SceneTree");
-        this.createSceneTreeTab(tab);
+        this.side_panel_tabs = new LiteGUI.Tabs("leftpanel-tabs");
+        this.side_panel_tabs.addTab("Attributes");
+        this.createSceneTreeTab();
 
-        tab = tabs.addTab("Test");
-        this.createTestTab(tab);
+//        this.createTestTab(tab);
 
-
-        this.side_panel.add(tabs);
+        this.side_panel.add(this.side_panel_tabs);
 
     },
     createMainPanel: function () {
@@ -73,19 +83,19 @@ var UI = {
         this.main_panel.dockTo(this.main_area.getSection(1), "full"); // section 0 is the left one
 
         //create some tabs
-        var tabs = new LiteGUI.Tabs("tabs");
-        tabs.addTab("Scene");
+        this.main_panel_tabs = new LiteGUI.Tabs("tabs");
+        this.main_panel_tabs.addTab("Scene");
 
-        var code_tab = tabs.addTab("Code");
+//        var code_tab = tabs.addTab("Code");
+//
+//        //show the code applying the most basic code beautify algorithm (by me!)
+//        var code = escapeHtmlEntities(document.querySelector("body script").innerHTML);
+//        code = beautifyCode(code);
+//
+//        //code_tab.content.innerHTML = "<h2>Code of this example</h2><pre>" + code + "</pre>";
+//        tabs.addTab("Example");
 
-        //show the code applying the most basic code beautify algorithm (by me!)
-        var code = escapeHtmlEntities(document.querySelector("body script").innerHTML);
-        code = beautifyCode(code);
-
-        //code_tab.content.innerHTML = "<h2>Code of this example</h2><pre>" + code + "</pre>";
-        tabs.addTab("Example");
-
-        this.main_panel.add(tabs);
+        this.main_panel.add(this.main_panel_tabs);
     },
     createMainMenu: function () {
 

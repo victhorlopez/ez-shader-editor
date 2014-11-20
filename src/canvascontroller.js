@@ -1,30 +1,32 @@
 function CanvasController() {
     this._camera_controller = new CameraController(App.camera, {rotation_speed: 5});
     this._node_controller = new NodeController(null, {rotation_speed: 10});
+    this._controller = null;
 }
 
 CanvasController.prototype.onMouseEvent = function (e) {
 
         var obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
-        var controller = null;
-        if (obj) {
-            e.obj = obj;
-            controller = this._node_controller;
-        } else {
-            controller = this._camera_controller;
+
+        if(e.eventType != "mousemove"){
+            if (obj) {
+                e.obj = obj;
+                this._controller  = this._node_controller;
+            } else {
+                this._controller  = this._camera_controller;
+            }
         }
 
 
         if (e.eventType == "mousewheel") {
             this._camera_controller.handleMouseWheel(e);
         }
-        if (e.eventType == "mousemove") {
-            controller.handleMouseMove(e);
+        if (e.eventType == "mousemove" && e.dragging) {
+            this._controller .handleMouseMove(e);
         }
         if(e.eventType == "mousedown"){
-            controller.handleMouseDown(e);
+            this._controller .handleMouseDown(e);
         }
-
 
 }
 
@@ -49,4 +51,8 @@ CanvasController.prototype.getNodeOnMouse = function (canvas_x, canvas_y) {
         }
     }
     return closest_node;
+}
+
+CanvasController.prototype.getSelectedNode = function()  {
+    return this._node_controller._obj;
 }

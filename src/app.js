@@ -13,7 +13,6 @@ var App =
     dt: 0.0,
     camera: null,
     light: null,
-    shaders: [],
     canvas_controller: null,
 
     init: function () {
@@ -61,7 +60,7 @@ var App =
         this.renderer.addMesh("box", GL.Mesh.box({size: 1}));
         this.renderer.addMesh("bounding", GL.Mesh.boundingFrame({size: 1}));
         this.renderer.addMesh("monkey", GL.Mesh.fromURL(assets_path + "suzanne.obj"));
-
+        //this.renderer.addMesh("batman", GL.Mesh.fromURL(assets_path + "batman.obj"));
 
 
         //gl.textures["checkers"] = GL.Texture.fromURL(assets_path + "textures/checkers.gif", {filter: gl.NEAREST, wrap: gl.REPEAT});
@@ -90,6 +89,7 @@ var App =
         var ball = new RD.SceneNode();
         ball.id = "sphere";
         ball.mesh = "sphere";
+        ball.shader = "phong";
         ball.color = [0.3, 0.7, 0.56];
         ball.position = [0, scale*0.5, 0];
         ball.scale([scale, scale, scale]);
@@ -99,15 +99,18 @@ var App =
         var cube = new RD.SceneNode();
         cube.id = "box";
         cube.mesh = "box";
-        cube.color = [0.3, 0.7, 0.56];
+        cube.shader = "phong";
+        cube.color = [0.7, 0.3, 0.96];
         cube.position = [2*scale, scale*0.5, 0];
         cube.scale([scale, scale, scale]);
         this.scene.root.addChild(cube);
 
         var monkey = new RD.SceneNode();
         monkey.id = "monkey";
+        //monkey.mesh = "batman";
         monkey.mesh = "monkey";
-        monkey.color = [0.3, 0.7, 0.56];
+        monkey.shader = "phong";
+        monkey.color = [0.8, 0.2, 0.2];
         monkey.position = [-2*scale, scale, 0];
         monkey.scale([scale, scale, scale]);
         this.scene.root.addChild(monkey);
