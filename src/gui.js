@@ -32,6 +32,11 @@ var UI = {
             callback: function(color) {
                 node.color = color;
             }});
+        widgets.addVector3("Position", node.position,  {
+            callback: function(pos) {
+                node.position = pos;
+            }});
+
         tab.add(widgets);
 
     },
