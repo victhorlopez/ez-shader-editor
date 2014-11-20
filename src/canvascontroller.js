@@ -17,7 +17,6 @@ CanvasController.prototype.onMouseEvent = function (e) {
             }
         }
 
-
         if (e.eventType == "mousewheel") {
             this._camera_controller.handleMouseWheel(e);
         }
