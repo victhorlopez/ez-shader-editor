@@ -6,9 +6,9 @@ function CanvasController() {
 
 CanvasController.prototype.onMouseEvent = function (e) {
 
-        var obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
-
+        var obj = null;
         if(e.eventType != "mousemove"){
+            obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
             if (obj) {
                 e.obj = obj;
                 this._controller  = this._node_controller;
@@ -54,4 +54,8 @@ CanvasController.prototype.getNodeOnMouse = function (canvas_x, canvas_y) {
 
 CanvasController.prototype.getSelectedNode = function()  {
     return this._node_controller._obj;
+}
+
+CanvasController.prototype.selectNode = function(node)  {
+    this._node_controller.selectNode(node);
 }

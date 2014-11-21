@@ -5,6 +5,7 @@ var UI = {
     main_panel_tabs: null,
     main_panel: null,
     main_menu: null,
+    scene_tree: null,
 
 
     init: function () {
@@ -18,7 +19,7 @@ var UI = {
         this.main_area.split("horizontal", [500, null], true);
         LiteGUI.add(this.main_area);
 
-        this.createMainMenu();
+        //this.createMainMenu();
         this.createLeftPanel();
         this.createMainPanel();
 
@@ -28,31 +29,51 @@ var UI = {
         tab.content.innerHTML = "";
         var widgets = new LiteGUI.Inspector();
         var node = App.canvas_controller.getSelectedNode();
-        widgets.addColor("Color", node.color,  {
-            callback: function(color) {
+        widgets.addColor("Color", node.color, {
+            callback: function (color) {
                 node.color = color;
             }});
         widgets.addSection("Transform");
-        widgets.addVector3("Position", node.getGlobalPosition(),  {
-            callback: function(pos) {
+        widgets.addVector3("Position", node.getGlobalPosition(), {
+            callback: function (pos) {
                 node.position = pos;
             }});
-        widgets.addVector3("Rotation", node.rotation,  {
-            callback: function(rot) {
+        widgets.addVector3("Rotation", node.rotation, {
+            callback: function (rot) {
                 node.setRotationFromEuler(rot);
             }});
-        widgets.addVector3("Scale", node.scale,  {
-            callback: function(sca) {
+        widgets.addVector3("Scale", node.scale, {
+            callback: function (sca) {
                 node.scale = sca;
             }});
         tab.add(widgets);
 
     },
     createSceneTreeTab: function () {
+        // Evenets of scene tree tab
+        $(document).on("item_selected", function (event, item) {
+            var node = App.scene.getNodeById(item.node_id);
+            App.canvas_controller.selectNode(node);
+        });
+        $(document).on("node_selected", function (event, node) {
+            UI.scene_tree.setSelectedItem("uid_" + node._uid);
+        });
+
 
         var tab = this.side_panel_tabs.addTab("SceneTree");
-        var tree = new LiteGUI.Tree("SceneTree", { id: "scene-root-node", content: "root"});
-        tab.add(tree);
+        this.scene_tree = new LiteGUI.Tree("SceneTree", {id: "uid_0", node_id: "0", content: "root", allow_rename: false}); // hardcoded values, need improvement
+        tab.add(this.scene_tree);
+    },
+    updateSceneTreeTab: function () {
+        var nodes = App.scene.root.getAllChildren();
+        for (var i in nodes) {
+            var node = nodes[i];
+            if (!node.unselecteble) {
+                var parent_id = node.parentNode ? "uid_" + node.parentNode._uid : null;
+                var node_uid = "uid_" + node._uid;
+                this.scene_tree.insertItem({id: node_uid, node_id: node.id, content: node.id ? node.id : "root", allow_rename: (parent_id != null)}, parent_id);
+            }
+        }
     },
     createTestTab: function () {
         //create a inspector (widget container)
@@ -157,7 +178,9 @@ var UI = {
         this.main_menu = LiteGUI.mainmenu;
 
 
-    }
+    },
+
+
 };
 
 

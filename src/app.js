@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    UI.init();
     App.init();
 });
 
@@ -16,6 +15,7 @@ var App =
     canvas_controller: null,
 
     init: function () {
+        UI.init();
         var container = $(".wtabcontent-Scene");
         gl = GL.create({width: container.width(), height: container.parent().parent().height() - container.parent().height()});
         this.scene = new RD.Scene();
@@ -76,6 +76,7 @@ var App =
 
         var scale = 10;
         var grid = new RD.SceneNode();
+        grid.unselecteble = true;
         grid.id = "grid";
         grid.mesh = "grid";
         grid.color = [0.3, 0.3, 0.3];
@@ -114,14 +115,8 @@ var App =
         monkey.position = [-2*scale, scale, 0];
         monkey.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(monkey);
+        UI.updateSceneTreeTab();
 
-
-    },
-    rotateCamera: function (angle, axis, center) {
-        this.camera.orbit(angle, axis, center);
-    },
-    moveCamera: function (delta) {
-        this.camera.orbitDistanceFactor(1 + delta * -0.05 * 0.1);
 
     },
     resize: function () {
@@ -153,10 +148,7 @@ var App =
     },
     update: function () {
         this.scene.update(this.dt);
-        this.setUniforms();
-        //this.rotateCamera(20 * this.dt, [0, 1, 0]);
-
-
+        //this.setUniforms();
     },
     animate: function () {
         requestAnimationFrame(App.animate);

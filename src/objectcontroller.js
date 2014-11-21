@@ -6,7 +6,7 @@ ObjectController.prototype._constructor = function (obj, options) {
     this._obj = obj;
     this._rotation_speed = options && options.rotation_speed || 10.0;
     this._move_speed = options && options.move_speed || 20.0;
-    this._zoom_speed = options && options.move_speed || 0.1;
+    this._zoom_speed = options && options.move_speed || 10.0;
 }
 
 ObjectController.prototype.move = function (v) {
@@ -32,7 +32,7 @@ CameraController.prototype.orbitDistanceFactor = function (f, center) {
 }
 
 CameraController.prototype.handleMouseWheel = function (e) {
-    this._obj.orbitDistanceFactor(1 + e.wheelDelta * App.dt * -this._zoom_speed );
+    this._obj.orbitDistanceFactor(1 + App.dt * -this._zoom_speed * (e.deltaY > 1 ? -1 : 1) );
 }
 
 CameraController.prototype.orbit = function (e) {
@@ -102,11 +102,8 @@ NodeController.prototype.handleMouseMove = function (e) {
 }
 
 NodeController.prototype.handleMouseDown = function (e) {
-    if (this._obj)
-        this.removeBounding();
-    this._obj = e.obj;
-    this.createBounding();
-    this.addUIAttributes();
+    $(document).trigger("node_selected", e.obj  );
+    this.selectNode(e.obj)
 
 }
 
@@ -118,6 +115,13 @@ NodeController.prototype.getScaleFactors = function () {
     return [max[0]-min[0], max[1]-min[1], max[2]-min[2]];
 }
 
+NodeController.prototype.selectNode = function (node) {
+    if (this._obj)
+        this.removeBounding();
+    this._obj = node;
+    this.createBounding();
+    this.addUIAttributes();
+}
 
 NodeController.prototype.createBounding = function () {
     this._node_temp._scale.set(this.getScaleFactors());
