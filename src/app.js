@@ -82,7 +82,7 @@ var App =
         grid.primitive = gl.LINES;
         grid.position = [0, 0, 0];
         scale *= 20;
-        grid.scaleSize([scale, scale, scale]);
+        grid.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(grid);
 
         scale = 1.0;
@@ -92,7 +92,7 @@ var App =
         ball.shader = "phong";
         ball.color = [0.3, 0.7, 0.56];
         ball.position = [0, scale*0.5, 0];
-        ball.scaleSize([scale, scale, scale]);
+        ball.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(ball);
 
         scale = 1.0;
@@ -102,7 +102,7 @@ var App =
         cube.shader = "phong";
         cube.color = [0.7, 0.3, 0.96];
         cube.position = [2*scale, scale*0.5, 0];
-        cube.scaleSize([scale, scale, scale]);
+        cube.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(cube);
 
         var monkey = new RD.SceneNode();
@@ -112,7 +112,7 @@ var App =
         monkey.shader = "phong";
         monkey.color = [0.8, 0.2, 0.2];
         monkey.position = [-2*scale, scale, 0];
-        monkey.scaleSize([scale, scale, scale]);
+        monkey.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(monkey);
 
 
