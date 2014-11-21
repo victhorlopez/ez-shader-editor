@@ -16,7 +16,7 @@ var UI = {
 
         //create a main container and split it in two
         this.main_area = new LiteGUI.Area("mainarea", {content_id: "canvasarea", autoresize: true, inmediateResize: true});
-        this.main_area.split("horizontal", [500, null], true);
+        this.main_area.split("horizontal", [225, null], true);
         LiteGUI.add(this.main_area);
 
         //this.createMainMenu();
