@@ -32,11 +32,19 @@ var UI = {
             callback: function(color) {
                 node.color = color;
             }});
-        widgets.addVector3("Position", node.position,  {
+        widgets.addSection("Transform");
+        widgets.addVector3("Position", node.getGlobalPosition(),  {
             callback: function(pos) {
                 node.position = pos;
             }});
-
+        widgets.addVector3("Rotation", node.rotation,  {
+            callback: function(rot) {
+                node.setRotationFromEuler(rot);
+            }});
+        widgets.addVector3("Scale", node.scale,  {
+            callback: function(sca) {
+                node.scale = sca;
+            }});
         tab.add(widgets);
 
     },
