@@ -27,25 +27,27 @@ var UI = {
     createAttributesTab: function () {
         var tab = this.side_panel_tabs.getTab("Attributes");
         tab.content.innerHTML = "";
-        var widgets = new LiteGUI.Inspector();
         var node = App.canvas_controller.getSelectedNode();
-        widgets.addColor("Color", node.color, {
-            callback: function (color) {
-                node.color = color;
-            }});
-        widgets.addSection("Transform");
-        widgets.addVector3("Position", node.getGlobalPosition(), {
-            callback: function (pos) {
-                node.position = pos;
-            }});
-        widgets.addVector3("Rotation", node.rotation, {
-            callback: function (rot) {
-                node.setRotationFromEuler(rot);
-            }});
-        widgets.addVector3("Scale", node.scale, {
-            callback: function (sca) {
-                node.scale = sca;
-            }});
+        var widgets = new LiteGUI.Inspector();
+        if(node){
+            widgets.addColor("Color", node.color, {
+                callback: function (color) {
+                    node.color = color;
+                }});
+            widgets.addSection("Transform");
+            widgets.addVector3("Position", node.getGlobalPosition(), {
+                callback: function (pos) {
+                    node.position = pos;
+                }});
+            widgets.addVector3("Rotation", node.rotation, {
+                callback: function (rot) {
+                    node.setRotationFromEuler(rot);
+                }});
+            widgets.addVector3("Scale", node.scale, {
+                callback: function (sca) {
+                    node.scale = sca;
+                }});
+        }
         tab.add(widgets);
 
     },
@@ -54,9 +56,11 @@ var UI = {
         $(document).on("item_selected", function (event, item) {
             var node = App.scene.getNodeById(item.node_id);
             App.canvas_controller.selectNode(node);
+            UI.createAttributesTab();
         });
         $(document).on("node_selected", function (event, node) {
             UI.scene_tree.setSelectedItem("uid_" + node._uid);
+            UI.createAttributesTab();
         });
 
 

@@ -54,10 +54,7 @@ CameraController.prototype.rotate = function (e) {
 }
 
 CameraController.prototype.move = function (e) {
-
     this._obj.moveLocal( [-e.deltax * App.dt, e.deltay * App.dt, 0]);
-
-
 }
 
 CameraController.prototype.handleMouseMove = function (e) {
@@ -83,13 +80,11 @@ function NodeController(obj, options) {
     this._node_temp.mesh = "bounding";
     this._node_temp.primitive = gl.LINES;
     this._node_temp.color = [0.3, 0.7, 0.56];
-    // the attributes the ui must show
+    // TODO the attributes the ui must show
     this._ui_attributes = [
         "color",
         "position"
-    ]
-
-
+    ];
 }
 extendClass(NodeController, ObjectController);
 
@@ -102,25 +97,24 @@ NodeController.prototype.handleMouseMove = function (e) {
 }
 
 NodeController.prototype.handleMouseDown = function (e) {
-    $(document).trigger("node_selected", e.obj  );
     this.selectNode(e.obj)
-
+    $(document).trigger("node_selected", e.obj );
 }
 
 
 NodeController.prototype.getScaleFactors = function () {
-    var mesh = gl.meshes[this._obj.mesh];
-    var min = BBox.getMin(mesh.bounding);
-    var max = BBox.getMax(mesh.bounding);
-    return [max[0]-min[0], max[1]-min[1], max[2]-min[2]];
+        var mesh = gl.meshes[this._obj.mesh];
+        var min = BBox.getMin(mesh.bounding);
+        var max = BBox.getMax(mesh.bounding);
+        return [max[0]-min[0], max[1]-min[1], max[2]-min[2]];
 }
 
 NodeController.prototype.selectNode = function (node) {
     if (this._obj)
         this.removeBounding();
     this._obj = node;
-    this.createBounding();
-    this.addUIAttributes();
+    if(this._obj)
+        this.createBounding();
 }
 
 NodeController.prototype.createBounding = function () {
@@ -133,6 +127,3 @@ NodeController.prototype.removeBounding = function () {
     this._obj.removeChild(this._node_temp);
 }
 
-NodeController.prototype.addUIAttributes = function () {
-    UI.createAttributesTab();
-}
