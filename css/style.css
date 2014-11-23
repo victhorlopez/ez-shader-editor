@@ -1,0 +1,17 @@
+#tools-menu {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+}
+.canvas-tool{
+    height: 30px;
+    width: 30px;
+    margin-left: 3px;
+    display: inline-block;
+}
+#tool-translate {
+    background: url("../img/translate_min2.png") no-repeat center center;
+}
+#tool-rotate {
+    background: url("../img/rotation_min2.png") no-repeat center center;
+}

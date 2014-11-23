@@ -22,6 +22,7 @@ var UI = {
         //this.createMainMenu();
         this.createLeftPanel();
         this.createMainPanel();
+        this.createToolsMenu();
 
     },
     createAttributesTab: function () {
@@ -29,7 +30,7 @@ var UI = {
         tab.content.innerHTML = "";
         var node = App.canvas_controller.getSelectedNode();
         var widgets = new LiteGUI.Inspector();
-        if(node){
+        if (node) {
             widgets.addColor("Color", node.color, {
                 callback: function (color) {
                     node.color = color;
@@ -52,7 +53,7 @@ var UI = {
 
     },
     createSceneTreeTab: function () {
-        // Evenets of scene tree tab
+        // Events of scene tree tab
         $(document).on("item_selected", function (event, item) {
             var node = App.scene.getNodeById(item.node_id);
             App.canvas_controller.selectNode(node);
@@ -118,7 +119,7 @@ var UI = {
     createMainPanel: function () {
         //create main panel on the left side
         this.main_panel = new LiteGUI.Panel("mainpanel");
-        this.main_panel.dockTo(this.main_area.getSection(1), "full"); // section 0 is the left one
+        this.main_panel.dockTo(this.main_area.getSection(1), "full"); // section 1 is the right one
 
         //create some tabs
         this.main_panel_tabs = new LiteGUI.Tabs("tabs");
@@ -183,6 +184,21 @@ var UI = {
 
 
     },
+    createToolsMenu: function () {
+
+        $(this.main_area.root).append(' <div id="tools-menu" class="canvas-tools-menu"></div>');
+        addTool("#tools-menu","translate");
+        addTool("#tools-menu","rotate");
+        addTool("#tools-menu","select");
+
+        function addTool(parent_id,id){
+            $(parent_id).append('<div id="tool-'+id+'" class="canvas-tool">   </div>');
+            $('#tool-'+id).bind("click", function(e) {
+                $('#tool-'+id).trigger("mode_"+id);
+            });
+        }
+
+    }
 
 
 };
