@@ -188,12 +188,13 @@ var UI = {
     createToolsMenu: function () {
 
         $(this.main_area.root).append(' <div id="tools-menu" class="canvas-tools-menu"></div>');
-        addTool("#tools-menu","translate");
-        addTool("#tools-menu","rotate");
-        addTool("#tools-menu","select");
+        addTool("#tools-menu","translate","Translate the selected item");
+        addTool("#tools-menu","rotate","Rotate the selected item");
+        addTool("#tools-menu","scale","Scale items");
 
-        function addTool(parent_id,id){
-            $(parent_id).append('<div id="tool-'+id+'" class="canvas-tool">   </div>');
+        function addTool(parent_id,id, on_hover_info){
+            $(parent_id).append('<div id="tool-'+id+'" class="canvas-tool" title="'+on_hover_info+'">   </div>');
+            $('#tool-'+id).tooltip({ content: on_hover_info });
             $('#tool-'+id).bind("click", function(e) {
                 $('#tool-'+id).trigger("mode_"+id);
             });

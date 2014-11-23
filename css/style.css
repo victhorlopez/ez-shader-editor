@@ -15,3 +15,37 @@
 #tool-rotate {
     background: url("../img/rotation_min2.png") no-repeat center center;
 }
+#tool-scale {
+    background: url("../img/scale.png") no-repeat center center;
+}
+/* from jquery ui css */
+.ui-tooltip {
+    padding: 8px;
+    position: absolute;
+    z-index: 9999;
+    max-width: 300px;
+    -webkit-box-shadow: 0 0 5px #aaa;
+    box-shadow: 0 0 5px #aaa;
+}
+body .ui-tooltip {
+    border-width: 2px;
+}
+.ui-widget .ui-widget {
+    font-size: 1em;
+}
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button {
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
+}
+.ui-widget-content {
+    border: 1px solid #aaaaaa;
+    background: #ffffff ;
+    color: #222222;
+}
+.ui-widget-content a {
+    color: #222222;
+}
+/* ---------------- */
