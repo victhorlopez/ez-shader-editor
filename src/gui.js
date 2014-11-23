@@ -8,7 +8,7 @@ var UI = {
     scene_tree: null,
 
 
-    init: function () {
+    preinit: function () {
         //call the init to setup
         LiteGUI.init({
             menubar: "menu-bar"
@@ -22,8 +22,9 @@ var UI = {
         //this.createMainMenu();
         this.createLeftPanel();
         this.createMainPanel();
+    },
+    postinit: function () {
         this.createToolsMenu();
-
     },
     createAttributesTab: function () {
         var tab = this.side_panel_tabs.getTab("Attributes");

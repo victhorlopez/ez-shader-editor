@@ -15,13 +15,13 @@ var App =
     canvas_controller: null,
 
     init: function () {
-        UI.init();
+        UI.preinit();
         var container = $(".wtabcontent-Scene");
         gl = GL.create({width: container.width(), height: container.parent().parent().height() - container.parent().height()});
         this.scene = new RD.Scene();
         this.renderer = new RD.Renderer(gl);
         container.append(gl.canvas);
-
+        UI.postinit();
 
         // need to fix on load
         this.addExtraAssets();
