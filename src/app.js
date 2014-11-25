@@ -21,13 +21,14 @@ var App =
         this.scene = new RD.Scene();
         this.renderer = new RD.Renderer(gl);
         container.append(gl.canvas);
-        UI.postinit();
+
 
         // need to fix on load
         this.addExtraAssets();
         this.createScene();
         this.captureInput();
 
+        UI.postinit();
         requestAnimationFrame(this.animate);
     },
     captureInput: function () {
@@ -55,7 +56,7 @@ var App =
     addExtraAssets: function () {
         var assets_path = "../old/assets/";
         this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64, size:0.5}));
-        this.renderer.addMesh("cylinder",GL.Mesh.cylinder());
+        this.renderer.addMesh("cylinder",GL.Mesh.cylinder({height: 2, radius:0.1}));
         this.renderer.addMesh("circle", GL.Mesh.circle({xz: true}));
         this.renderer.addMesh("grid", GL.Mesh.grid({size: 1, lines: 50}));
         this.renderer.addMesh("box", GL.Mesh.box({size: 1}));
@@ -72,6 +73,7 @@ var App =
         this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
         this.camera.lookAt([0, 10, 10], [0, 0, 0], [0, 1, 0]);
+        // canvas controller needs the camera created
         this.canvas_controller = new CanvasController();
 
 

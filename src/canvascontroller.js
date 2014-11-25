@@ -6,26 +6,26 @@ function CanvasController() {
 
 CanvasController.prototype.onMouseEvent = function (e) {
 
-        var obj = null;
-        if(e.eventType != "mousemove"){
-            obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
-            if (obj) {
-                e.obj = obj;
-                this._controller  = this._node_controller;
-            } else {
-                this._controller  = this._camera_controller;
-            }
+    var obj = null;
+    if (e.eventType != "mousemove") {
+        obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
+        if (obj) {
+            e.obj = obj;
+            this._controller = this._node_controller;
+        } else {
+            this._controller = this._camera_controller;
         }
+    }
 
-        if (e.eventType == "mousewheel") {
-            this._camera_controller.handleMouseWheel(e);
-        }
-        if (e.eventType == "mousemove" && e.dragging) {
-            this._controller .handleMouseMove(e);
-        }
-        if(e.eventType == "mousedown"){
-            this._controller .handleMouseDown(e);
-        }
+    if (e.eventType == "mousewheel") {
+        this._camera_controller.handleMouseWheel(e);
+    }
+    if (e.eventType == "mousemove" && e.dragging) {
+        this._controller.handleMouseMove(e);
+    }
+    if (e.eventType == "mousedown") {
+        this._controller.handleMouseDown(e);
+    }
 
 }
 
@@ -41,7 +41,7 @@ CanvasController.prototype.getNodeOnMouse = function (canvas_x, canvas_y) {
     for (var i in nodes) {
         var node = nodes[i];
         var mesh = gl.meshes[node.mesh];
-        if (mesh.bounding) {
+        if (mesh && mesh.bounding && node.parentNode && node.parentNode.id != "gizmo") {
             var result = Raytracer.hitTestBox(App.camera._position, ray, BBox.getMin(mesh.bounding), BBox.getMax(mesh.bounding), node._local_matrix);
             if (result && closest_t > result.t) {
                 closest_node = node;
@@ -52,10 +52,25 @@ CanvasController.prototype.getNodeOnMouse = function (canvas_x, canvas_y) {
     return closest_node;
 }
 
-CanvasController.prototype.getSelectedNode = function()  {
+CanvasController.prototype.getSelectedNode = function () {
     return this._node_controller._obj;
 }
 
-CanvasController.prototype.selectNode = function(node)  {
+CanvasController.prototype.selectNode = function (node) {
     this._node_controller.selectNode(node);
 }
+
+CanvasController.prototype.onTranslateTool = function () {
+    App.canvas_controller._node_controller.activateGizmo();
+}
+
+CanvasController.prototype.onRotateTool = function () {
+}
+
+CanvasController.prototype.onScaleTool = function () {
+}
+
+CanvasController.prototype.onNoTool = function () {
+    App.canvas_controller._node_controller.desactivateTools();
+}
+

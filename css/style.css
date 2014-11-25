@@ -9,14 +9,23 @@
     margin-left: 3px;
     display: inline-block;
 }
+#tools-menu div.hover{
+    background-position: -30px 0px;
+}
+#tools-menu div.selected{
+    background-position: -60px 0px;
+}
 #tool-translate {
-    background: url("../img/translate_min2.png") no-repeat center center;
+    background: url("../img/translate_min2.png") no-repeat 0px 0px;
 }
 #tool-rotate {
-    background: url("../img/rotation_min2.png") no-repeat center center;
+    background: url("../img/rotation_min3.png") no-repeat 0px 0px;
 }
 #tool-scale {
-    background: url("../img/scale.png") no-repeat center center;
+    background: url("../img/scale.png") no-repeat 0px 0px;
+}
+#tool-unselect {
+    background: url("../img/unselect.png") no-repeat 0px 0px;
 }
 /* from jquery ui css */
 .ui-tooltip {

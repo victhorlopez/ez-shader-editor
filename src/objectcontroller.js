@@ -85,6 +85,29 @@ function NodeController(obj, options) {
         "color",
         "position"
     ];
+    this._gizmo_activated = false;
+    this._gizmo = new RD.SceneNode();
+    //this._gizmo.scale = [ 0.5, 0.5, 0.5];
+    this._gizmo.id = "gizmo";
+    var gizmoX = createGizmoAxis("gizmoX",[1, 0 ,0 ], [0, 90 * DEG2RAD, 0]);
+    this._gizmo.addChild(gizmoX);
+    var gizmoY = createGizmoAxis("gizmoY",[0, 1 ,0 ], [0, 0, 0]);
+    this._gizmo.addChild(gizmoY);
+    var gizmoZ = createGizmoAxis("gizmoZ",[0, 0 ,1 ], [0, 0, 90 * DEG2RAD]);
+    this._gizmo.addChild(gizmoZ);
+
+
+    function createGizmoAxis(id,position, angle_euler_in_dg){
+        var axis = new RD.SceneNode();
+        axis.id = id;
+        axis.mesh = "cylinder";
+        axis.position = position;
+        axis.flags.depth_test = false;
+        axis.shader = "phong";
+        axis.setRotationFromEuler(angle_euler_in_dg);
+        axis.color = [ 1, 1, 1];
+        return axis;
+    }
 }
 extendClass(NodeController, ObjectController);
 
@@ -121,9 +144,28 @@ NodeController.prototype.createBounding = function () {
     this._node_temp._scale.set(this.getScaleFactors());
     this._node_temp.updateLocalMatrix();
     this._obj.addChild(this._node_temp);
+
+    if(this._gizmo_activated)
+        this._obj.addChild(this._gizmo);
+
+
 }
 
 NodeController.prototype.removeBounding = function () {
     this._obj.removeChild(this._node_temp);
+    if(this._gizmo_activated && this._gizmo.parentNode)
+        this._obj.removeChild(this._gizmo);
 }
 
+NodeController.prototype.activateGizmo = function (e) {
+    this._gizmo_activated = true;
+}
+NodeController.prototype.desactivateGizmo = function (e) {
+    this._gizmo_activated = false;
+    if(this._gizmo.parentNode)
+        this._obj.removeChild(this._gizmo);
+}
+
+NodeController.prototype.desactivateTools = function (e) {
+    this.desactivateGizmo();
+}

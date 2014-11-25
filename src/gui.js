@@ -188,21 +188,37 @@ var UI = {
     createToolsMenu: function () {
 
         $(this.main_area.root).append(' <div id="tools-menu" class="canvas-tools-menu"></div>');
-        addTool("#tools-menu","translate","Translate the selected item");
-        addTool("#tools-menu","rotate","Rotate the selected item");
-        addTool("#tools-menu","scale","Scale items");
+        addTool("#tools-menu","translate","Translate the selected item", App.canvas_controller.onTranslateTool);
+        addTool("#tools-menu","rotate","Rotate the selected item", App.canvas_controller.onRotateTool);
+        addTool("#tools-menu","scale","Scale items", App.canvas_controller.onScaleTool);
+        addTool("#tools-menu","unselect","No tool selected", App.canvas_controller.onNoTool, true);
 
-        function addTool(parent_id,id, on_hover_info){
-            $(parent_id).append('<div id="tool-'+id+'" class="canvas-tool" title="'+on_hover_info+'">   </div>');
-            $('#tool-'+id).tooltip({ content: on_hover_info });
-            $('#tool-'+id).bind("click", function(e) {
-                $('#tool-'+id).trigger("mode_"+id);
+        function addTool(parent_id,id, on_hover_info, event_callback, selected){
+            $(parent_id).append('<div id="tool-'+id+'" class="canvas-tool " title="'+on_hover_info+'">   </div>');
+            var tag = $('#tool-'+id);
+            if(selected)
+                tag.addClass("selected");
+            //creation of the tooltip
+            tag.tooltip({ content: on_hover_info });
+            // we attach the click function
+            tag.bind("click", function(e) {
+                tag.trigger("on_"+id+"_tool");
+                $("#tools-menu div").removeClass("selected");
+                tag.addClass("selected");
             });
+            // we add the hover eeffect
+            $("#tools-menu div").hover(
+                function () {
+                    $(this).addClass("hover");
+                },
+                function () {
+                    $(this).removeClass("hover");
+                }
+            );
+            $(document).on("on_"+id+"_tool", event_callback);
+
         }
-
     }
-
-
 };
 
 
