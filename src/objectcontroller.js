@@ -138,17 +138,18 @@ NodeController.prototype.selectNode = function (node) {
     this._obj = node;
     if(this._obj)
         this.createBounding();
+    this.createGizmo();
 }
 
 NodeController.prototype.createBounding = function () {
     this._node_temp._scale.set(this.getScaleFactors());
     this._node_temp.updateLocalMatrix();
     this._obj.addChild(this._node_temp);
+}
 
-    if(this._gizmo_activated)
+NodeController.prototype.createGizmo = function () {
+    if(this._gizmo_activated && this._obj)
         this._obj.addChild(this._gizmo);
-
-
 }
 
 NodeController.prototype.removeBounding = function () {
@@ -159,6 +160,7 @@ NodeController.prototype.removeBounding = function () {
 
 NodeController.prototype.activateGizmo = function (e) {
     this._gizmo_activated = true;
+    this.createGizmo();
 }
 NodeController.prototype.desactivateGizmo = function (e) {
     this._gizmo_activated = false;
