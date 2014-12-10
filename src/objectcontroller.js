@@ -10,11 +10,11 @@ ObjectController.prototype._constructor = function (obj, options) {
 }
 
 ObjectController.prototype.move = function (v) {
-    obj.move(v);
+    this._obj.move(v);
 }
 
 ObjectController.prototype.rotate = function (angle_in_deg, axis) {
-    obj.rotate(angle_in_deg, axis);
+    this._obj.rotate(angle_in_deg, axis);
 }
 
 function CameraController(obj, options) {
@@ -32,7 +32,7 @@ CameraController.prototype.orbitDistanceFactor = function (f, center) {
 }
 
 CameraController.prototype.handleMouseWheel = function (e) {
-    this._obj.orbitDistanceFactor(1 + App.dt * -this._zoom_speed * (e.deltaY > 1 ? -1 : 1) );
+    this._obj.orbitDistanceFactor(1 + App.dt * -this._zoom_speed * (e.deltaY > 1 ? -1 : 1));
 }
 
 CameraController.prototype.orbit = function (e) {
@@ -54,15 +54,15 @@ CameraController.prototype.rotate = function (e) {
 }
 
 CameraController.prototype.move = function (e) {
-    this._obj.moveLocal( [-e.deltax * App.dt, e.deltay * App.dt, 0]);
+    this._obj.moveLocal([-e.deltax * App.dt, e.deltay * App.dt, 0]);
 }
 
 CameraController.prototype.handleMouseMove = function (e) {
-    if (e.dragging)  {
+    if (e.dragging) {
 
-        if(e.leftButton) {
+        if (e.leftButton) {
             this.orbit(e);
-        } else if(e.rightButton){
+        } else if (e.rightButton) {
             this.rotate(e);
         } else {
             this.move(e);
@@ -89,15 +89,15 @@ function NodeController(obj, options) {
     this._gizmo = new RD.SceneNode();
     //this._gizmo.scale = [ 0.5, 0.5, 0.5];
     this._gizmo.id = "gizmo";
-    var gizmoX = createGizmoAxis("gizmoX",[1, 0 ,0 ], [0, 90 * DEG2RAD, 0]);
+    var gizmoX = createGizmoAxis("gizmoX", [1, 0 , 0 ], [0, 90 * DEG2RAD, 0]);
     this._gizmo.addChild(gizmoX);
-    var gizmoY = createGizmoAxis("gizmoY",[0, 1 ,0 ], [0, 0, 0]);
+    var gizmoY = createGizmoAxis("gizmoY", [0, 1 , 0 ], [0, 0, 0]);
     this._gizmo.addChild(gizmoY);
-    var gizmoZ = createGizmoAxis("gizmoZ",[0, 0 ,1 ], [0, 0, 90 * DEG2RAD]);
+    var gizmoZ = createGizmoAxis("gizmoZ", [0, 0 , 1 ], [0, 0, 90 * DEG2RAD]);
     this._gizmo.addChild(gizmoZ);
 
 
-    function createGizmoAxis(id,position, angle_euler_in_dg){
+    function createGizmoAxis(id, position, angle_euler_in_dg) {
         var axis = new RD.SceneNode();
         axis.id = id;
         axis.mesh = "cylinder";
@@ -116,46 +116,43 @@ NodeController.prototype.handleMouseWheel = function (e) {
 }
 
 NodeController.prototype.handleMouseMove = function (e) {
+    if (this.gizmo) {
+
+        this.move([0,0 , e.deltay * App.dt]);
+    }
 
 }
 
 NodeController.prototype.handleMouseDown = function (e) {
-    this.selectNode(e.obj)
-    $(document).trigger("node_selected", e.obj );
+
+    if (!this.gizmo) {
+        this.selectNode(e.obj);
+        $(document).trigger("node_selected", e.obj);
+    }
+
 }
 
 
 NodeController.prototype.getScaleFactors = function () {
-        var mesh = gl.meshes[this._obj.mesh];
-        var min = BBox.getMin(mesh.bounding);
-        var max = BBox.getMax(mesh.bounding);
-        return [max[0]-min[0], max[1]-min[1], max[2]-min[2]];
+    var mesh = gl.meshes[this._obj.mesh];
+    var min = BBox.getMin(mesh.bounding);
+    var max = BBox.getMax(mesh.bounding);
+    return [max[0] - min[0], max[1] - min[1], max[2] - min[2]];
 }
 
 NodeController.prototype.selectNode = function (node) {
     if (this._obj)
-        this.removeBounding();
+        this._obj.removeBounding();
     this._obj = node;
-    if(this._obj)
-        this.createBounding();
+    if (this._obj)
+        this._obj.createBounding();
     this.createGizmo();
 }
 
-NodeController.prototype.createBounding = function () {
-    this._node_temp._scale.set(this.getScaleFactors());
-    this._node_temp.updateLocalMatrix();
-    this._obj.addChild(this._node_temp);
-}
 
 NodeController.prototype.createGizmo = function () {
-    if(this._gizmo_activated && this._obj)
+    if (this._gizmo_activated && this._obj)
         this._obj.addChild(this._gizmo);
-}
-
-NodeController.prototype.removeBounding = function () {
-    this._obj.removeChild(this._node_temp);
-    if(this._gizmo_activated && this._gizmo.parentNode)
-        this._obj.removeChild(this._gizmo);
 }
 
 NodeController.prototype.activateGizmo = function (e) {
@@ -164,10 +161,14 @@ NodeController.prototype.activateGizmo = function (e) {
 }
 NodeController.prototype.desactivateGizmo = function (e) {
     this._gizmo_activated = false;
-    if(this._gizmo.parentNode)
+    if (this._gizmo.parentNode)
         this._obj.removeChild(this._gizmo);
 }
 
 NodeController.prototype.desactivateTools = function (e) {
     this.desactivateGizmo();
+}
+
+NodeController.prototype.translateNode = function () {
+
 }
