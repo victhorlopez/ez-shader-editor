@@ -77,6 +77,9 @@ var App =
         // canvas controller needs the camera created
         this.canvas_controller = new CanvasController();
 
+        var light = new RD.LightNode();
+        light.position = [0, 0, 0];
+        this.scene.root.addChild(light);
 
         var scale = 10;
         var grid = new RD.SceneNode();

@@ -87,9 +87,10 @@ function NodeController(obj, options) {
         "color",
         "position"
     ];
-    this._gizmo_activated = false;
+    this._gizmo_activate = false;
     this._gizmo = new RD.SceneNode();
     this._gizmo.id = "gizmo";
+    //TODO gizmo needs to take into account the camera setup for the movement
     var gizmoX = createGizmoAxis("gizmoX", [1, 0 , 0 ], [0, 90 * DEG2RAD, 0],
         function (e) {
             return [e.deltax * App.dt, 0 , 0];
@@ -128,11 +129,18 @@ NodeController.prototype.setGizmoAxis = function (node) {
 }
 
 NodeController.prototype.handleMouseWheel = function (e) {
+    if(this._gizmo_activate){
+        // TODO resize gizmo
+
+
+    }
 }
 
 NodeController.prototype.handleMouseMove = function (e) {
     if (this._is_gizmo) {
         this.move(this._selected_gizmo.getMoveVec(e));
+        // TODO trigger event so the ui gets updated
+        $(document).trigger("", e.obj);
     }
 
 }
@@ -166,22 +174,22 @@ NodeController.prototype.selectNode = function (node) {
 }
 
 NodeController.prototype.createGizmo = function () {
-    if (this._gizmo_activated && this._obj && !this._obj.findNode("gizmo"))
+    if (this._gizmo_activate && this._obj && !this._obj.findNode("gizmo"))
         this._obj.addChild(this._gizmo);
 }
 
 NodeController.prototype.removeGizmo = function () {
-    if (this._gizmo_activated)
+    if (this._gizmo_activate)
         this._obj.removeChild(this._gizmo);
 }
 
 NodeController.prototype.activateGizmo = function (e) {
-    this._gizmo_activated = true;
+    this._gizmo_activate = true;
     this.createGizmo();
 }
 
 NodeController.prototype.desactivateGizmo = function (e) {
-    this._gizmo_activated = false;
+    this._gizmo_activate = false;
     if (this._gizmo.parentNode)
         this._obj.removeChild(this._gizmo);
 }
