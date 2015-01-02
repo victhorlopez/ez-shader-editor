@@ -49,7 +49,8 @@ var App =
         };
 
         gl.captureKeys();
-        this.renderer.context.onkey = function (e) {
+        this.renderer.context.onkeydown = function (e) {
+            if(e.character = "d") App.renderer.toggleDebug();
         };
 
     },

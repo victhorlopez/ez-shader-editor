@@ -10,8 +10,13 @@ CanvasController.prototype.onMouseEvent = function (e) {
     if (e.eventType != "mousemove") {
         obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
         if (obj) {
-            e.obj = obj;
-            this._controller = this._node_controller;
+            if (obj.parentNode && obj.parentNode.id == "gizmo") {
+                this._node_controller.setGizmoAxis(obj);
+            } else {
+                e.obj = obj;
+                this._node_controller._is_gizmo = false;
+                this._controller = this._node_controller;
+            }
         } else {
             this._controller = this._camera_controller;
         }
@@ -41,7 +46,7 @@ CanvasController.prototype.getNodeOnMouse = function (canvas_x, canvas_y) {
     for (var i in nodes) {
         var node = nodes[i];
         var mesh = gl.meshes[node.mesh];
-        if (mesh && mesh.bounding && node.parentNode && node.parentNode.id != "gizmo") {
+        if (mesh && mesh.bounding) {
             var result = Raytracer.hitTestBox(App.camera._position, ray, BBox.getMin(mesh.bounding), BBox.getMax(mesh.bounding), node._local_matrix);
             if (result && closest_t > result.t) {
                 closest_node = node;
