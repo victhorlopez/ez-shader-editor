@@ -89,7 +89,6 @@ function NodeController(obj, options) {
     ];
     this._gizmo_activated = false;
     this._gizmo = new RD.SceneNode();
-    //this._gizmo.scale = [ 0.5, 0.5, 0.5];
     this._gizmo.id = "gizmo";
     var gizmoX = createGizmoAxis("gizmoX", [1, 0 , 0 ], [0, 90 * DEG2RAD, 0],
         function (e) {
@@ -122,10 +121,12 @@ function NodeController(obj, options) {
     }
 }
 extendClass(NodeController, ObjectController);
+
 NodeController.prototype.setGizmoAxis = function (node) {
     this._is_gizmo = true;
     this._selected_gizmo = node;
 }
+
 NodeController.prototype.handleMouseWheel = function (e) {
 }
 
@@ -144,7 +145,6 @@ NodeController.prototype.handleMouseDown = function (e) {
     }
 
 }
-
 
 NodeController.prototype.getScaleFactors = function () {
     var mesh = gl.meshes[this._obj.mesh];
@@ -165,7 +165,6 @@ NodeController.prototype.selectNode = function (node) {
     this.createGizmo();
 }
 
-
 NodeController.prototype.createGizmo = function () {
     if (this._gizmo_activated && this._obj && !this._obj.findNode("gizmo"))
         this._obj.addChild(this._gizmo);
@@ -180,6 +179,7 @@ NodeController.prototype.activateGizmo = function (e) {
     this._gizmo_activated = true;
     this.createGizmo();
 }
+
 NodeController.prototype.desactivateGizmo = function (e) {
     this._gizmo_activated = false;
     if (this._gizmo.parentNode)
