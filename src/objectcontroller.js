@@ -135,6 +135,7 @@ NodeController.prototype.setGizmoAxis = function (node,e) {
     this._is_gizmo = true;
     node._position_selected = App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, this._obj.position, this._obj.getLocalVector([0,1,0]));
     this._selected_gizmo = node;
+    this._obj = node.parentNode.parentNode;
 }
 
 NodeController.prototype.handleMouseWheel = function (e) {
