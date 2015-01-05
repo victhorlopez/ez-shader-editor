@@ -51,4 +51,6 @@ Mesh.boundingFrame = function (options) {
     return Mesh.load(buffers, options);
 }
 
-
+function sign(x) {
+    return x > 0 ? 1 : x < 0 ? -1 : 0;
+}

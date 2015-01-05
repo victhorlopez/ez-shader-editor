@@ -103,7 +103,21 @@ function NodeController(obj, options) {
     this._gizmo.addChild(gizmoY);
     var gizmoZ = createGizmoAxis("gizmoZ", [0, 0 , 1 ], [0, 0, 90 * DEG2RAD],
         function (e) {
-            return [0, 0 , e.deltay * App.dt];
+            var result = App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, this.position, [0,1,0]);
+            if(!result)return [0,0,0];
+            var temp = vec3.create();
+            vec3.sub(temp,result,this._position_selected);
+            this._position_selected = result;
+//            var normal = this.getLocalVector([0,0,1]);
+//            var p = vec3.dot(normal,this._position_selected);
+//            var delta = vec3.dot(normal,result) - p;
+////            this._position_selected = result;
+//            // TODO posar speed o agafar sign de delta
+//
+//            return [0, 0 , sign(delta)  * -10 * App.dt];
+            this.parentNode.parentNode.translate([0,0,-vec3.dot([0,0,1],temp)]);
+            return [0,0,0];
+            return [0,0,sign(vec3.dot([0,0,1],temp))* App.dt];
         });
     this._gizmo.addChild(gizmoZ);
 
@@ -123,16 +137,15 @@ function NodeController(obj, options) {
 }
 extendClass(NodeController, ObjectController);
 
-NodeController.prototype.setGizmoAxis = function (node) {
+NodeController.prototype.setGizmoAxis = function (node,e) {
     this._is_gizmo = true;
+    node._position_selected = App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, this._obj.position, this._obj.getLocalVector([0,1,0]));
     this._selected_gizmo = node;
 }
 
 NodeController.prototype.handleMouseWheel = function (e) {
     if(this._gizmo_activate){
         // TODO resize gizmo
-
-
     }
 }
 

@@ -79,6 +79,7 @@ var App =
 
         var light = new RD.LightNode();
         light.position = [0, 0, 0];
+        light.depth_test = false;
         this.scene.root.addChild(light);
 
         var scale = 10;
@@ -140,22 +141,8 @@ var App =
         gl.canvas.height = h;
         gl.viewport(0, 0, w, h);
     },
-    setUniforms: function () {
-
-        this.renderer._uniforms["u_time"] = this.scene.time;
-        this.renderer._uniforms["u_ambient"] = 0.1;
-        this.renderer._uniforms["u_eye"] = this.camera.position;
-        this.renderer._uniforms["u_light_dir"] = [1.5, 1.1, 1.4];
-        this.renderer._uniforms["u_light_color"] = [1.0, 1.0, 1.0, 1.0];
-        this.renderer._uniforms["u_lights_dir"] = [1.5, 1.1, 1.4, 1.0,
-            -1.0, 0.3, 0.3, 1.0,
-            1.3, 0.4, -1.0, 1.0,
-            0.0, 0.0, 0.0, 0.0];
-
-    },
     update: function () {
         this.scene.update(this.dt);
-        //this.setUniforms();
     },
     animate: function () {
         requestAnimationFrame(App.animate);
