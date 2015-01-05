@@ -10,13 +10,12 @@ CanvasController.prototype.onMouseEvent = function (e) {
     if (e.eventType != "mousemove") {
         obj = this.getNodeOnMouse(e.canvasx, gl.canvas.height - e.canvasy); // the y coordinates start from the bottom in the event
         if (obj) {
+            this._controller = this._node_controller;
             if (obj.parentNode && obj.parentNode.id == "gizmo") {
-                // TODO if you click the background the gizmo stops working
                 this._node_controller.setGizmoAxis(obj,e);
             } else {
                 e.obj = obj;
                 this._node_controller._is_gizmo = false;
-                this._controller = this._node_controller;
             }
         } else {
             this._controller = this._camera_controller;
