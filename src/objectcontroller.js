@@ -91,36 +91,30 @@ function NodeController(obj, options) {
     this._gizmo = new RD.SceneNode();
     this._gizmo.id = "gizmo";
     //TODO gizmo needs to take into account the camera setup for the movement
-    var gizmoX = createGizmoAxis("gizmoX", [1, 0 , 0 ], [0, 90 * DEG2RAD, 0],
-        function (e) {
-            return [e.deltax * App.dt, 0 , 0];
-        });
+    var gizmoX = createGizmoAxis("gizmoX", [1, 0 , 0 ], [0, 90 * DEG2RAD, 0], moveObjectWithGizmo);
     this._gizmo.addChild(gizmoX);
-    var gizmoY = createGizmoAxis("gizmoY", [0, 1 , 0 ], [0, 0, 0],
-        function (e) {
-            return [0, -e.deltay * App.dt , 0];
-        });
+    var gizmoY = createGizmoAxis("gizmoY", [0, 1 , 0 ], [0, 0, 0], moveObjectWithGizmo);
     this._gizmo.addChild(gizmoY);
-    var gizmoZ = createGizmoAxis("gizmoZ", [0, 0 , 1 ], [0, 0, 90 * DEG2RAD],
-        function (e, node) {
-            var result = App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, node.getGlobalPosition(), node.getLocalVector([0,1,0]));
-//            var q = quat.create();
-//            quat.setAxisAngle(q, node.getLocalVector([1,0,0]), 180 * DEG2RAD);
-//            vec3.transformQuat(result, result, q);
-//            vec3.transformQuat(this._position_selected, this._position_selected, q);
-            if(!result)return [0,0,0];
-            var temp = vec3.create();
-            vec3.sub(temp,result,this._position_selected);
-
-            console.log("pos" + vec3.str(result));
-            this._position_selected = result;
-            var z_ax = node.getLocalVector([0,0,1]);
-            vec3.scale(z_ax,z_ax,vec3.dot(z_ax,temp));
-            return z_ax;
-        });
+    var gizmoZ = createGizmoAxis("gizmoZ", [0, 0 , 1 ], [0, 0, 90 * DEG2RAD], moveObjectWithGizmo);
     this._gizmo.addChild(gizmoZ);
 
-
+    function moveObjectWithGizmo(e, node) {
+        // TODO add temp variables
+        var v = vec3.fromValues(e.deltax, -e.deltay, 0);
+        var left = vec3.create();
+        vec3.scale(left,App.camera._right ,e.deltax);
+        var up = vec3.create();
+        vec3.scale(up,App.camera._top ,-e.deltay);
+        vec3.add(v,left,up);
+        var axis = node.getGlobalVector(this.position);
+        var l = vec3.length(v);
+        vec3.normalize(axis,axis);
+        vec3.normalize(v,v);
+        var angle = vec3.dot( axis, v);
+        var movement = node.getGlobalVector(this.position);
+        vec3.scale(movement,movement,l * sign(angle) * Math.abs(angle) * App.dt);
+        return movement;
+    }
     function createGizmoAxis(id, position, angle_euler_in_dg, delta_func) {
         var axis = new RD.SceneNode();
         axis._render_priority = 8;
@@ -131,7 +125,7 @@ function NodeController(obj, options) {
         axis.shader = "phong";
         axis.setRotationFromEuler(angle_euler_in_dg);
         axis.color = [ 1, 1, 1];
-        axis.getMoveVec = delta_func;
+        axis.getMoveVec = moveObjectWithGizmo;
         return axis;
     }
 }
@@ -151,7 +145,7 @@ NodeController.prototype.handleMouseWheel = function (e) {
 
 NodeController.prototype.handleMouseMove = function (e) {
     if (this._is_gizmo) {
-        this._obj.translate(this._selected_gizmo.getMoveVec(e, this._obj));
+        this._obj.move(this._selected_gizmo.getMoveVec(e, this._obj));
         // TODO trigger event so the ui gets updated
         $(document).trigger("", e.obj);
     }
