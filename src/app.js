@@ -79,6 +79,7 @@ var App =
 
         var light = new RD.LightNode();
         light.position = [0, 0, 0];
+        light.id = "light";
         light.depth_test = false;
         this.scene.root.addChild(light);
 

@@ -31,6 +31,7 @@ CanvasController.prototype.onMouseEvent = function (e) {
         this._controller.handleMouseMove(e);
     }
     if (e.eventType == "mousedown") {
+        console.log(App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, [1000,0,1000], [0,1,0]));
         this._controller.handleMouseDown(e);
     }
 

@@ -102,28 +102,28 @@ function NodeController(obj, options) {
         });
     this._gizmo.addChild(gizmoY);
     var gizmoZ = createGizmoAxis("gizmoZ", [0, 0 , 1 ], [0, 0, 90 * DEG2RAD],
-        function (e) {
-            var result = App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, this.position, [0,1,0]);
+        function (e, node) {
+            var result = App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, node.getGlobalPosition(), node.getLocalVector([0,1,0]));
+//            var q = quat.create();
+//            quat.setAxisAngle(q, node.getLocalVector([1,0,0]), 180 * DEG2RAD);
+//            vec3.transformQuat(result, result, q);
+//            vec3.transformQuat(this._position_selected, this._position_selected, q);
             if(!result)return [0,0,0];
             var temp = vec3.create();
             vec3.sub(temp,result,this._position_selected);
+
+            console.log("pos" + vec3.str(result));
             this._position_selected = result;
-//            var normal = this.getLocalVector([0,0,1]);
-//            var p = vec3.dot(normal,this._position_selected);
-//            var delta = vec3.dot(normal,result) - p;
-////            this._position_selected = result;
-//            // TODO posar speed o agafar sign de delta
-//
-//            return [0, 0 , sign(delta)  * -10 * App.dt];
-            this.parentNode.parentNode.translate([0,0,-vec3.dot([0,0,1],temp)]);
-            return [0,0,0];
-            return [0,0,sign(vec3.dot([0,0,1],temp))* App.dt];
+            var z_ax = node.getLocalVector([0,0,1]);
+            vec3.scale(z_ax,z_ax,vec3.dot(z_ax,temp));
+            return z_ax;
         });
     this._gizmo.addChild(gizmoZ);
 
 
     function createGizmoAxis(id, position, angle_euler_in_dg, delta_func) {
         var axis = new RD.SceneNode();
+        axis._render_priority = 8;
         axis.id = id;
         axis.mesh = "cylinder";
         axis.position = position;
@@ -151,7 +151,7 @@ NodeController.prototype.handleMouseWheel = function (e) {
 
 NodeController.prototype.handleMouseMove = function (e) {
     if (this._is_gizmo) {
-        this.move(this._selected_gizmo.getMoveVec(e));
+        this._obj.translate(this._selected_gizmo.getMoveVec(e, this._obj));
         // TODO trigger event so the ui gets updated
         $(document).trigger("", e.obj);
     }
