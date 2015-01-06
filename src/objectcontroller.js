@@ -147,8 +147,7 @@ NodeController.prototype.handleMouseWheel = function (e) {
 NodeController.prototype.handleMouseMove = function (e) {
     if (this._is_gizmo) {
         this._obj.move(this._selected_gizmo.getMoveVec(e, this._obj));
-        // TODO trigger event so the ui gets updated
-        $(document).trigger("", e.obj);
+        $(document).trigger("node_moved", e.obj);
     }
 
 }
@@ -171,11 +170,12 @@ NodeController.prototype.getScaleFactors = function () {
 
 NodeController.prototype.selectNode = function (node) {
     if (this._obj) {
+        this._obj.selected = false;
         this._obj.removeBounding();
         this.removeGizmo();
     }
-
     this._obj = node;
+    this._obj.selected = true;
     if (this._obj)
         this._obj.createBounding();
     this.createGizmo();

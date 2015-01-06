@@ -64,6 +64,9 @@ var UI = {
             UI.scene_tree.setSelectedItem("uid_" + node._uid);
             UI.createAttributesTab();
         });
+        $(document).on("node_moved", function (event, node) {
+            UI.createAttributesTab();
+        });
 
 
         var tab = this.side_panel_tabs.addTab("SceneTree");
