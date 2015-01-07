@@ -56,7 +56,7 @@ var App =
     },
     addExtraAssets: function () {
         var assets_path = "../old/assets/";
-        gl.textures["light"] = GL.Texture.fromURL( "../img/light.png", {filter: gl.NEAREST, wrap: gl.REPEAT});
+        gl.textures["light"] = GL.Texture.fromURL( "../img/light.png", {minFilter: gl.LINEAR_MIPMAP_LINEAR, wrap: gl.REPEAT});
 
         this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64, size:0.5}));
         this.renderer.addMesh("cylinder",GL.Mesh.cylinder({height: 2, radius:0.1}));
@@ -84,12 +84,12 @@ var App =
         light.position = [0, 5, 0];
         light.id = "light";
         //light.unselecteble = true;
-        light.setTexture("color","light");
+        //light.setTexture("color","light");
         this.scene.root.addChild(light);
 
         var scale = 10;
         var grid = new RD.SceneNode();
-        grid.unselecteble = true;
+        grid.unselectable = true;
         grid.id = "grid";
         grid.mesh = "grid";
         grid.color = [0.3, 0.3, 0.3];

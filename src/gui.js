@@ -78,7 +78,7 @@ var UI = {
         console.log(nodes);
         for (var i in nodes) {
             var node = nodes[i];
-            if (!node.unselecteble) {
+            if (!node.unselectable) {
                 var parent_id = node.parentNode ? "uid_" + node.parentNode._uid : null;
                 var node_uid = "uid_" + node._uid;
                 this.scene_tree.insertItem({id: node_uid, node_id: node.id, content: node.id ? node.id : "root", allow_rename: (parent_id != null)}, parent_id);

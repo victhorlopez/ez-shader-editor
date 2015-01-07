@@ -48,7 +48,7 @@ CanvasController.prototype.getNodeOnMouse = function (canvas_x, canvas_y) {
     for (var i in nodes) {
         var node = nodes[i];
         var mesh = gl.meshes[node.mesh];
-        if (mesh && mesh.bounding && !node.selected ) {
+        if (mesh && mesh.bounding && !node.selected && !node.unselectable ) {
             var result = Raytracer.hitTestBox(App.camera._position, ray, BBox.getMin(mesh.bounding), BBox.getMax(mesh.bounding), node._global_matrix);
             if (result && closest_t > result.t) {
                 closest_node = node;
