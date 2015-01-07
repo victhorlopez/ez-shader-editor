@@ -56,6 +56,8 @@ var App =
     },
     addExtraAssets: function () {
         var assets_path = "../old/assets/";
+        gl.textures["light"] = GL.Texture.fromURL( "../img/light.png", {filter: gl.NEAREST, wrap: gl.REPEAT});
+
         this.renderer.addMesh("sphere",GL.Mesh.sphere({lat: 64, long: 64, size:0.5}));
         this.renderer.addMesh("cylinder",GL.Mesh.cylinder({height: 2, radius:0.1}));
         this.renderer.addMesh("circle", GL.Mesh.circle({xz: true}));
@@ -63,10 +65,11 @@ var App =
         this.renderer.addMesh("box", GL.Mesh.box({size: 1}));
         this.renderer.addMesh("bounding", GL.Mesh.boundingFrame({size: 1}));
         this.renderer.addMesh("monkey", GL.Mesh.fromURL(assets_path + "suzanne.obj"));
+        this.renderer.addMesh("thin_plane", GL.Mesh.box({sizex: 1, sizey: 1, sizez: 0.5}));
         //this.renderer.addMesh("batman", GL.Mesh.fromURL(assets_path + "batman.obj"));
 
 
-        //gl.textures["checkers"] = GL.Texture.fromURL(assets_path + "textures/checkers.gif", {filter: gl.NEAREST, wrap: gl.REPEAT});
+
 
     },
     createScene: function () {
@@ -78,9 +81,10 @@ var App =
         this.canvas_controller = new CanvasController();
 
         var light = new RD.LightNode();
-        light.position = [0, 0, 0];
+        light.position = [0, 5, 0];
         light.id = "light";
-        light.depth_test = false;
+        //light.unselecteble = true;
+        light.setTexture("color","light");
         this.scene.root.addChild(light);
 
         var scale = 10;

@@ -75,6 +75,7 @@ var UI = {
     },
     updateSceneTreeTab: function () {
         var nodes = App.scene.root.getAllChildren();
+        console.log(nodes);
         for (var i in nodes) {
             var node = nodes[i];
             if (!node.unselecteble) {
