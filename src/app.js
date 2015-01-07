@@ -82,10 +82,14 @@ var App =
 
         var light = new RD.LightNode();
         light.position = [0, 5, 0];
-        light.id = "light";
-        //light.unselecteble = true;
-        //light.setTexture("color","light");
+        light.id = "light1";
         this.scene.root.addChild(light);
+
+        light = new RD.LightNode();
+        light.position = [0, 5, 5];
+        light.id = "light2";
+        this.scene.root.addChild(light);
+
 
         var scale = 10;
         var grid = new RD.SceneNode();

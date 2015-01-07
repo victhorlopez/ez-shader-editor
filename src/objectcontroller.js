@@ -117,7 +117,7 @@ function NodeController(obj, options) {
     }
     function createGizmoAxis(id, position, angle_euler_in_dg, delta_func) {
         var axis = new RD.SceneNode();
-        axis._render_priority = 8;
+        axis._render_priority = RD.PRIORITY_ALPHA;
         axis.id = id;
         axis.mesh = "cylinder";
         axis.position = position;
