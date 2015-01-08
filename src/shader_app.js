@@ -26,11 +26,12 @@ var App =
         var container = $(".wtabcontent-Scene");
         var h = container.parent().parent().height() - container.parent().height();
         var w = container.width();
-        var html = "<canvas class='graphcanvas' width='"+ w +"' height='"+ h +"' tabindex=10></canvas>";
+        var html = "<canvas class='graph' width='"+ w +"' height='"+ h +"'></canvas>";
         container.append(html);
         var graph = new LGraph();
-
-        var canvas = new LGraphCanvas(container.children()[0], graph);
+        var gcanvas = new LGraphCanvas(container.children()[0], graph);
+        gcanvas.background_image = "../img/grid.png";
+        gcanvas.drawBackCanvas();
 
 
         // need to fix on load

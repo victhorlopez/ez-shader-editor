@@ -19,7 +19,7 @@ var UI = {
         //create a main container and split it in two
         this.main_area = new LiteGUI.Area("mainarea", {content_id: "canvasarea", autoresize: true, inmediateResize: true});
         this.main_area.split("horizontal", [390, null], true);
-        this.main_area.getSection(1).split("horizontal", [null, 390], true);
+        this.main_area.getSection(1).split("horizontal", [null, 300], true);
 
         LiteGUI.add(this.main_area);
 
@@ -66,7 +66,7 @@ var UI = {
     },
     createRightPanel: function () {
         //create a left panel
-        this.right_side_panel = new LiteGUI.Panel("sidepanel", {title: "", width: 390});
+        this.right_side_panel = new LiteGUI.Panel("sidepanel", {title: "", width: 300});
         this.right_side_panel.dockTo(this.main_area.getSection(1).getSection(1), "full"); // section 2 is the right one
 
         this.right_side_panel_tabs = new LiteGUI.Tabs("leftpanel-tabs");
