@@ -19,7 +19,7 @@ var UI = {
         this.main_area.split("horizontal", [225, null], true);
         LiteGUI.add(this.main_area);
 
-        //this.createMainMenu();
+        this.createMainMenu();
         this.createLeftPanel();
         this.createMainPanel();
     },
@@ -144,45 +144,54 @@ var UI = {
     createMainMenu: function () {
 
 
-        LiteGUI.mainmenu.add("file/new");
-        LiteGUI.mainmenu.add("file/open");
-        LiteGUI.mainmenu.add("file/save");
-        LiteGUI.mainmenu.add("edit/undo");
-        LiteGUI.mainmenu.add("edit/redo");
-        LiteGUI.mainmenu.add("edit/");
-        LiteGUI.mainmenu.add("edit/copy", {callback: function () {
-            trace("FOOOO");
-        }});
-        LiteGUI.mainmenu.add("edit/paste");
-        LiteGUI.mainmenu.add("edit/clear");
+//        LiteGUI.mainmenu.add("file/new");
+//        LiteGUI.mainmenu.add("file/open");
+//        LiteGUI.mainmenu.add("file/save");
+//        LiteGUI.mainmenu.add("edit/undo");
+//        LiteGUI.mainmenu.add("edit/redo");
+//        LiteGUI.mainmenu.add("edit/");
+//        LiteGUI.mainmenu.add("edit/copy", {callback: function () {
+//            trace("FOOOO");
+//        }});
+//        LiteGUI.mainmenu.add("edit/paste");
+//        LiteGUI.mainmenu.add("edit/clear");
+//
+//        LiteGUI.mainmenu.add("view/bottom panel", {callback: function () {
+//            docked_bottom.show();
+//        }});
+//        LiteGUI.mainmenu.add("view/fixed size", {callback: function () {
+//            LiteGUI.setWindowSize(1000, 600);
+//        }});
+//        LiteGUI.mainmenu.add("view/");
+//        LiteGUI.mainmenu.add("view/side panel", {callback: function () {
+//            //createSidePanel();
+//        }});
+//        LiteGUI.mainmenu.add("view/maximize", {callback: function () {
+//            LiteGUI.setWindowSize();
+//        }});
+//
+//        LiteGUI.mainmenu.add("debug/dialog", {callback: function () {
+//            //createDialog();
+//        }});
+//
+//        LiteGUI.mainmenu.add("debug/message", {callback: function () {
+//            LiteGUI.showMessage("This is an example of message");
+//        }});
+//
+//        LiteGUI.mainmenu.add("debug/modal", {callback: function () {
+//            var dialog = new LiteGUI.Panel("blarg", {width: 300, height: 100, close: true, content: "This is an example of modal dialog"});
+//            dialog.makeModal();
+//            dialog.addButton("Accept", {close: true});
+//            dialog.addButton("Cancel", {close: 'fade'});
+//        }});
 
-        LiteGUI.mainmenu.add("view/bottom panel", {callback: function () {
-            docked_bottom.show();
-        }});
-        LiteGUI.mainmenu.add("view/fixed size", {callback: function () {
-            LiteGUI.setWindowSize(1000, 600);
-        }});
-        LiteGUI.mainmenu.add("view/");
-        LiteGUI.mainmenu.add("view/side panel", {callback: function () {
-            //createSidePanel();
-        }});
-        LiteGUI.mainmenu.add("view/maximize", {callback: function () {
-            LiteGUI.setWindowSize();
+
+        LiteGUI.mainmenu.add("Scene Editor", {callback: function () {
+            window.location = "index.html";
         }});
 
-        LiteGUI.mainmenu.add("debug/dialog", {callback: function () {
-            //createDialog();
-        }});
-
-        LiteGUI.mainmenu.add("debug/message", {callback: function () {
-            LiteGUI.showMessage("This is an example of message");
-        }});
-
-        LiteGUI.mainmenu.add("debug/modal", {callback: function () {
-            var dialog = new LiteGUI.Panel("blarg", {width: 300, height: 100, close: true, content: "This is an example of modal dialog"});
-            dialog.makeModal();
-            dialog.addButton("Accept", {close: true});
-            dialog.addButton("Cancel", {close: 'fade'});
+        LiteGUI.mainmenu.add("Shader Editor", {callback: function () {
+            window.location = "shader_editor.html";
         }});
 
         this.main_menu = LiteGUI.mainmenu;
