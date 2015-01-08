@@ -87,10 +87,11 @@ function NodeController(obj, options) {
         "color",
         "position"
     ];
+
+    // TODO refactor gizmo
     this._gizmo_activate = false;
     this._gizmo = new RD.SceneNode();
     this._gizmo.id = "gizmo";
-    //TODO gizmo needs to take into account the camera setup for the movement
     var gizmoX = createGizmoAxis("gizmoX", [1, 0 , 0 ], [0, 90 * DEG2RAD, 0], moveObjectWithGizmo);
     this._gizmo.addChild(gizmoX);
     var gizmoY = createGizmoAxis("gizmoY", [0, 1 , 0 ], [0, 0, 0], moveObjectWithGizmo);
@@ -135,6 +136,7 @@ NodeController.prototype.setGizmoAxis = function (node,e) {
     this._is_gizmo = true;
     node._position_selected = App.camera.getRayPlaneCollision(e.canvasx,e.canvasy, this._obj.position, this._obj.getLocalVector([0,1,0]));
     this._selected_gizmo = node;
+    this._selected_gizmo.color = [1,0,0];
     this._obj = node.parentNode.parentNode;
 }
 
@@ -145,10 +147,18 @@ NodeController.prototype.handleMouseWheel = function (e) {
 }
 
 NodeController.prototype.handleMouseMove = function (e) {
-    if (this._is_gizmo) {
-        this._obj.move(this._selected_gizmo.getMoveVec(e, this._obj));
-        $(document).trigger("node_moved", e.obj);
+    if(e.dragging)
+    {
+        if (this._is_gizmo) {
+            this._obj.move(this._selected_gizmo.getMoveVec(e, this._obj));
+            $(document).trigger("node_moved", e.obj);
+        }
+    } else {
+        if(this._selected_gizmo)
+            this._selected_gizmo.color = RD.WHITE;
+
     }
+
 
 }
 
@@ -187,8 +197,10 @@ NodeController.prototype.createGizmo = function () {
 }
 
 NodeController.prototype.removeGizmo = function () {
-    if (this._gizmo_activate)
+    if (this._gizmo_activate){
         this._obj.removeChild(this._gizmo);
+    }
+
 }
 
 NodeController.prototype.activateGizmo = function (e) {

@@ -27,7 +27,7 @@ CanvasController.prototype.onMouseEvent = function (e) {
         // we require to scale the gizmo on the wheel event
         this._node_controller.handleMouseWheel(e);
     }
-    if (e.eventType == "mousemove" && e.dragging) {
+    if (this._controller && e.eventType == "mousemove") {
         this._controller.handleMouseMove(e);
     }
     if (e.eventType == "mousedown") {
