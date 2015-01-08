@@ -22,12 +22,15 @@ var App =
         this.renderer = new RD.Renderer(gl);
         container.append(gl.canvas);
 
-//        var container = $(".wtabcontent-Scene");
-//        var mid_canvas = GL.create({width: container.width(), height: container.parent().parent().height() - container.parent().height()});
-//        container.append(mid_canvas.canvas);
-//        var graph = new LGraph();
-//        var container = $(".wtabcontent-Scene canvas");
-////        var canvas = new LGraphCanvas(container[0], graph);
+
+        var container = $(".wtabcontent-Scene");
+        var h = container.parent().parent().height() - container.parent().height();
+        var w = container.width();
+        var html = "<canvas class='graphcanvas' width='"+ w +"' height='"+ h +"' tabindex=10></canvas>";
+        container.append(html);
+        var graph = new LGraph();
+
+        var canvas = new LGraphCanvas(container.children()[0], graph);
 
 
         // need to fix on load
