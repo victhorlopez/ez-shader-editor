@@ -122,7 +122,7 @@ function NodeController(obj, options) {
         axis.mesh = "cylinder";
         axis.position = position;
         axis.flags.depth_test = false;
-        axis.shader = "phong";
+        axis.shader = "flat";
         axis.setRotationFromEuler(angle_euler_in_dg);
         axis.color = [ 1, 1, 1];
         axis.getMoveVec = moveObjectWithGizmo;

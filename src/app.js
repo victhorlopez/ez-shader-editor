@@ -76,20 +76,30 @@ var App =
 
         this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
-        this.camera.lookAt([0, 10, 10], [0, 0, 0], [0, 1, 0]);
+        this.camera.lookAt([0, 10, 25], [0, 0, 0], [0, 1, 0]);
         // canvas controller needs the camera created
         this.canvas_controller = new CanvasController();
 
         var light = new RD.LightNode();
-        light.position = [0, 5, 0];
+        light.position = [0, 5, -10];
         light.id = "light1";
         this.scene.root.addChild(light);
 
         light = new RD.LightNode();
-        light.position = [0, 5, 5];
+        light.position = [-10, 5, 5];
         light.id = "light2";
         this.scene.root.addChild(light);
 
+
+//        for(var i = -1 ; i <= 1 ; i+=2)
+//        {
+//            for(var j = -1 ; j <= 1 ; j+=2) {
+//                var light = new RD.LightNode();
+//                light.position = [-10 * i, 5, -10 * j];
+//                light.id = "light" + i;
+//                this.scene.root.addChild(light);
+//            }
+//        }
 
         var scale = 10;
         var grid = new RD.SceneNode();
