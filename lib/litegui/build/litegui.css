@@ -1460,7 +1460,7 @@ button.close-button {
 .litetabs {
 	-moz-box-sizing: border-box;	
 	-webkit-box-sizing: border-box;	
-	box-sizing: border-box;	
+	box-sizing: border-box;
 }
 
 .litetabs ul.wtabcontainer {

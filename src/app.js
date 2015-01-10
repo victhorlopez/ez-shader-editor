@@ -73,6 +73,9 @@ var App =
 
     },
     createShaderEditorScene: function () {
+        this.renderer.saveState();
+        this.scene.clear();
+        this.renderer.clear();
 
         this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
@@ -80,7 +83,7 @@ var App =
         this.canvas_controller = new CanvasController();
 
         var light = new RD.LightNode();
-        light.position = [0, 5, -10];
+        light.position = [0, 100, 100];
         light.id = "light1";
         this.scene.root.addChild(light);
 
@@ -97,12 +100,12 @@ var App =
         grid.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(grid);
 
-        scale = 1.0;
+        scale = 10;
         var ball = new RD.SceneNode();
         ball.id = "sphere";
         ball.mesh = "sphere";
         ball.shader = "phong";
-        ball.color = [0.3, 0.7, 0.56];
+        ball.color = [0.1, 0.1, 0.9];
         ball.position = [0, scale*0.5, 0];
         ball.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(ball);
@@ -166,7 +169,6 @@ var App =
         monkey.position = [-2*scale, scale, 0];
         monkey.scaleFromVector([scale, scale, scale]);
         this.scene.root.addChild(monkey);
-        UI.updateSceneTreeTab();
 
 
     },
