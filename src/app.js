@@ -16,8 +16,8 @@ var App =
 
     init: function () {
         UI.preinit();
-        var container = $(".wtabcontent-Scene");
-        gl = GL.create({width: container.width(), height: container.parent().parent().height() - container.parent().height()});
+        var container = UI.getCanvasContainer();
+        gl = GL.create(UI.getCanvasWidthAndHeight());
         this.scene = new RD.Scene();
         this.renderer = new RD.Renderer(gl);
         container.append(gl.canvas);
@@ -72,6 +72,41 @@ var App =
 
 
     },
+    createShaderEditorScene: function () {
+
+        this.camera = new RD.Camera();
+        this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
+        this.camera.lookAt([0, 5, 25], [0, 5, 0], [0, 1, 0]);
+        this.canvas_controller = new CanvasController();
+
+        var light = new RD.LightNode();
+        light.position = [0, 5, -10];
+        light.id = "light1";
+        this.scene.root.addChild(light);
+
+
+        var scale = 10;
+        var grid = new RD.SceneNode();
+        grid.unselectable = true;
+        grid.id = "grid";
+        grid.mesh = "grid";
+        grid.color = [0.3, 0.3, 0.3];
+        grid.primitive = gl.LINES;
+        grid.position = [0, 0, 0];
+        scale *= 20;
+        grid.scaleFromVector([scale, scale, scale]);
+        this.scene.root.addChild(grid);
+
+        scale = 1.0;
+        var ball = new RD.SceneNode();
+        ball.id = "sphere";
+        ball.mesh = "sphere";
+        ball.shader = "phong";
+        ball.color = [0.3, 0.7, 0.56];
+        ball.position = [0, scale*0.5, 0];
+        ball.scaleFromVector([scale, scale, scale]);
+        this.scene.root.addChild(ball);
+    },
     createScene: function () {
 
         this.camera = new RD.Camera();
@@ -89,17 +124,6 @@ var App =
         light.position = [-10, 5, 5];
         light.id = "light2";
         this.scene.root.addChild(light);
-
-
-//        for(var i = -1 ; i <= 1 ; i+=2)
-//        {
-//            for(var j = -1 ; j <= 1 ; j+=2) {
-//                var light = new RD.LightNode();
-//                light.position = [-10 * i, 5, -10 * j];
-//                light.id = "light" + i;
-//                this.scene.root.addChild(light);
-//            }
-//        }
 
         var scale = 10;
         var grid = new RD.SceneNode();

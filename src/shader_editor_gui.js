@@ -1,9 +1,9 @@
 var UI = {
     main_area: null,
-    left_side_panel: null,
-    left_side_panel_tabs: null,
-    right_side_panel:null,
-    right_side_panel_tabs: null,
+    left_upper_panel: null,
+    left_upper_tabs: null,
+    right_upper_panel:null,
+    right_upper_tabs: null,
     main_panel_tabs: null,
     main_panel: null,
     main_menu: null,
@@ -32,7 +32,7 @@ var UI = {
         this.createToolsMenu();
     },
     createAttributesTab: function () {
-        var tab = this.left_side_panel_tabs.getTab("Details");
+        var tab = this.left_upper_tabs.getTab("Details");
         tab.content.innerHTML = "";
         var node = App.canvas_controller.getSelectedNode();
         var widgets = new LiteGUI.Inspector();
@@ -66,25 +66,25 @@ var UI = {
     },
     createRightPanel: function () {
         //create a left panel
-        this.right_side_panel = new LiteGUI.Panel("sidepanel", {title: "", width: 300});
-        this.right_side_panel.dockTo(this.main_area.getSection(1).getSection(1), "full"); // section 2 is the right one
+        this.right_upper_panel = new LiteGUI.Panel("sidepanel", {title: "", width: 300});
+        this.right_upper_panel.dockTo(this.main_area.getSection(1).getSection(1), "full"); // section 2 is the right one
 
-        this.right_side_panel_tabs = new LiteGUI.Tabs("leftpanel-tabs");
-        this.right_side_panel_tabs.addTab("Palette");
+        this.right_upper_tabs = new LiteGUI.Tabs("leftpanel-tabs");
+        this.right_upper_tabs.addTab("Palette");
 
-        this.right_side_panel.add(this.right_side_panel_tabs);
+        this.right_upper_panel.add(this.right_upper_tabs);
 
     },
     createLeftPanel: function () {
         //create a left panel
         this.main_area.getSection(0).split("vertical", [440, null], true);
-        this.left_side_panel = new LiteGUI.Panel("sidepanel", {title: "", width: 390});
-        this.left_side_panel.dockTo(this.main_area.getSection(0).getSection(1), "full"); // section 0 is the left one
+        this.left_upper_panel = new LiteGUI.Panel("sidepanel", {title: "", width: 390});
+        this.left_upper_panel.dockTo(this.main_area.getSection(0).getSection(1), "full"); // section 0 is the left one
 
-        this.left_side_panel_tabs = new LiteGUI.Tabs("leftpanel-tabs");
-        this.left_side_panel_tabs.addTab("Details");
+        this.left_upper_tabs = new LiteGUI.Tabs("leftpanel-tabs");
+        this.left_upper_tabs.addTab("Details");
 
-        this.left_side_panel.add(this.left_side_panel_tabs);
+        this.left_upper_panel.add(this.left_upper_tabs);
 
         $(document).on("item_selected", function (event, item) {
             var node = App.scene.getNodeById(item.node_id);
