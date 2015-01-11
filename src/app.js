@@ -67,10 +67,6 @@ var App =
         this.renderer.addMesh("monkey", GL.Mesh.fromURL(assets_path + "suzanne.obj"));
         this.renderer.addMesh("thin_plane", GL.Mesh.box({sizex: 1, sizey: 1, sizez: 0.5}));
         //this.renderer.addMesh("batman", GL.Mesh.fromURL(assets_path + "batman.obj"));
-
-
-
-
     },
     saveState: function() {
         this.renderer.saveState();
