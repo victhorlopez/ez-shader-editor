@@ -12,14 +12,13 @@ var UI = {
         right_area: null,
         left_upper_panel: null,
         left_upper_tabs: null,
-        left_upper_tabs: null,
         left_lower_tabs: null,
         right_upper_panel: null,
         right_upper_tabs: null,
         right_lower_panel: null,
         right_lower_tabs: null,
         canvas_id: null,
-        mode: "scene_editor" // TODO better to use bitmasks
+        mode: null// TODO better to use bitmasks
     },
 
     preinit: function () {
@@ -37,8 +36,7 @@ var UI = {
     },
     postinit: function () {
         this.updateSceneTreeTab();
-        this.createToolsMenu();
-
+        this.createToolsMenu(this.editor.mid_area);
     },
     getCanvasContainer: function () {
         return $("#" + this.canvas_id);
@@ -85,7 +83,7 @@ var UI = {
 
         container = container || this.editor.left_upper_panel; // default place
         var tab = container.getTab("Palette");
-        if(!container.selected)
+        if (!container.selected)
             tab = container.addTab("Palette", {selected: true});
         tab.content.innerHTML = "";
     },
@@ -93,7 +91,7 @@ var UI = {
 
         container = container || this.editor.right_upper_tabs; // default place
         var tab = container.getTab("SceneTree");
-        if(!container.selected)
+        if (!container.selected)
             tab = container.addTab("SceneTree", {selected: true});
         tab.content.innerHTML = "";
         this.scene_tree = new LiteGUI.Tree("SceneTree", {id: "uid_0", node_id: "0", content: "root", allow_rename: false}); // TODO hardcoded value, get root from scene
@@ -127,12 +125,12 @@ var UI = {
             }
         }
     },
-    createSceneTab: function (container,id) {
+    createSceneTab: function (container, id) {
         container = container || this.main_panel_tabs; // default place
         this.canvas_id = id || "canvas_render";
         var tab = container.getTab("Scene");
-        if(!container.selected)
-            tab = container.addTab("Scene", {height:"full", id: this.canvas_id});
+        if (!container.selected)
+            tab = container.addTab("Scene", {height: "full", id: this.canvas_id});
         //tab.content.innerHTML = "";
 
     },
@@ -140,14 +138,14 @@ var UI = {
         container = container || this.editor.main_panel_tabs; // default place
         var id = "node_canvas";
         var tab = container.getTab("Shader Editor");
-        if(!container.selected)
-            tab = container.addTab("Shader Editor", {id: id, selected:true });
+        if (!container.selected)
+            tab = container.addTab("Shader Editor", {id: id, selected: true });
         tab.content.innerHTML = "";
 
-        container = $("#"+ id);
+        container = $("#" + id);
         var h = container.parent().parent().height() - container.parent().height();
         var w = container.width();
-        var html = "<canvas class='graph' width='"+ w +"' height='"+ h +"'></canvas>";
+        var html = "<canvas class='graph' width='" + w + "' height='" + h + "'></canvas>";
         container.append(html);
         var graph = new LGraph();
         var gcanvas = new LGraphCanvas(container.children()[0], graph);
@@ -158,8 +156,8 @@ var UI = {
     createAttributesTab: function (container) {
         container = container || this.editor.right_lower_tabs; // default place
         var tab = container.getTab("Attributes");
-        if(!container.selected)
-            tab = container.addTab("Attributes", {selected:true });
+        if (!container.selected)
+            tab = container.addTab("Attributes", {selected: true });
         tab.content.innerHTML = "";
 
         var widgets = new LiteGUI.Inspector();
@@ -186,10 +184,14 @@ var UI = {
             }
         }
         widgets.addSeparator();
-        if(this.editor.mode == "scene_editor")
-            widgets.addButton("","Edit Shader",{callback: function() { UI.changeMode("shader_editor");}});
-        else if(this.editor.mode == "shader_editor")
-            widgets.addButton("","Edit Scene",{callback: function() { UI.changeMode("scene_editor");}});
+        if (this.editor.mode == "scene_editor" || !this.editor.mode)
+            widgets.addButton("", "Edit Shader", {callback: function () {
+                UI.changeMode("shader_editor");
+            }});
+        else if (this.editor.mode == "shader_editor")
+            widgets.addButton("", "Edit Scene", {callback: function () {
+                UI.changeMode("scene_editor");
+            }});
         tab.add(widgets);
 
     },
@@ -257,9 +259,9 @@ var UI = {
 
 
     },
-    createToolsMenu: function () {
+    createToolsMenu: function (container) {
 
-        $(this.editor.mid_area.root).append(' <div id="tools-menu" class="canvas-tools-menu"></div>');
+        $(container.root).append(' <div id="tools-menu" class="canvas-tools-menu"></div>');
         addTool("#tools-menu", "translate", "Translate the selected item", App.canvas_controller.onTranslateTool);
         addTool("#tools-menu", "rotate", "Rotate the selected item", App.canvas_controller.onRotateTool);
         addTool("#tools-menu", "scale", "Scale items", App.canvas_controller.onScaleTool);
@@ -291,27 +293,30 @@ var UI = {
 
         }
     },
-    moveSceneTab: function (container) {
-        this.createSceneTab(container, "canvas_shader_render");
-
-        var tab = this.editor.right_upper_tabs.getTab("Scene");
-        var canvas_ct = $("#canvas_shader_render");
-
-        var h =  canvas_ct.parent().parent().height() - canvas_ct.parent().height();
-        gl.canvas.width = canvas_ct.parent().width();
-        gl.canvas.height = h;
-        canvas_ct.parent().parent()[0].style.overflow = "hidden";  // TODO remove this uggly patch , related with the movesplit
-        gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
-        canvas_ct.append( gl.canvas );
-
-        //tab.add(gl.canvas);
-        App.createShaderEditorScene();
-
+    removeTools: function () {
+        var tools = $("#tools-menu");
+        if(tools.length)
+            tools[0].parentNode.removeChild(tools[0]);
     },
-    resetTabs: function(container) {
-        var nodes = container.root.childNodes; // TODO destroy the tabs correctly
-        for(var i=0; i<nodes.length; i++) {
-            nodes[i].innerHTML = "";
+    createAndmoveSceneTab: function (container, id) {
+        this.createSceneTab(container, id);
+
+        if (typeof(gl) !== "undefined") {
+            var canvas_ct = $("#" + id);
+            var h = canvas_ct.parent().parent().height() - canvas_ct.parent().height();
+            gl.canvas.width = canvas_ct.parent().width();
+            gl.canvas.height = h;
+            canvas_ct.parent().parent()[0].style.overflow = "hidden";  // TODO remove this uggly patch , related with the movesplit
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            canvas_ct.append(gl.canvas);
+        }
+    },
+
+    resetTabs: function (container) {
+        var nodes = container.root.childNodes;
+        nodes[0].innerHTML = "";
+        for (var i = 1; i < nodes.length; i++) {
+            nodes[i].parentNode.removeChild(nodes[i]);
         }
         container.selected = null;
     },
@@ -319,29 +324,40 @@ var UI = {
     changeMode: function (new_mode) {
 
         this.editor.mode = new_mode;
-        if(new_mode == "scene_editor"){
+        if (new_mode == "scene_editor") {
             this.resetTabs(this.editor.right_upper_tabs);
             this.resetTabs(this.editor.left_upper_tabs);
             this.resetTabs(this.editor.right_lower_tabs);
             this.resetTabs(this.main_panel_tabs);
+            this.removeTools();
 
-            this.createSceneTab(this.main_panel_tabs);
             this.createPaletteTab(this.editor.left_upper_tabs);
             this.createSceneTreeTab(this.editor.right_upper_tabs);
             this.createAttributesTab(this.editor.right_lower_tabs);
+            this.createAndmoveSceneTab(this.main_panel_tabs, "canvas_render");
+            if (typeof(gl) !== "undefined") {
+                this.editor.right_area.moveSplit(-265); // temporary workaround TODO remove this
+                this.createToolsMenu(this.editor.mid_area);
+                App.restoreState();
+                this.updateSceneTreeTab();
+            }
 
-        } else if( new_mode == "shader_editor" ){
+        } else if (new_mode == "shader_editor") {
             this.resetTabs(this.editor.right_upper_tabs);
             this.resetTabs(this.editor.left_upper_tabs);
             this.resetTabs(this.editor.right_lower_tabs);
             this.resetTabs(this.main_panel_tabs);
+            this.removeTools();
 
             this.editor.right_area.moveSplit(265); // temporary workaround TODO remove this
 
             this.createNodeGraphTab(this.main_panel_tabs);
-            this.moveSceneTab(this.editor.right_upper_tabs);
+            this.createAndmoveSceneTab(this.editor.right_upper_tabs, "canvas_shader_render");
+            this.createToolsMenu(this.editor.right_upper_tabs);
             this.createPaletteTab(this.editor.left_upper_tabs);
             this.createAttributesTab(this.editor.right_lower_tabs);
+            App.saveState();
+            App.createShaderEditorScene();
 
         }
 

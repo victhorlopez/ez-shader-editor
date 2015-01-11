@@ -72,15 +72,26 @@ var App =
 
 
     },
-    createShaderEditorScene: function () {
+    saveState: function() {
         this.renderer.saveState();
         this.scene.clear();
         this.renderer.clear();
+    },
+    restoreState: function() {
+        this.scene.clear();
+        this.renderer.clear();
+        this.renderer.restoreState();
+        this.camera = this.renderer._camera;
+        this.canvas_controller._camera_controller._obj = this.camera; // TODO need refactor
+    },
+    createShaderEditorScene: function () {
 
-        this.camera = new RD.Camera();
+        if(!this.camera)
+            this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
         this.camera.lookAt([0, 5, 25], [0, 5, 0], [0, 1, 0]);
-        this.canvas_controller = new CanvasController();
+        if(!this.canvas_controller)
+            this.canvas_controller = new CanvasController();
 
         var light = new RD.LightNode();
         light.position = [0, 100, 100];
@@ -111,12 +122,13 @@ var App =
         this.scene.root.addChild(ball);
     },
     createScene: function () {
-
-        this.camera = new RD.Camera();
+        if(!this.camera)
+            this.camera = new RD.Camera();
         this.camera.perspective(45, gl.canvas.width / gl.canvas.height, 1, 1000);
         this.camera.lookAt([0, 10, 25], [0, 0, 0], [0, 1, 0]);
         // canvas controller needs the camera created
-        this.canvas_controller = new CanvasController();
+        if(!this.canvas_controller)
+            this.canvas_controller = new CanvasController();
 
         var light = new RD.LightNode();
         light.position = [0, 5, -10];
