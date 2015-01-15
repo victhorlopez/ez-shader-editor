@@ -22,11 +22,22 @@
             name: 'main_layout',
             panels: [
                 { type: 'top', size: 30 }, // so far top not used
-                { type: 'left', size: '25%', resizable: true },
+
                 { type: 'main' },
                 //{ type: 'preview', size: 100, resizable: true, content: 'preview' },
                 //{ type: 'lower_right', size: 300, resizable: true },
                 //{ type: 'bottom', size: 50, resizable: true, content: 'bottom' }
+                { type: 'left', size: '25%', resizable: true,
+                    tabs: {
+                        active: 'Preview',
+                        tabs: [
+                            { id: 'Preview', caption: 'Preview' }
+                        ],
+                        onClick: function (event) {
+                            $('#tab-content').html('Tab: ' + event.target);
+                        }
+                    }
+                },
                 { type: 'lower_left', size: '60%', resizable: true,
                     tabs: {
                         active: 'Details',
@@ -281,6 +292,13 @@
 
         customContainer[0].appendChild(gui2.domElement);
         $("#layout_main_layout_panel_right div.w2ui-panel-content")[0].appendChild(gui2.domElement);
+        $("#layout_main_layout_panel_top div.w2ui-panel-content").append(        "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('top', true)\">Top</button>"+
+        "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left', true)\">Left</button>"+
+        "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right', true)\">Right</button>"+
+        "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('preview', true)\">Preview</button>"+
+        "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('bottom', true)\">Bottom</button>");
+
+
     });
 
 </script>
