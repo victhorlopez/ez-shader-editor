@@ -2738,7 +2738,8 @@ LGraphCanvas.prototype.processMouseMove = function(e)
 	*/
 
 	e.preventDefault();
-	e.stopPropagation();
+    // vik
+	//e.stopPropagation();
 	return false;
 	//this is not really optimal
 	//this.graph.change();
