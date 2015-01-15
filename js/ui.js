@@ -140,15 +140,11 @@ vik.ui = (function () {
 
         customContainer[0].appendChild(gui2.domElement);
         $("#layout_main_layout_panel_right div.w2ui-panel-content")[0].appendChild(gui2.domElement);
-        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main')\">Top</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left')\">Left</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right')\">Right</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('preview')\">Preview</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main')\">main</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('bottom')\">Bottom</button>");
-
-
-
+        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +
+            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left',true)\">Left</button>" +
+            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +
+            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('preview',true )\">Preview</button>" +
+            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main' ,true)\">main</button>");
     }
 
     return module;
