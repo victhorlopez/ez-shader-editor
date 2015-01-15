@@ -1015,7 +1015,7 @@ w2utils.event = {
                     resize : function (event) {
                         w2ui[obj.name].resize();
                     },
-                    resizeStart: resizeStart,
+                    resizeStart: obj.resize_cancel ? resizeMove : resizeStart,
                     mouseMove: obj.resize_cancel ? resizeMove : resizeMoveUpdate,
                     mouseUp: obj.resize_cancel ? resizeStop : resizeStop
                 };

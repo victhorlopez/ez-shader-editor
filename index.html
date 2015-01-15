@@ -208,6 +208,13 @@ function init() {
     }
 
     //create the rendering context
+    w2ui['layout2'].on('resize', function (target, data) {
+        data.onComplete = function () {
+            var width = w2ui['main_layout'].get('left').width;
+            var height = w2ui['main_layout'].get('left').height;
+            resize();
+        }
+    });
     w2ui['main_layout'].on('resize', function (target, data) {
         data.onComplete = function () {
             var width = w2ui['main_layout'].get('left').width;
