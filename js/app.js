@@ -134,14 +134,14 @@ vik.app = (function() {
         w = $(parent).width();
         h = $(parent).height();
 
-        if (w <= 0 || h <= 0)
-            return;
-        if (w == gl.canvas.width && h == gl.canvas.height)
-            return;
-        gl.canvas.width = w;
-        gl.canvas.height = h;
-        gl.viewport(0, 0, w, h);
-        mat4.perspective(persp, 45 * DEG2RAD, gl.canvas.width / gl.canvas.height, 0.1, 1000);
+        if ((w > 0 || h > 0) && (w != gl.canvas.width || h != gl.canvas.height)){
+            gl.canvas.width = w;
+            gl.canvas.height = h;
+            gl.viewport(0, 0, w, h);
+            mat4.perspective(persp, 45 * DEG2RAD, gl.canvas.width / gl.canvas.height, 0.1, 1000);
+        }
+
+        vik.ui.onResize();
     }
 
     function loadListeners(){

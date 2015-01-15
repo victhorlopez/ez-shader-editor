@@ -8,10 +8,22 @@ vik.ui = vik.ui || {};
 
 vik.ui = (function () {
     var module = {};
+    var details_gui = {};
+    var palette_gui = {};
+
 
     module.init = function () {
         loadLayout();
     }
+
+    module.onResize = function () {
+        details_gui.width = details_gui.parent_node.width();
+        details_gui.domElement.style.height = details_gui.parent_node.height();
+        palette_gui.width = palette_gui.parent_node.width();
+        palette_gui.domElement.style.height = palette_gui.parent_node.height();
+    }
+
+
 
     function loadLayout() {
         $('#layout').w2layout({
@@ -20,7 +32,7 @@ vik.ui = (function () {
                 { type: 'top', size: 30 }, // so far top not used
                 { type: 'main' },
                 { type: 'left', size: '25%', resizable: true },
-                { type: 'right', size: '25%', resizable: true,
+                { type: 'right', size: '270', resizable: true,
                     tabs: {
                         active: 'Palette',
                         tabs: [
@@ -83,63 +95,65 @@ vik.ui = (function () {
         };
 
 
-        var customContainer = $("#layout_layout2_panel_preview div.w2ui-panel-content");
         var text = new FizzyText();
-        var gui = new dat.GUI({
-            resizable: false,
+        details_gui = new dat.GUI({
+            resizable: true,
             hideable: false
         });
-        gui.width = customContainer.width();
-        gui.add(text, 'message');
-        gui.add(text, 'speed', -5, 5);
-        gui.add(text, 'displayOutline');
-        gui.add(text, 'explode');
-        gui.addColor(text, 'color0');
-        gui.addColor(text, 'color1');
-        gui.addColor(text, 'color2');
-        gui.addColor(text, 'color3');
-        var f1 = gui.addFolder('Flow Field');
+        details_gui.parent_node = $("#layout_layout2_panel_preview div.w2ui-panel-content");
+        details_gui.width = details_gui.parent_node.width();
+        details_gui.add(text, 'message');
+        details_gui.add(text, 'speed', -5, 5);
+        details_gui.add(text, 'displayOutline');
+        details_gui.add(text, 'explode');
+        details_gui.addColor(text, 'color0');
+        details_gui.addColor(text, 'color1');
+        details_gui.addColor(text, 'color2');
+        details_gui.addColor(text, 'color3');
+        var f1 = details_gui.addFolder('Flow Field');
         f1.add(text, 'speed');
         f1.add(text, 'noiseStrength');
 
-        var f2 = gui.addFolder('Letters');
+        var f2 = details_gui.addFolder('Letters');
         f2.add(text, 'growthSpeed');
         f2.add(text, 'maxSize');
         f2.add(text, 'message');
 
-        gui.add(text, 'noiseStrength').step(5); // Increment amount
-        gui.add(text, 'growthSpeed', -5, 5); // Min and max
-        gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
+        details_gui.add(text, 'noiseStrength').step(5); // Increment amount
+        details_gui.add(text, 'growthSpeed', -5, 5); // Min and max
+        details_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
 
         f2.open();
 
-        customContainer[0].appendChild(gui.domElement);
-        $("#layout_layout2_panel_preview div.w2ui-panel-content")[0].appendChild(gui.domElement);
+        details_gui.parent_node[0].appendChild(details_gui.domElement);
 
-        var text = new FizzyText();
-        var gui2 = new dat.GUI({
+
+        text = new FizzyText();
+        palette_gui = new dat.GUI({
             resizable: false,
             hideable: false
         });
-        gui2.width = customContainer.width();
-        gui2.add(text, 'message');
-        gui2.add(text, 'speed', -5, 5);
-        gui2.add(text, 'displayOutline');
-        gui2.add(text, 'explode');
-        gui2.addColor(text, 'color0');
-        gui2.addColor(text, 'color1');
-        gui2.addColor(text, 'color2');
-        gui2.addColor(text, 'color3');
+        palette_gui.parent_node = $("#layout_main_layout_panel_right div.w2ui-panel-content");
+        palette_gui.width = palette_gui.parent_node.width();
+        palette_gui.add(text, 'message');
+        palette_gui.add(text, 'speed', -5, 5);
+        palette_gui.add(text, 'displayOutline');
+        palette_gui.add(text, 'explode');
+        palette_gui.addColor(text, 'color0');
+        palette_gui.addColor(text, 'color1');
+        palette_gui.addColor(text, 'color2');
+        palette_gui.addColor(text, 'color3');
 
 
-        gui.add(text, 'noiseStrength').step(5); // Increment amount
-        gui.add(text, 'growthSpeed', -5, 5); // Min and max
-        gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
+        palette_gui.add(text, 'noiseStrength').step(5); // Increment amount
+        palette_gui.add(text, 'growthSpeed', -5, 5); // Min and max
+        palette_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
 
         f2.open();
 
-        customContainer[0].appendChild(gui2.domElement);
-        $("#layout_main_layout_panel_right div.w2ui-panel-content")[0].appendChild(gui2.domElement);
+        palette_gui.parent_node[0].appendChild(palette_gui.domElement);
+
+
         $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +
             "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left',true)\">Left</button>" +
             "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +

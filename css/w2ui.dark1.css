@@ -2106,7 +2106,7 @@ select {
 }
 
 .w2ui-tabs .w2ui-tab.closable {
-    padding: 6px 28px 6px 20px;
+    padding: 6px 50px 6px 20px;
 }
 
 .w2ui-tabs .w2ui-tab-close {
@@ -2124,7 +2124,7 @@ select {
 }
 
 .w2ui-tabs .w2ui-tab-close:hover {
-    background-color: #D77F7F;
+    background-color: #333;
     color: white;
 }
 
