@@ -675,6 +675,7 @@ w2utils.event = {
             if ($.isArray(tabs)) tabs = { tabs: tabs };
             $().w2destroy(object.name + '_' + panel + '_tabs'); // destroy if existed
             pan.tabs = $().w2tabs($.extend({}, tabs, { owner: object, name: object.name + '_' + panel + '_tabs' }));
+            pan.tabs.panel_owner = panel; // vik we save the panel where the tabs are stored
             pan.show.tabs = true;
             return true;
         }
@@ -809,20 +810,24 @@ w2utils.event = {
             return false;
         },
 
-        sizeTo: function (panel, size) {
+        sizeTo: function (panel, size, immediate) {
             var obj = this;
             var pan = obj.get(panel);
             if (pan === null) return false;
             // resize
-            $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '.2s'));
-            setTimeout(function () {
+            if(immediate)
                 obj.set(panel, { size: size });
-            }, 1);
-            // clean
-            setTimeout(function () {
-                $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '0s'));
-                obj.resize();
-            }, 500);
+            else {
+                $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '.2s'));
+                setTimeout(function () {
+                    obj.set(panel, { size: size });
+                }, 1);
+                // clean
+                setTimeout(function () {
+                    $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '0s'));
+                    obj.resize();
+                }, 500);
+            }
             return true;
         },
 
@@ -1186,7 +1191,6 @@ w2utils.event = {
                 if (obj.tmp.diff_x !== 0 || obj.tmp.resize.diff_y !== 0) { // only recalculate if changed
                     var ptop = obj.get('top');
                     var pbottom = obj.get('bottom');
-                    var panel = obj.get(obj.tmp.resize.type);
                     var height = parseInt($(obj.box).height());
                     var width = parseInt($(obj.box).width());
                     var str = String(panel.size);
@@ -2014,7 +2018,7 @@ w2utils.event = {
                 if (typeof tab.caption !== 'undefined') tab.text = tab.caption;
 
                 var jq_el = $(this.box).find('#tabs_' + this.name + '_tab_' + w2utils.escapeId(tab.id));
-                var tabHTML = (tab.closable ? '<div class="w2ui-tab-close" onclick="w2ui[\'' + this.name + '\'].animateClose(\'' + tab.id + '\', event);"></div>' : '') +
+                var tabHTML = (tab.closable ? '<div class="w2ui-tab-close" onclick="w2ui[\'' + this.name + '\'].minimize(\'' + tab.id + '\', event);"></div>' : '') +
                     '    <div class="w2ui-tab' + (this.active === tab.id ? ' active' : '') + (tab.closable ? ' closable' : '') + '" ' +
                     '        title="' + (typeof tab.hint !== 'undefined' ? tab.hint : '') + '" style="' + tab.style + '" ' +
                     '        onclick="w2ui[\'' + this.name + '\'].click(\'' + tab.id + '\', event);">' + tab.text + '</div>';
@@ -2148,7 +2152,29 @@ w2utils.event = {
             this.trigger($.extend(eventData, { phase: 'after' }));
             this.refresh(id);
         },
+        minimize: function (id, event) {
 
+            var tab = this.get(id);
+            if (tab === null || tab.disabled) return false;
+            var obj = this;
+            var panel = w2ui[obj.owner.name].get(obj.panel_owner );
+            panel.hidden = true;
+            console.log(obj);
+            var parent = obj.box.parentNode;
+            $(parent).css('opacity', '0');
+            obj.panel_owner.storedSize = obj.panel_owner.sizeCalculated;
+            w2ui[obj.owner.name].sizeTo( obj.panel_owner , 20, true);
+
+        },
+        maximize: function (id, event) {
+            var tab = this.get(id);
+            if (tab === null || tab.disabled) return false;
+            var obj = this;
+            console.log(obj);
+            var parent = obj.box.parentNode;
+            $(parent).css('opacity', '1');
+            w2ui[obj.owner.name].sizeTo( obj.panel_owner , obj.panel_owner.storedSize, true);
+        },
         animateClose: function (id, event) {
             var tab = this.get(id);
             if (tab === null || tab.disabled) return false;

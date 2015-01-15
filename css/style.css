@@ -198,3 +198,20 @@ body .dg.a {
     border-right:4px solid #3d3d3d;
     margin: 0;
 }
+
+body div.w2ui-panel div.w2ui-panel .left_rotated_tab {
+    display: block;
+    position: absolute;
+    z-index: 125;
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg);
+    -webkit-transform-origin: 25% 0%;
+    -moz-transform-origin: 25% 0%;
+    -ms-transform-origin: 25% 0%;
+    -o-transform-origin: 25% 0%;
+    transform-origin: 25% 0%;
+
+}

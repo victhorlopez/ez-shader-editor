@@ -51,6 +51,9 @@ vik.ui = (function () {
         $('#layout_main_layout_panel_left').w2layout({
             name: 'layout2',
             panels: [
+
+                { type: 'left', size: '25%', resizable: true, hidden:true, content:'<div class="w2ui-panel-tabs w2ui-reset w2ui-tabs left_rotated_tab" style="top: 50px;" name="layout2_preview_tabs"><div class="w2ui-tab active closable" title="" style="">myTab</div></div>' },
+
                 { type: 'main', size: '50%', resizable: true,
                     tabs: {
                         active: 'Preview',
