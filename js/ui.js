@@ -33,18 +33,7 @@ vik.ui = (function () {
                 { type: 'top', size: 30 }, // so far top not used
                 { type: 'main' },
                 { type: 'left', size: '25%', resizable: true },
-                { type: 'right', size: '270', resizable: true,
-                    tabs: {
-                        active: 'Palette',
-                        tabs: [
-                            { id: 'Palette', caption: 'Palette', closable: true }
-                        ],
-                        onClick: function (event) {
-                            $('#tab-content').html('Tab: ' + event.target);
-                        }
-                    }
-                },
-
+                { type: 'right', size: '270', resizable: true}
             ],
             resize_cancel: true
         });
@@ -83,6 +72,32 @@ vik.ui = (function () {
             resize_cancel: true
         });
         w2ui['layout2'].content('left', w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') + w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left') );
+
+        $('#layout_main_layout_panel_right').w2layout({
+            name: 'layout3',
+            parent_layout:'main_layout',
+            panel_holder:'main',
+            panels: [
+
+                { type: 'right', size: '30', resizable: true, hidden:false },
+
+                { type: 'main', size: '50%', resizable: true,
+                    tabs: {
+                        active: 'Palette',
+                        tabs: [
+                            { id: 'Palette', caption: 'Palette', closable: true }
+                        ],
+                        onClick: function (event) {
+                            $('#tab-content').html('Tab: ' + event.target);
+                        }
+                    }
+                }
+            ],
+            resize_cancel: true
+        });
+        w2ui['layout3'].content('right',w2ui['layout3_main_tabs'].getMaximizeButton('Palette', 'right') );
+
+
         //+ w2ui['layout2_main_tabs'].getMaximizeButton('Preview')
 
         var FizzyText = function () {
@@ -141,7 +156,7 @@ vik.ui = (function () {
             resizable: false,
             hideable: false
         });
-        palette_gui.parent_node = $("#layout_main_layout_panel_right div.w2ui-panel-content");
+        palette_gui.parent_node = $("#layout_layout3_panel_main div.w2ui-panel-content");
         palette_gui.width = palette_gui.parent_node.width();
         palette_gui.add(text, 'message');
         palette_gui.add(text, 'speed', -5, 5);

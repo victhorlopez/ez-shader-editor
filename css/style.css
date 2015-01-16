@@ -219,11 +219,34 @@ body div.w2ui-panel div.w2ui-panel .left_rotated_tab {
     background: #222;
 }
 
-#layout_layout2_panel_left div.w2ui-panel-content{
+body div.w2ui-panel div.w2ui-panel .right_rotated_tab {
+    display: block;
+    position: relative;
+    z-index: 125;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    -webkit-transform-origin: 25% 0%;
+    -moz-transform-origin: 25% 0%;
+    -ms-transform-origin: 25% 0%;
+    -o-transform-origin: 25% 0%;
+    transform-origin: 25% 0%;
+    margin: 90px 0px 110px -26px;
+    width: 110px;
+    padding: 0;
     background: #222;
 }
 
-.w2ui-layout > div #layout_layout2_panel_left .w2ui-panel-tabs > .w2ui-tab.active {
+
+
+
+#layout_layout2_panel_left div.w2ui-panel-content, #layout_layout3_panel_right div.w2ui-panel-content{
+    background: #222;
+}
+
+.w2ui-layout > div #layout_layout2_panel_left .w2ui-panel-tabs > .w2ui-tab.active, .w2ui-layout > div #layout_layout3_panel_right .w2ui-panel-tabs > .w2ui-tab.active {
     background-color: #3d3d3d;
 }
 
