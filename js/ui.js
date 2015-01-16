@@ -28,6 +28,7 @@ vik.ui = (function () {
     function loadLayout() {
         $('#layout').w2layout({
             name: 'main_layout',
+            parent_layout: null,
             panels: [
                 { type: 'top', size: 30 }, // so far top not used
                 { type: 'main' },
@@ -50,6 +51,8 @@ vik.ui = (function () {
 
         $('#layout_main_layout_panel_left').w2layout({
             name: 'layout2',
+            parent_layout:'main_layout',
+            panel_holder:'left',
             panels: [
 
                 { type: 'left', size: '30', resizable: true, hidden:false },
@@ -159,11 +162,11 @@ vik.ui = (function () {
         palette_gui.parent_node[0].appendChild(palette_gui.domElement);
 
 
-        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left',true)\">Left</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('preview',true )\">Preview</button>" +
-            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main' ,true)\">main</button>");
+//        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left',true)\">Left</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('preview',true )\">Preview</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main' ,true)\">main</button>");
     }
 
     return module;

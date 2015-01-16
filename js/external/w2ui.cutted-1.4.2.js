@@ -2153,33 +2153,54 @@ w2utils.event = {
             this.refresh(id);
         },
         minimize: function (id, event) {
-
             var tab = this.get(id);
             if (tab === null || tab.disabled) return false;
             var obj = this;
             var panel = w2ui[obj.owner.name].get(obj.panel_owner );
             panel.hidden = true;
-            console.log(obj);
+
             var parent = obj.box.parentNode;
             $(parent).css('opacity', '0');
             obj.storedSize = panel.size;
-            w2ui[obj.owner.name].sizeTo( obj.panel_owner , 20, true);
+            w2ui[obj.owner.name].sizeTo( obj.panel_owner , panel.minSize, true);
+
+            var layout = w2ui[obj.owner.name];
+            $("#maximize_"+tab.id).toggle();
+            if(layout.parent_layout){
+                var parent_layout = w2ui[layout.parent_layout];
+                var parent_panel = parent_layout.get(layout.panel_holder );
+                console.log(layout );
+                if(w2ui[obj.owner.name].get('preview').hidden && w2ui[obj.owner.name].get('main').hidden){
+                    console.log(parent_panel );
+                    parent_panel.storedSize = parent_panel.size;
+
+                    parent_layout.sizeTo(layout.panel_holder, parent_panel.minSize + parent_layout.padding ,true);
+                }
+            }
+
 
         },
         maximize: function (id, event) {
             var tab = this.get(id);
             if (tab === null || tab.disabled) return false;
             var obj = this;
-            console.log(obj);
             var panel = w2ui[obj.owner.name].get(obj.panel_owner );
             panel.hidden = false;
             var parent = obj.box.parentNode;
             $(parent).css('opacity', '1');
             w2ui[obj.owner.name].sizeTo( obj.panel_owner , obj.storedSize, true);
+            var layout = w2ui[obj.owner.name];
+            $("#maximize_"+tab.id).toggle();
+            if(layout.parent_layout) {
+                var parent_layout = w2ui[layout.parent_layout];
+                var parent_panel = parent_layout.get(layout.panel_holder);
+                if (w2ui[obj.owner.name].get('preview').hidden || w2ui[obj.owner.name].get('main').hidden)
+                    parent_layout.sizeTo(layout.panel_holder, parent_panel.storedSize, true);
+            }
         },
         getMaximizeButton: function (id, orientation){
             var tab = this.get(id);
-            var tabHTML = (tab.closable ? '<div class="w2ui-panel-tabs w2ui-reset w2ui-tabs ' +  (orientation == "left" ?  'left_rotated_tab' : 'right_rotated_tab') + '"><div class="w2ui-tab-close" onclick="w2ui[\'' + this.name + '\'].maximize(\'' + tab.id + '\', event);"></div>' : '') +
+            var tabHTML = (tab.closable ? '<div style="display:none" id="maximize_'+tab.id+'" class="w2ui-panel-tabs w2ui-reset w2ui-tabs ' +  (orientation == "left" ?  'left_rotated_tab' : 'right_rotated_tab') + '"><div class="w2ui-tab-close" onclick="w2ui[\'' + this.name + '\'].maximize(\'' + tab.id + '\', event);"></div>' : '') +
                 '    <div class="w2ui-tab' + (this.active === tab.id ? ' active' : '') + (tab.closable ? ' closable' : '') + '" ' +
                 '        title="' + (typeof tab.hint !== 'undefined' ? tab.hint : '') + '" style="' + tab.style + '" ' +
                 '        onclick="w2ui[\'' + this.name + '\'].click(\'' + tab.id + '\', event);">' + tab.text + '</div></div>'
