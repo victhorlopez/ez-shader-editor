@@ -52,7 +52,7 @@ vik.ui = (function () {
             name: 'layout2',
             panels: [
 
-                { type: 'left', size: '25%', resizable: true, hidden:true, content:'<div class="w2ui-panel-tabs w2ui-reset w2ui-tabs left_rotated_tab" style="top: 50px;" name="layout2_preview_tabs"><div class="w2ui-tab active closable" title="" style="">myTab</div></div>' },
+                { type: 'left', size: '30', resizable: true, hidden:false },
 
                 { type: 'main', size: '50%', resizable: true,
                     tabs: {
@@ -79,6 +79,8 @@ vik.ui = (function () {
             ],
             resize_cancel: true
         });
+        w2ui['layout2'].content('left', w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') + w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left') );
+        //+ w2ui['layout2_main_tabs'].getMaximizeButton('Preview')
 
         var FizzyText = function () {
             this.message = 'dat.gui';

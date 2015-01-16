@@ -201,7 +201,7 @@ body .dg.a {
 
 body div.w2ui-panel div.w2ui-panel .left_rotated_tab {
     display: block;
-    position: absolute;
+    position: relative;
     z-index: 125;
     -webkit-transform: rotate(90deg);
     -moz-transform: rotate(90deg);
@@ -213,5 +213,17 @@ body div.w2ui-panel div.w2ui-panel .left_rotated_tab {
     -ms-transform-origin: 25% 0%;
     -o-transform-origin: 25% 0%;
     transform-origin: 25% 0%;
-
+    margin: 50px 0px 105px -8px;
+    width: 110px;
+    padding: 0;
+    background: #222;
 }
+
+#layout_layout2_panel_left div.w2ui-panel-content{
+    background: #222;
+}
+
+.w2ui-layout > div #layout_layout2_panel_left .w2ui-panel-tabs > .w2ui-tab.active {
+    background-color: #3d3d3d;
+}
+
