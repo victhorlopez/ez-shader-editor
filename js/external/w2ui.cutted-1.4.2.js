@@ -2173,7 +2173,6 @@ w2utils.event = {
                 if(w2ui[obj.owner.name].get('preview').hidden && w2ui[obj.owner.name].get('main').hidden){
                     console.log(parent_panel );
                     parent_panel.storedSize = parent_panel.size;
-
                     parent_layout.sizeTo(layout.panel_holder, parent_panel.minSize + parent_layout.padding ,true);
                 }
             }

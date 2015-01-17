@@ -76,7 +76,7 @@ vik.ui = (function () {
         $('#layout_main_layout_panel_right').w2layout({
             name: 'layout3',
             parent_layout:'main_layout',
-            panel_holder:'main',
+            panel_holder:'right',
             panels: [
 
                 { type: 'right', size: '30', resizable: true, hidden:false },

@@ -145,16 +145,22 @@ vik.app = (function() {
     }
 
     function loadListeners(){
-        w2ui['layout2'].on('resize', function (target, data) {
-            data.onComplete = function () {
-                module.resize();
-            }
-        });
         w2ui['main_layout'].on('resize', function (target, data) {
             data.onComplete = function () {
                 module.resize();
             }
         });
+        w2ui['layout2'].on('resize', function (target, data) {
+            data.onComplete = function () {
+                module.resize();
+            }
+        });
+        w2ui['layout3'].on('resize', function (target, data) {
+            data.onComplete = function () {
+                module.resize();
+            }
+        });
+
     }
 
     return module;
