@@ -44,7 +44,7 @@ vik.ui = (function () {
             panel_holder:'left',
             panels: [
 
-                { type: 'left', size: '30', resizable: true, hidden:false },
+                { type: 'left', size: '30', resizable: true, hidden:true },
 
                 { type: 'main', size: '50%', resizable: true,
                     tabs: {
@@ -79,7 +79,7 @@ vik.ui = (function () {
             panel_holder:'right',
             panels: [
 
-                { type: 'right', size: '30', resizable: true, hidden:false },
+                { type: 'right', size: '30', resizable: true, hidden:true },
 
                 { type: 'main', size: '50%', resizable: true,
                     tabs: {

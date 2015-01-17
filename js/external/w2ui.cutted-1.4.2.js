@@ -69,8 +69,8 @@ var w2utils = (function () {
             "dateStartYear": 1950,     // start year for date-picker
             "dateEndYear": 2020      // end year for date picker
         },
-        isInt           : isInt,
-        isAlphaNumeric  : isAlphaNumeric,
+        isInt: isInt,
+        isAlphaNumeric: isAlphaNumeric,
         escapeId: escapeId,
         transition: transition,
         lock: lock,
@@ -92,12 +92,12 @@ var w2utils = (function () {
     };
     return obj;
 
-    function isInt (val) {
+    function isInt(val) {
         var re = /^[-+]?[0-9]+$/;
         return re.test(val);
     }
 
-    function isAlphaNumeric (val) {
+    function isAlphaNumeric(val) {
         var re = /^[a-zA-Z0-9_-]+$/;
         return re.test(val);
     }
@@ -606,23 +606,23 @@ w2utils.event = {
 
 (function () {
     var w2layout = function (options) {
-        this.box     = null;        // DOM Element that holds the element
-        this.name    = null;        // unique name for w2ui
-        this.panels  = [];
-        this.tmp     = {};
+        this.box = null;        // DOM Element that holds the element
+        this.name = null;        // unique name for w2ui
+        this.panels = [];
+        this.tmp = {};
 
         this.padding = 7;        // panel padding
         this.resizer = 7;        // resizer width or height
-        this.style   = '';
+        this.style = '';
 
-        this.onShow         = null;
-        this.onHide         = null;
-        this.onResizing     = null;
+        this.onShow = null;
+        this.onHide = null;
+        this.onResizing = null;
         this.onResizerClick = null;
-        this.onRender       = null;
-        this.onRefresh      = null;
-        this.onResize       = null;
-        this.onDestroy      = null;
+        this.onRender = null;
+        this.onRefresh = null;
+        this.onResize = null;
+        this.onDestroy = null;
 
         $.extend(true, this, w2obj.layout, options);
     };
@@ -632,7 +632,7 @@ w2utils.event = {
     // ====================================================
     // -- Registers as a jQuery plugin
 
-    $.fn.w2layout = function(method) {
+    $.fn.w2layout = function (method) {
         if ($.isPlainObject(method)) {
             // check name parameter
             if (!w2utils.checkName(method, 'w2layout')) return;
@@ -699,27 +699,27 @@ w2utils.event = {
     w2layout.prototype = {
         // default setting for a panel
         panel: {
-            type      : null,        // left, right, top, bottom
-            title     : '',
-            size      : 100,        // width or height depending on panel name
-            minSize   : 20,
-            maxSize   : false,
-            hidden    : false,
-            resizable : false,
-            overflow  : 'hidden',
-            style     : '',
-            content   : '',        // can be String or Object with .render(box) method
-            tabs      : null,
-            toolbar   : null,
-            width     : null,        // read only
-            height    : null,        // read only
-            show : {
-                toolbar : false,
-                tabs    : false
+            type: null,        // left, right, top, bottom
+            title: '',
+            size: 100,        // width or height depending on panel name
+            minSize: 20,
+            maxSize: false,
+            hidden: false,
+            resizable: false,
+            overflow: 'hidden',
+            style: '',
+            content: '',        // can be String or Object with .render(box) method
+            tabs: null,
+            toolbar: null,
+            width: null,        // read only
+            height: null,        // read only
+            show: {
+                toolbar: false,
+                tabs: false
             },
-            onRefresh : null,
-            onShow    : null,
-            onHide    : null
+            onRefresh: null,
+            onShow: null,
+            onHide: null
         },
 
         // alias for content
@@ -732,7 +732,7 @@ w2utils.event = {
             var p = this.get(panel);
             // if it is CSS panel
             if (panel == 'css') {
-                $('#layout_'+ obj.name +'_panel_css').html('<style>'+ data +'</style>');
+                $('#layout_' + obj.name + '_panel_css').html('<style>' + data + '</style>');
                 return true;
             }
             if (p === null) return false;
@@ -743,8 +743,8 @@ w2utils.event = {
                     console.log('ERROR: You can not pass jQuery object to w2layout.content() method');
                     return false;
                 }
-                var pname    = '#layout_'+ this.name + '_panel_'+ p.type;
-                var current  = $(pname + '> .w2ui-panel-content');
+                var pname = '#layout_' + this.name + '_panel_' + p.type;
+                var current = $(pname + '> .w2ui-panel-content');
                 var panelTop = 0;
                 if (current.length > 0) {
                     $(pname).scrollTop(0);
@@ -759,7 +759,7 @@ w2utils.event = {
                         if (transition !== null && transition !== '' && typeof transition != 'undefined') {
                             // apply transition
                             var div1 = $(pname + '> .w2ui-panel-content');
-                            div1.after('<div class="w2ui-panel-content new-panel" style="'+ div1[0].style.cssText +'"></div>');
+                            div1.after('<div class="w2ui-panel-content new-panel" style="' + div1[0].style.cssText + '"></div>');
                             var div2 = $(pname + '> .w2ui-panel-content.new-panel');
                             div1.css('top', panelTop);
                             div2.css('top', panelTop);
@@ -775,7 +775,9 @@ w2utils.event = {
                                 div2.css('overflow', p.overflow);
                                 // IE Hack
                                 obj.resize();
-                                if (window.navigator.userAgent.indexOf('MSIE') != -1) setTimeout(function () { obj.resize(); }, 100);
+                                if (window.navigator.userAgent.indexOf('MSIE') != -1) setTimeout(function () {
+                                    obj.resize();
+                                }, 100);
                             });
                         }
                     }
@@ -784,7 +786,9 @@ w2utils.event = {
             }
             // IE Hack
             obj.resize();
-            if (window.navigator.userAgent.indexOf('MSIE') != -1) setTimeout(function () { obj.resize(); }, 100);
+            if (window.navigator.userAgent.indexOf('MSIE') != -1) setTimeout(function () {
+                obj.resize();
+            }, 100);
             return true;
         },
 
@@ -803,7 +807,9 @@ w2utils.event = {
                     if (onLoad) onLoad();
                     // IE Hack
                     obj.resize();
-                    if (window.navigator.userAgent.indexOf('MSIE') != -1) setTimeout(function () { obj.resize(); }, 100);
+                    if (window.navigator.userAgent.indexOf('MSIE') != -1) setTimeout(function () {
+                        obj.resize();
+                    }, 100);
                 });
                 return true;
             }
@@ -815,7 +821,7 @@ w2utils.event = {
             var pan = obj.get(panel);
             if (pan === null) return false;
             // resize
-            if(immediate)
+            if (immediate)
                 obj.set(panel, { size: size });
             else {
                 $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '.2s'));
@@ -841,17 +847,19 @@ w2utils.event = {
             if (p === null) return false;
             p.hidden = false;
             if (immediate === true) {
-                $('#layout_'+ obj.name +'_panel_'+panel).css({ 'opacity': '1' });
+                $('#layout_' + obj.name + '_panel_' + panel).css({ 'opacity': '1' });
                 obj.trigger($.extend(eventData, { phase: 'after' }));
                 obj.resize();
             } else {
                 // resize
-                $('#layout_'+ obj.name +'_panel_'+panel).css({ 'opacity': '0' });
+                $('#layout_' + obj.name + '_panel_' + panel).css({ 'opacity': '0' });
                 $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '.2s'));
-                setTimeout(function () { obj.resize(); }, 1);
+                setTimeout(function () {
+                    obj.resize();
+                }, 1);
                 // show
-                setTimeout(function() {
-                    $('#layout_'+ obj.name +'_panel_'+ panel).css({ 'opacity': '1' });
+                setTimeout(function () {
+                    $('#layout_' + obj.name + '_panel_' + panel).css({ 'opacity': '1' });
                 }, 250);
                 // clean
                 setTimeout(function () {
@@ -873,14 +881,16 @@ w2utils.event = {
             if (p === null) return false;
             p.hidden = true;
             if (immediate === true) {
-                $('#layout_'+ obj.name +'_panel_'+panel).css({ 'opacity': '0'    });
+                $('#layout_' + obj.name + '_panel_' + panel).css({ 'opacity': '0'    });
                 obj.trigger($.extend(eventData, { phase: 'after' }));
                 obj.resize();
             } else {
                 // hide
                 $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '.2s'));
-                $('#layout_'+ obj.name +'_panel_'+panel).css({ 'opacity': '0'    });
-                setTimeout(function () { obj.resize(); }, 1);
+                $('#layout_' + obj.name + '_panel_' + panel).css({ 'opacity': '0'    });
+                setTimeout(function () {
+                    obj.resize();
+                }, 1);
                 // clean
                 setTimeout(function () {
                     $(obj.box).find(' > div > .w2ui-panel').css(w2utils.cssPrefix('transition', '0s'));
@@ -918,7 +928,7 @@ w2utils.event = {
         },
 
         el: function (panel) {
-            var el = $('#layout_'+ this.name +'_panel_'+ panel +'> .w2ui-panel-content');
+            var el = $('#layout_' + this.name + '_panel_' + panel + '> .w2ui-panel-content');
             if (el.length != 1) return null;
             return el[0];
         },
@@ -927,7 +937,7 @@ w2utils.event = {
             var pan = this.get(panel);
             if (!pan) return;
             pan.show.toolbar = false;
-            $('#layout_'+ this.name +'_panel_'+ panel +'> .w2ui-panel-toolbar').hide();
+            $('#layout_' + this.name + '_panel_' + panel + '> .w2ui-panel-toolbar').hide();
             this.resize();
         },
 
@@ -935,7 +945,7 @@ w2utils.event = {
             var pan = this.get(panel);
             if (!pan) return;
             pan.show.toolbar = true;
-            $('#layout_'+ this.name +'_panel_'+ panel +'> .w2ui-panel-toolbar').show();
+            $('#layout_' + this.name + '_panel_' + panel + '> .w2ui-panel-toolbar').show();
             this.resize();
         },
 
@@ -949,7 +959,7 @@ w2utils.event = {
             var pan = this.get(panel);
             if (!pan) return;
             pan.show.tabs = false;
-            $('#layout_'+ this.name +'_panel_'+ panel +'> .w2ui-panel-tabs').hide();
+            $('#layout_' + this.name + '_panel_' + panel + '> .w2ui-panel-tabs').hide();
             this.resize();
         },
 
@@ -957,7 +967,7 @@ w2utils.event = {
             var pan = this.get(panel);
             if (!pan) return;
             pan.show.tabs = true;
-            $('#layout_'+ this.name +'_panel_'+ panel +'> .w2ui-panel-tabs').show();
+            $('#layout_' + this.name + '_panel_' + panel + '> .w2ui-panel-tabs').show();
             this.resize();
         },
 
@@ -976,7 +986,7 @@ w2utils.event = {
             if (eventData.isCancelled === true) return;
 
             if (typeof box != 'undefined' && box !== null) {
-                if ($(obj.box).find('#layout_'+ obj.name +'_panel_main').length > 0) {
+                if ($(obj.box).find('#layout_' + obj.name + '_panel_main').length > 0) {
                     $(obj.box)
                         .removeAttr('name')
                         .removeClass('w2ui-layout')
@@ -992,19 +1002,19 @@ w2utils.event = {
             if ($(obj.box).length > 0) $(obj.box)[0].style.cssText += obj.style;
             // create all panels
             for (var p1 = 0; p1 < w2panels.length; p1++) {
-                var pan  = obj.get(w2panels[p1]);
-                var html =  '<div id="layout_'+ obj.name + '_panel_'+ w2panels[p1] +'" class="w2ui-panel">'+
-                    '    <div class="w2ui-panel-title"></div>'+
-                    '    <div class="w2ui-panel-tabs"></div>'+
-                    '    <div class="w2ui-panel-toolbar"></div>'+
-                    '    <div class="w2ui-panel-content"></div>'+
-                    '</div>'+
-                    '<div id="layout_'+ obj.name + '_resizer_'+ w2panels[p1] +'" class="w2ui-resizer"></div>';
+                var pan = obj.get(w2panels[p1]);
+                var html = '<div id="layout_' + obj.name + '_panel_' + w2panels[p1] + '" class="w2ui-panel">' +
+                    '    <div class="w2ui-panel-title"></div>' +
+                    '    <div class="w2ui-panel-tabs"></div>' +
+                    '    <div class="w2ui-panel-toolbar"></div>' +
+                    '    <div class="w2ui-panel-content"></div>' +
+                    '</div>' +
+                    '<div id="layout_' + obj.name + '_resizer_' + w2panels[p1] + '" class="w2ui-resizer"></div>';
                 $(obj.box).find(' > div').append(html);
                 // tabs are rendered in refresh()
             }
             $(obj.box).find(' > div')
-                .append('<div id="layout_'+ obj.name + '_panel_css" style="position: absolute; top: 10000px;"></div');
+                .append('<div id="layout_' + obj.name + '_panel_css" style="position: absolute; top: 10000px;"></div');
             obj.refresh(); // if refresh is not called here, the layout will not be available right after initialization
             // process event
             obj.trigger($.extend(eventData, { phase: 'after' }));
@@ -1017,7 +1027,7 @@ w2utils.event = {
 
             function initEvents() {
                 obj.tmp.events = {
-                    resize : function (event) {
+                    resize: function (event) {
                         w2ui[obj.name].resize();
                     },
                     resizeStart: obj.resize_cancel ? resizeStart : resizeStart,
@@ -1030,16 +1040,20 @@ w2utils.event = {
             function resizeStart(type, evnt) {
                 if (!obj.box) return;
                 if (!evnt) evnt = window.event;
-                if (!window.addEventListener) { window.document.attachEvent('onselectstart', function() { return false; } ); }
+                if (!window.addEventListener) {
+                    window.document.attachEvent('onselectstart', function () {
+                        return false;
+                    });
+                }
                 $(document).off('mousemove', obj.tmp.events.mouseMove).on('mousemove', obj.tmp.events.mouseMove);
                 $(document).off('mouseup', obj.tmp.events.mouseUp).on('mouseup', obj.tmp.events.mouseUp);
                 obj.tmp.resize = {
-                    type    : type,
-                    x       : evnt.screenX,
-                    y       : evnt.screenY,
-                    diff_x  : 0,
-                    diff_y  : 0,
-                    value   : 0
+                    type: type,
+                    x: evnt.screenX,
+                    y: evnt.screenY,
+                    diff_x: 0,
+                    diff_y: 0,
+                    value: 0
                 };
                 // lock all panels
                 for (var p1 = 0; p1 < w2panels.length; p1++) {
@@ -1051,17 +1065,21 @@ w2utils.event = {
                     }
                 }
                 if (type == 'left' || type == 'right') {
-                    obj.tmp.resize.value = parseInt($('#layout_'+ obj.name +'_resizer_'+ type)[0].style.left);
+                    obj.tmp.resize.value = parseInt($('#layout_' + obj.name + '_resizer_' + type)[0].style.left);
                 }
                 if (type == 'top' || type == 'preview' || type == 'bottom') {
-                    obj.tmp.resize.value = parseInt($('#layout_'+ obj.name +'_resizer_'+ type)[0].style.top);
+                    obj.tmp.resize.value = parseInt($('#layout_' + obj.name + '_resizer_' + type)[0].style.top);
                 }
             }
 
             function resizeStop(evnt) {
                 if (!obj.box) return;
                 if (!evnt) evnt = window.event;
-                if (!window.addEventListener) { window.document.attachEvent('onselectstart', function() { return false; } ); }
+                if (!window.addEventListener) {
+                    window.document.attachEvent('onselectstart', function () {
+                        return false;
+                    });
+                }
                 $(document).off('mousemove', obj.tmp.events.mouseMove);
                 $(document).off('mouseup', obj.tmp.events.mouseUp);
                 if (typeof obj.tmp.resize == 'undefined') return;
@@ -1076,12 +1094,12 @@ w2utils.event = {
                 }
                 // set new size
                 if (obj.tmp.diff_x !== 0 || obj.tmp.resize.diff_y !== 0) { // only recalculate if changed
-                    var ptop    = obj.get('top');
+                    var ptop = obj.get('top');
                     var pbottom = obj.get('bottom');
-                    var panel   = obj.get(obj.tmp.resize.type);
-                    var height  = parseInt($(obj.box).height());
-                    var width   = parseInt($(obj.box).width());
-                    var str     = String(panel.size);
+                    var panel = obj.get(obj.tmp.resize.type);
+                    var height = parseInt($(obj.box).height());
+                    var width = parseInt($(obj.box).width());
+                    var str = String(panel.size);
                     var ns, nd;
                     switch (obj.tmp.resize.type) {
                         case 'top':
@@ -1107,7 +1125,7 @@ w2utils.event = {
                             break;
                     }
                     // set size
-                    if (str.substr(str.length-1) == '%') {
+                    if (str.substr(str.length - 1) == '%') {
                         panel.size = Math.floor(ns * 100 /
                             (panel.type == 'left' || panel.type == 'right' ? width : height - nd) * 100) / 100 + '%';
                     } else {
@@ -1115,7 +1133,7 @@ w2utils.event = {
                     }
                     obj.resize();
                 }
-                $('#layout_'+ obj.name + '_resizer_'+ obj.tmp.resize.type).removeClass('active');
+                $('#layout_' + obj.name + '_resizer_' + obj.tmp.resize.type).removeClass('active');
                 delete obj.tmp.resize;
             }
 
@@ -1247,9 +1265,9 @@ w2utils.event = {
                     panel: tmp ? tmp.type : 'all', diff_x: tmp ? tmp.diff_x : 0, diff_y: tmp ? tmp.diff_y : 0 });
                 if (eventData.isCancelled === true) return;
 
-                var p         = $('#layout_'+ obj.name + '_resizer_'+ tmp.type);
-                var resize_x  = (evnt.screenX - tmp.x);
-                var resize_y  = (evnt.screenY - tmp.y);
+                var p = $('#layout_' + obj.name + '_resizer_' + tmp.type);
+                var resize_x = (evnt.screenX - tmp.x);
+                var resize_y = (evnt.screenY - tmp.y);
                 var mainPanel = obj.get('main');
 
                 if (!p.hasClass('active')) p.addClass('active');
@@ -1338,18 +1356,18 @@ w2utils.event = {
             if (typeof panel == 'string') {
                 var p = obj.get(panel);
                 if (p === null) return;
-                var pname = '#layout_'+ obj.name + '_panel_'+ p.type;
-                var rname = '#layout_'+ obj.name +'_resizer_'+ p.type;
+                var pname = '#layout_' + obj.name + '_panel_' + p.type;
+                var rname = '#layout_' + obj.name + '_resizer_' + p.type;
                 // apply properties to the panel
                 $(pname).css({ display: p.hidden ? 'none' : 'block' });
                 if (p.resizable) $(rname).show(); else $(rname).hide();
                 // insert content
                 if (typeof p.content == 'object' && typeof p.content.render === 'function') {
-                    p.content.box = $(pname +'> .w2ui-panel-content')[0];
+                    p.content.box = $(pname + '> .w2ui-panel-content')[0];
                     setTimeout(function () {
                         // need to remove unnecessary classes
-                        if ($(pname +'> .w2ui-panel-content').length > 0) {
-                            $(pname +'> .w2ui-panel-content')
+                        if ($(pname + '> .w2ui-panel-content').length > 0) {
+                            $(pname + '> .w2ui-panel-content')
                                 .removeClass()
                                 .removeAttr('name')
                                 .addClass('w2ui-panel-content')
@@ -1359,8 +1377,8 @@ w2utils.event = {
                     }, 1);
                 } else {
                     // need to remove unnecessary classes
-                    if ($(pname +'> .w2ui-panel-content').length > 0) {
-                        $(pname +'> .w2ui-panel-content')
+                    if ($(pname + '> .w2ui-panel-content').length > 0) {
+                        $(pname + '> .w2ui-panel-content')
                             .removeClass()
                             .removeAttr('name')
                             .addClass('w2ui-panel-content')
@@ -1369,33 +1387,35 @@ w2utils.event = {
                     }
                 }
                 // if there are tabs and/or toolbar - render it
-                var tmp = $(obj.box).find(pname +'> .w2ui-panel-tabs');
+                var tmp = $(obj.box).find(pname + '> .w2ui-panel-tabs');
                 if (p.show.tabs) {
-                    if (tmp.find('[name='+ p.tabs.name +']').length === 0 && p.tabs !== null) tmp.w2render(p.tabs); else p.tabs.refresh();
+                    if (tmp.find('[name=' + p.tabs.name + ']').length === 0 && p.tabs !== null) tmp.w2render(p.tabs); else p.tabs.refresh();
                 } else {
                     tmp.html('').removeClass('w2ui-tabs').hide();
                 }
-                tmp = $(obj.box).find(pname +'> .w2ui-panel-toolbar');
+                tmp = $(obj.box).find(pname + '> .w2ui-panel-toolbar');
                 if (p.show.toolbar) {
-                    if (tmp.find('[name='+ p.toolbar.name +']').length === 0 && p.toolbar !== null) tmp.w2render(p.toolbar); else p.toolbar.refresh();
+                    if (tmp.find('[name=' + p.toolbar.name + ']').length === 0 && p.toolbar !== null) tmp.w2render(p.toolbar); else p.toolbar.refresh();
                 } else {
                     tmp.html('').removeClass('w2ui-toolbar').hide();
                 }
                 // show title
-                tmp = $(obj.box).find(pname +'> .w2ui-panel-title');
+                tmp = $(obj.box).find(pname + '> .w2ui-panel-title');
                 if (p.title) {
                     tmp.html(p.title).show();
                 } else {
                     tmp.html('').hide();
                 }
             } else {
-                if ($('#layout_'+ obj.name +'_panel_main').length == 0) {
+                if ($('#layout_' + obj.name + '_panel_main').length == 0) {
                     obj.render();
                     return;
                 }
                 obj.resize();
                 // refresh all of them
-                for (var p1 = 0; p1 < this.panels.length; p1++) { obj.refresh(this.panels[p1].type); }
+                for (var p1 = 0; p1 < this.panels.length; p1++) {
+                    obj.refresh(this.panels[p1].type);
+                }
             }
             obj.trigger($.extend(eventData, { phase: 'after' }));
             return (new Date()).getTime() - time;
@@ -1413,27 +1433,28 @@ w2utils.event = {
             if (this.padding < 0) this.padding = 0;
 
             // layout itself
-            var width  = parseInt($(this.box).width());
+            var width = parseInt($(this.box).width());
             var height = parseInt($(this.box).height());
             $(this.box).find(' > div').css({
-                width    : width + 'px',
-                height    : height + 'px'
+                width: width + 'px',
+                height: height + 'px'
             });
             var obj = this;
 
             var separator = (this.resizer > this.padding ? this.resizer : this.padding);
             // panels
-            var pmain   = this.get('main');
-            var pprev   = this.get('preview');
-            var pleft   = this.get('left');
-            var pright  = this.get('right');
-            var ptop    = this.get('top');
+            var pmain = this.get('main');
+            var pprev = this.get('preview');
+            var pleft = this.get('left');
+            var pright = this.get('right');
+            var ptop = this.get('top');
             var pbottom = this.get('bottom');
-            var smain   = (pmain !== null && pmain.hidden !== true ? true : false);; // main always on
-            var sprev   = (pprev !== null && pprev.hidden !== true ? true : false);
-            var sleft   = (pleft !== null && pleft.hidden !== true ? true : false);
-            var sright  = (pright !== null && pright.hidden !== true ? true : false);
-            var stop    = (ptop !== null && ptop.hidden !== true ? true : false);
+            var smain = (pmain !== null && pmain.hidden !== true ? true : false);
+            ; // main always on
+            var sprev = (pprev !== null && pprev.hidden !== true ? true : false);
+            var sleft = (pleft !== null && pleft.hidden !== true ? true : false);
+            var sright = (pright !== null && pright.hidden !== true ? true : false);
+            var stop = (ptop !== null && ptop.hidden !== true ? true : false);
             var sbottom = (pbottom !== null && pbottom.hidden !== true ? true : false);
             var l, t, w, h, e;
             // calculate %
@@ -1442,7 +1463,7 @@ w2utils.event = {
                 var tmp = this.get(w2panels[p]);
                 if (!tmp) continue;
                 var str = String(tmp.size || 0);
-                if (str.substr(str.length-1) == '%') {
+                if (str.substr(str.length - 1) == '%') {
                     var tmph = height;
                     if (tmp.type == 'preview') {
                         tmph = tmph -
@@ -1461,20 +1482,20 @@ w2utils.event = {
                 t = 0;
                 w = width;
                 h = ptop.sizeCalculated;
-                $('#layout_'+ this.name +'_panel_top').css({
+                $('#layout_' + this.name + '_panel_top').css({
                     'display': 'block',
                     'left': l + 'px',
                     'top': t + 'px',
                     'width': w + 'px',
                     'height': h + 'px'
                 }).show();
-                ptop.width  = w;
+                ptop.width = w;
                 ptop.height = h;
                 // resizer
                 if (ptop.resizable) {
                     t = ptop.sizeCalculated - (this.padding === 0 ? this.resizer : 0);
                     h = (this.resizer > this.padding ? this.resizer : this.padding);
-                    $('#layout_'+ this.name +'_resizer_top').show().css({
+                    $('#layout_' + this.name + '_resizer_top').show().css({
                         'display': 'block',
                         'left': l + 'px',
                         'top': t + 'px',
@@ -1493,8 +1514,8 @@ w2utils.event = {
                     });
                 }
             } else {
-                $('#layout_'+ this.name +'_panel_top').hide();
-                $('#layout_'+ this.name +'_resizer_top').hide();
+                $('#layout_' + this.name + '_panel_top').hide();
+                $('#layout_' + this.name + '_resizer_top').hide();
             }
             // left if any
             if (pleft !== null && pleft.hidden !== true) {
@@ -1503,7 +1524,7 @@ w2utils.event = {
                 w = pleft.sizeCalculated;
                 h = height - (stop ? ptop.sizeCalculated + this.padding : 0) -
                     (sbottom ? pbottom.sizeCalculated + this.padding : 0);
-                e = $('#layout_'+ this.name +'_panel_left');
+                e = $('#layout_' + this.name + '_panel_left');
                 if (window.navigator.userAgent.indexOf('MSIE') != -1 && e.length > 0 && e[0].clientHeight < e[0].scrollHeight) w += 17; // IE hack
                 e.css({
                     'display': 'block',
@@ -1512,13 +1533,13 @@ w2utils.event = {
                     'width': w + 'px',
                     'height': h + 'px'
                 }).show();
-                pleft.width  = w;
+                pleft.width = w;
                 pleft.height = h;
                 // resizer
                 if (pleft.resizable) {
                     l = pleft.sizeCalculated - (this.padding === 0 ? this.resizer : 0);
                     w = (this.resizer > this.padding ? this.resizer : this.padding);
-                    $('#layout_'+ this.name +'_resizer_left').show().css({
+                    $('#layout_' + this.name + '_resizer_left').show().css({
                         'display': 'block',
                         'left': l + 'px',
                         'top': t + 'px',
@@ -1537,8 +1558,8 @@ w2utils.event = {
                     });
                 }
             } else {
-                $('#layout_'+ this.name +'_panel_left').hide();
-                $('#layout_'+ this.name +'_resizer_left').hide();
+                $('#layout_' + this.name + '_panel_left').hide();
+                $('#layout_' + this.name + '_resizer_left').hide();
             }
             // right if any
             if (pright !== null && pright.hidden !== true) {
@@ -1547,20 +1568,20 @@ w2utils.event = {
                 w = pright.sizeCalculated;
                 h = height - (stop ? ptop.sizeCalculated + this.padding : 0) -
                     (sbottom ? pbottom.sizeCalculated + this.padding : 0);
-                $('#layout_'+ this.name +'_panel_right').css({
+                $('#layout_' + this.name + '_panel_right').css({
                     'display': 'block',
                     'left': l + 'px',
                     'top': t + 'px',
                     'width': w + 'px',
                     'height': h + 'px'
                 }).show();
-                pright.width  = w;
+                pright.width = w;
                 pright.height = h;
                 // resizer
                 if (pright.resizable) {
                     l = l - this.padding;
                     w = (this.resizer > this.padding ? this.resizer : this.padding);
-                    $('#layout_'+ this.name +'_resizer_right').show().css({
+                    $('#layout_' + this.name + '_resizer_right').show().css({
                         'display': 'block',
                         'left': l + 'px',
                         'top': t + 'px',
@@ -1579,8 +1600,8 @@ w2utils.event = {
                     });
                 }
             } else {
-                $('#layout_'+ this.name +'_panel_right').hide();
-                $('#layout_'+ this.name +'_resizer_right').hide();
+                $('#layout_' + this.name + '_panel_right').hide();
+                $('#layout_' + this.name + '_resizer_right').hide();
             }
             // bottom if any
             if (pbottom !== null && pbottom.hidden !== true) {
@@ -1588,20 +1609,20 @@ w2utils.event = {
                 t = height - pbottom.sizeCalculated;
                 w = width;
                 h = pbottom.sizeCalculated;
-                $('#layout_'+ this.name +'_panel_bottom').css({
+                $('#layout_' + this.name + '_panel_bottom').css({
                     'display': 'block',
                     'left': l + 'px',
                     'top': t + 'px',
                     'width': w + 'px',
                     'height': h + 'px'
                 }).show();
-                pbottom.width  = w;
+                pbottom.width = w;
                 pbottom.height = h;
                 // resizer
                 if (pbottom.resizable) {
                     t = t - (this.padding === 0 ? 0 : this.padding);
                     h = (this.resizer > this.padding ? this.resizer : this.padding);
-                    $('#layout_'+ this.name +'_resizer_bottom').show().css({
+                    $('#layout_' + this.name + '_resizer_bottom').show().css({
                         'display': 'block',
                         'left': l + 'px',
                         'top': t + 'px',
@@ -1620,8 +1641,8 @@ w2utils.event = {
                     });
                 }
             } else {
-                $('#layout_'+ this.name +'_panel_bottom').hide();
-                $('#layout_'+ this.name +'_resizer_bottom').hide();
+                $('#layout_' + this.name + '_panel_bottom').hide();
+                $('#layout_' + this.name + '_resizer_bottom').hide();
             }
             if (pmain !== null && pmain.hidden !== true) {
                 // main - not always there
@@ -1644,17 +1665,17 @@ w2utils.event = {
                 pmain.width = w;
                 pmain.height = h;
             } else {
-                $('#layout_'+ this.name +'_panel_main').hide();
+                $('#layout_' + this.name + '_panel_main').hide();
             }
 
             // preview if any
             if (pprev !== null && pprev.hidden !== true) {
                 l = 0 + (sleft ? pleft.sizeCalculated + this.padding : 0);
                 t = 0 + (stop ? ptop.sizeCalculated + this.padding : 0) + (smain ? pmain.height + this.padding : 0);
-                w = width  - (sleft ? pleft.sizeCalculated + this.padding : 0) -
+                w = width - (sleft ? pleft.sizeCalculated + this.padding : 0) -
                     (sright ? pright.sizeCalculated + this.padding : 0);
                 h = height - (t - (sbottom ? pbottom.sizeCalculated + this.padding : 0));
-                e = $('#layout_'+ this.name +'_panel_preview');
+                e = $('#layout_' + this.name + '_panel_preview');
                 if (window.navigator.userAgent.indexOf('MSIE') != -1 && e.length > 0 && e[0].clientHeight < e[0].scrollHeight) w += 17; // IE hack
                 e.css({
                     'display': 'block',
@@ -1663,13 +1684,13 @@ w2utils.event = {
                     'width': w + 'px',
                     'height': h + 'px'
                 }).show();
-                pprev.width  = w;
+                pprev.width = w;
                 pprev.height = h;
                 // resizer
                 if (pprev.resizable) {
                     t = t - (this.padding === 0 ? 0 : this.padding);
                     h = (this.resizer > this.padding ? this.resizer : this.padding);
-                    $('#layout_'+ this.name +'_resizer_preview').show().css({
+                    $('#layout_' + this.name + '_resizer_preview').show().css({
                         'display': 'block',
                         'left': l + 'px',
                         'top': t + 'px',
@@ -1688,25 +1709,25 @@ w2utils.event = {
                     });
                 }
             } else {
-                $('#layout_'+ this.name +'_panel_preview').hide();
-                $('#layout_'+ this.name +'_resizer_preview').hide();
+                $('#layout_' + this.name + '_panel_preview').hide();
+                $('#layout_' + this.name + '_resizer_preview').hide();
             }
 
             // display tabs and toolbar if needed
             for (var p1 = 0; p1 < w2panels.length; p1++) {
                 var pan = this.get(w2panels[p1]);
-                var tmp2 = '#layout_'+ this.name +'_panel_'+ w2panels[p1] +' > .w2ui-panel-';
+                var tmp2 = '#layout_' + this.name + '_panel_' + w2panels[p1] + ' > .w2ui-panel-';
                 var tabHeight = 0;
                 if (pan) {
                     if (pan.title) {
                         tabHeight += w2utils.getSize($(tmp2 + 'title').css({ top: tabHeight + 'px', display: 'block' }), 'height');
                     }
                     if (pan.show.tabs) {
-                        if (pan.tabs !== null && w2ui[this.name +'_'+ w2panels[p1] +'_tabs']) w2ui[this.name +'_'+ w2panels[p1] +'_tabs'].resize();
+                        if (pan.tabs !== null && w2ui[this.name + '_' + w2panels[p1] + '_tabs']) w2ui[this.name + '_' + w2panels[p1] + '_tabs'].resize();
                         tabHeight += w2utils.getSize($(tmp2 + 'tabs').css({ top: tabHeight + 'px', display: 'block' }), 'height');
                     }
                     if (pan.show.toolbar) {
-                        if (pan.toolbar !== null && w2ui[this.name +'_'+ w2panels[p1] +'_toolbar']) w2ui[this.name +'_'+ w2panels[p1] +'_toolbar'].resize();
+                        if (pan.toolbar !== null && w2ui[this.name + '_' + w2panels[p1] + '_toolbar']) w2ui[this.name + '_' + w2panels[p1] + '_toolbar'].resize();
                         tabHeight += w2utils.getSize($(tmp2 + 'toolbar').css({ top: tabHeight + 'px', display: 'block' }), 'height');
                     }
                 }
@@ -1735,7 +1756,7 @@ w2utils.event = {
             if (eventData.isCancelled === true) return;
             if (typeof w2ui[this.name] == 'undefined') return false;
             // clean up
-            if ($(this.box).find('#layout_'+ this.name +'_panel_main').length > 0) {
+            if ($(this.box).find('#layout_' + this.name + '_panel_main').length > 0) {
                 $(this.box)
                     .removeAttr('name')
                     .removeClass('w2ui-layout')
@@ -1754,7 +1775,7 @@ w2utils.event = {
                 return;
             }
             var args = Array.prototype.slice.call(arguments, 0);
-            args[0]  = '#layout_'+ this.name + '_panel_' + panel;
+            args[0] = '#layout_' + this.name + '_panel_' + panel;
             w2utils.lock.apply(window, args);
         },
 
@@ -1763,7 +1784,7 @@ w2utils.event = {
                 console.log('ERROR: First parameter needs to be the a valid panel name.');
                 return;
             }
-            var nm = '#layout_'+ this.name + '_panel_' + panel;
+            var nm = '#layout_' + this.name + '_panel_' + panel;
             w2utils.unlock(nm, speed);
         }
     };
@@ -2156,24 +2177,41 @@ w2utils.event = {
             var tab = this.get(id);
             if (tab === null || tab.disabled) return false;
             var obj = this;
-            var panel = w2ui[obj.owner.name].get(obj.panel_owner );
+            var panel = w2ui[obj.owner.name].get(obj.panel_owner);
             panel.hidden = true;
 
             var parent = obj.box.parentNode;
             $(parent).css('opacity', '0');
             obj.storedSize = panel.size;
-            w2ui[obj.owner.name].sizeTo( obj.panel_owner , panel.minSize, true);
+            w2ui[obj.owner.name].sizeTo(obj.panel_owner, panel.minSize, true);
 
+            // to display the maximize button
             var layout = w2ui[obj.owner.name];
-            $("#maximize_"+tab.id).toggle();
-            if(layout.parent_layout){
+            $("#maximize_" + tab.id).show();
+
+
+            if (layout.parent_layout) {
+                // to hide the button panel
+                var button_panel = $("#maximize_" + tab.id).parent();
+                var buttons = button_panel.children();
+                var visible = true;
+                buttons.each(function () {
+                    visible = visible || ($(this).css('display') == 'block');
+                });
+                if (visible) {
+                    w2ui[obj.owner.name].show(layout.panel_holder, true);
+                }
+
+
+                // to resize the parent layout if it has one
+
                 var parent_layout = w2ui[layout.parent_layout];
-                var parent_panel = parent_layout.get(layout.panel_holder );
-                console.log(layout );
-                if(w2ui[obj.owner.name].get('preview').hidden && w2ui[obj.owner.name].get('main').hidden){
-                    console.log(parent_panel );
+                var parent_panel = parent_layout.get(layout.panel_holder);
+                console.log(layout);
+                if (w2ui[obj.owner.name].get('preview').hidden && w2ui[obj.owner.name].get('main').hidden) {
+                    console.log(parent_panel);
                     parent_panel.storedSize = parent_panel.size;
-                    parent_layout.sizeTo(layout.panel_holder, parent_panel.minSize + parent_layout.padding ,true);
+                    parent_layout.sizeTo(layout.panel_holder, parent_panel.minSize + parent_layout.padding, true);
                 }
             }
 
@@ -2183,23 +2221,34 @@ w2utils.event = {
             var tab = this.get(id);
             if (tab === null || tab.disabled) return false;
             var obj = this;
-            var panel = w2ui[obj.owner.name].get(obj.panel_owner );
+            var panel = w2ui[obj.owner.name].get(obj.panel_owner);
             panel.hidden = false;
             var parent = obj.box.parentNode;
             $(parent).css('opacity', '1');
-            w2ui[obj.owner.name].sizeTo( obj.panel_owner , obj.storedSize, true);
+            w2ui[obj.owner.name].sizeTo(obj.panel_owner, obj.storedSize, true);
             var layout = w2ui[obj.owner.name];
-            $("#maximize_"+tab.id).toggle();
-            if(layout.parent_layout) {
+            $("#maximize_" + tab.id).toggle();
+            if (layout.parent_layout) {
+                // to hide the button panel
+                var button_panel = $("#maximize_" + tab.id).parent();
+                var buttons = button_panel.children();
+                var hidden = true;
+                buttons.each(function () {
+                    hidden = hidden && ($(this).css('display') == 'none');
+                });
+                if (hidden) {
+                    w2ui[obj.owner.name].hide(layout.panel_holder, true);
+                }
+
                 var parent_layout = w2ui[layout.parent_layout];
                 var parent_panel = parent_layout.get(layout.panel_holder);
                 if (w2ui[obj.owner.name].get('preview').hidden || w2ui[obj.owner.name].get('main').hidden)
                     parent_layout.sizeTo(layout.panel_holder, parent_panel.storedSize, true);
             }
         },
-        getMaximizeButton: function (id, orientation){
+        getMaximizeButton: function (id, orientation) {
             var tab = this.get(id);
-            var tabHTML = (tab.closable ? '<div style="display:none" id="maximize_'+tab.id+'" class="w2ui-panel-tabs w2ui-reset w2ui-tabs ' +  (orientation == "left" ?  'left_rotated_tab' : 'right_rotated_tab') + '"><div class="w2ui-tab-close" onclick="w2ui[\'' + this.name + '\'].maximize(\'' + tab.id + '\', event);"></div>' : '') +
+            var tabHTML = (tab.closable ? '<div style="display:none" id="maximize_' + tab.id + '" class="w2ui-panel-tabs w2ui-reset w2ui-tabs ' + (orientation == "left" ? 'left_rotated_tab' : 'right_rotated_tab') + '"><div class="w2ui-tab-close" onclick="w2ui[\'' + this.name + '\'].maximize(\'' + tab.id + '\', event);"></div>' : '') +
                 '    <div class="w2ui-tab' + (this.active === tab.id ? ' active' : '') + (tab.closable ? ' closable' : '') + '" ' +
                 '        title="' + (typeof tab.hint !== 'undefined' ? tab.hint : '') + '" style="' + tab.style + '" ' +
                 '        onclick="w2ui[\'' + this.name + '\'].click(\'' + tab.id + '\', event);">' + tab.text + '</div></div>'
