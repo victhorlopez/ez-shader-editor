@@ -32,7 +32,7 @@ vik.app = (function() {
         var node = new EZ.EMesh();
         node.mesh = "sphere";
         node.setTexture("cubemap","cubemap");
-        node.shader = "env_cubemap";
+        node.shader = "env_reflection";
         node.position = [0, 0.5, 0];
         scene.addChild(node);
 
