@@ -38,6 +38,14 @@ vik.app = (function() {
         node.mesh = "grid";
         node.flags.primitive = gl.LINES;
         node.scale = [50,50,50];
+        //scene.addChild(node);
+
+        node = new EZ.EMesh();
+        node.mesh = "box";
+        node.flags.flip_normals = true;
+        node.shader = "cubemap";
+        node.setTexture("cubemap","cubemap");
+        node.scale = [50,50,50];
         scene.addChild(node);
 
         // litegraph
