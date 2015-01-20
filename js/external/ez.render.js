@@ -593,37 +593,41 @@ EZ.Renderer.prototype = {
 			');
         gl.shaders["cubemap"] = cubemap_shader;
 
-        var env_cubemap_shader = new Shader('\
+        var env_reflection_shader = new Shader('\
 				precision highp float;\
 				attribute vec3 a_vertex;\
 				attribute vec3 a_normal;\
 				varying vec3 v_pos;\
 				varying vec3 v_normal;\
+				varying vec3 v_refl;\
+				uniform vec3 u_eye;\
 				uniform mat4 u_mvp;\
 				uniform mat4 u_model;\
 				void main() {\
 					v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\
 					v_normal = (u_model * vec4(a_normal,0.0)).xyz;\
 					gl_Position = u_mvp * vec4(a_vertex,1.0);\
+				    vec3 I = v_pos - u_eye;\
+				    v_refl = reflect(I,v_normal);\
 				}\
 				', '\
 				precision highp float;\
 				varying vec3 v_normal;\
 				varying vec3 v_pos;\
+				varying vec3 v_refl;\
 				uniform vec4 u_color;\
-				uniform vec3 u_eye;\
 				uniform vec3 u_lightvector;\
 				uniform samplerCube u_cubemap_texture;\
 				void main() {\
 				  vec3 N = normalize(v_normal);\
-				  vec3 I = v_pos - u_eye;\
-				  vec3 R = reflect(I,N);\
-				  vec4 color = u_color * textureCube( u_cubemap_texture, R);\
+				  vec4 color = u_color * textureCube( u_cubemap_texture, v_refl);\
 				  gl_FragColor = color *(0.2  +  max(0.2, dot(u_lightvector, N)));\
 				}\
 			');
-        gl.shaders["env_cubemap"] = env_cubemap_shader;
-        gl.shaders["env_cubemap"].uniforms( phong_uniforms );
+        gl.shaders["env_reflection"] = env_reflection_shader;
+        gl.shaders["env_reflection"].uniforms( phong_uniforms );
+
+       
     },
     append: function (node) {
         node.appendChild(this.context.canvas);
