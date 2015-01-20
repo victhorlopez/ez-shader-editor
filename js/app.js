@@ -24,15 +24,28 @@ vik.app = (function() {
         renderer = new EZ.Renderer();
         renderer.createCanvas(container.width(), container.height());
         renderer.append(container[0]);
+
         var camera = new EZ.ECamera(45, gl.canvas.width / gl.canvas.height, 1, 1000);
         camera.position = [0, 0.5, 1.8];
         camera.target = [0, 0.5, 0];
         var scene = new EZ.EScene();
         var node = new EZ.EMesh();
         node.mesh = "sphere";
-        node.shader = "phong";
+        node.setTexture("cubemap","cubemap");
+        node.shader = "env_cubemap";
         node.position = [0, 0.5, 0];
         scene.addChild(node);
+
+        var box = new EZ.EMesh();
+        box.mesh = "box";
+        box.followEntity(camera);
+        box.setSkyBox();
+        box.shader = "cubemap";
+        box.setTexture("cubemap","cubemap");
+        box.scale = [50,50,50];
+        scene.addChild(box);
+
+        scene.addChild(camera);
 
         node = new EZ.EMesh();
         node.mesh = "grid";
@@ -40,13 +53,6 @@ vik.app = (function() {
         node.scale = [50,50,50];
         //scene.addChild(node);
 
-        node = new EZ.EMesh();
-        node.mesh = "box";
-        node.flags.flip_normals = true;
-        node.shader = "cubemap";
-        node.setTexture("cubemap","cubemap");
-        node.scale = [50,50,50];
-        scene.addChild(node);
 
         // litegraph
         container = $("#layout_main_layout_panel_main div.w2ui-panel-content");
@@ -60,15 +66,11 @@ vik.app = (function() {
         gcanvas.drawBackCanvas();
 
 
-
-        scene.addChild(camera);
         function render () {
             requestAnimationFrame(render);
             renderer.render(scene, camera);
         }
         render();
-
-
 
     }
 

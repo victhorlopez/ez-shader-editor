@@ -26,6 +26,13 @@ EZ.temp_vec4 = vec4.create();
 EZ.temp_quat = quat.create();
 EZ.temp_mat3 = mat3.create();
 
+/* priority render values ****/
+
+EZ.PRIORITY_BACKGROUND = 30;
+EZ.PRIORITY_OPAQUE = 20;
+EZ.PRIORITY_ALPHA = 10;
+EZ.PRIORITY_HUD = 0;
+
 /**
  * Created by vik on 17/01/2015.
  */
@@ -59,6 +66,9 @@ EZ.Entity = function() {
     // tree
     this.parent = null;
     this.children = [];
+
+    //
+    this.follow = null;
 };
 
 EZ.Entity.prototype = {
@@ -67,7 +77,7 @@ EZ.Entity.prototype = {
 
     updateLocalMatrix: function() {
         mat4.identity(this.local_transform);
-        mat4.translate(this.local_transform,this.local_transform, this.position);
+        mat4.translate(this.local_transform,this.local_transform, this.follow ? this.follow.position : this.position);
         mat4.fromQuat(EZ.temp_mat4, this.quat);
         mat4.mul(this.local_transform, this.local_transform, EZ.temp_mat4);
         mat4.scale(this.local_transform,this.local_transform, this.scale);
@@ -79,7 +89,7 @@ EZ.Entity.prototype = {
     // fast to skip parent update
     updateGlobalMatrix: function(fast) {
 
-        if(this.local_needs_update)
+        if(this.local_needs_update || (this.follow && this.follow.local_needs_update))
             this.updateLocalMatrix();
 
         if(this.parent){
@@ -105,7 +115,6 @@ EZ.Entity.prototype = {
 
         child.propagate("updateGlobalMatrix", [true]);
     },
-
     removeChild: function(child){
         if(child.parent !== this )
             throw ("the child "+ child.name+ " has a different parent");
@@ -120,7 +129,10 @@ EZ.Entity.prototype = {
         this.propagate("updateGlobalMatrix", [true]);
 
     },
-
+    // follows an entity with 0 offset
+    followEntity: function(entity){
+        this.follow = entity;
+    },
     // method from rendeer
     propagate: function(method, params)
     {
@@ -159,6 +171,8 @@ EZ.EMesh = function (fov, aspect, near, far) {
 
     this.color = vec4.fromValues(1, 1, 1, 1);
 
+    this.render_priority = EZ.PRIORITY_OPAQUE;
+
     this.shader = "";
     this.mesh = "";
     this.mesh_obj = null;
@@ -179,6 +193,14 @@ EZ.EMesh.prototype.setTexture = function (channel, texture) {
     else if (typeof(texture) == "string")
         this.textures[ channel ] = texture;
 };
+
+EZ.EMesh.prototype.setSkyBox = function (){
+    this.flags.depth_write = false;
+    this.flags.depth_test = false;
+    this.render_priority = EZ.PRIORITY_BACKGROUND;
+    this.flags.flip_normals = true;
+};
+
 // from rendeer
 EZ.EMesh.prototype.render = function (renderer) {
     //get mesh
@@ -360,7 +382,7 @@ EZ.CameraController = function ( renderer ) {
             this.scale = 1.0;
             this.cam.lookAt(this.cam.target);
             this.needs_update = false;
-            this.needs_rot_update = false
+            this.needs_rot_update = false;
         }
     };
 
@@ -441,6 +463,7 @@ EZ.Renderer.prototype = {
 
     setUniforms: function (cam, entity) {
         this.uniforms = {
+            u_eye: cam.position,
             u_view: cam.view,
             u_viewprojection: cam.view_projection,
             u_model: entity.global_transform,
@@ -485,6 +508,9 @@ EZ.Renderer.prototype = {
         //get matrices in the camera
         camera.updateProjectionMatrix();
 
+        // after the scene it's update sort entities by priority
+        entities.sort(function(a,b) { return a.render_priority - b.render_priority; } );
+
         //rendering
         for(var i = entities.length - 1; i >= 0; i--) {
             en = entities[i];
@@ -515,8 +541,7 @@ EZ.Renderer.prototype = {
 				}\
 			');
         gl.shaders["flat"] = flat_shader;
-        var phong_uniforms = { u_lightvector: vec3.fromValues(0.577, 0.577, 0.577), u_lightcolor: EZ.WHITE };
-
+        var phong_uniforms = { u_lightvector: vec3.fromValues( 1.0, 0.0, 0.0), u_lightcolor: EZ.WHITE };
         var phong_shader = new GL.Shader('\
 			precision highp float;\
 			attribute vec3 a_vertex;\
@@ -567,6 +592,38 @@ EZ.Renderer.prototype = {
 				}\
 			');
         gl.shaders["cubemap"] = cubemap_shader;
+
+        var env_cubemap_shader = new Shader('\
+				precision highp float;\
+				attribute vec3 a_vertex;\
+				attribute vec3 a_normal;\
+				varying vec3 v_pos;\
+				varying vec3 v_normal;\
+				uniform mat4 u_mvp;\
+				uniform mat4 u_model;\
+				void main() {\
+					v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\
+					v_normal = (u_model * vec4(a_normal,0.0)).xyz;\
+					gl_Position = u_mvp * vec4(a_vertex,1.0);\
+				}\
+				', '\
+				precision highp float;\
+				varying vec3 v_normal;\
+				varying vec3 v_pos;\
+				uniform vec4 u_color;\
+				uniform vec3 u_eye;\
+				uniform vec3 u_lightvector;\
+				uniform samplerCube u_cubemap_texture;\
+				void main() {\
+				  vec3 N = normalize(v_normal);\
+				  vec3 I = v_pos - u_eye;\
+				  vec3 R = reflect(I,N);\
+				  vec4 color = u_color * textureCube( u_cubemap_texture, R);\
+				  gl_FragColor = color *(0.2  +  max(0.2, dot(u_lightvector, N)));\
+				}\
+			');
+        gl.shaders["env_cubemap"] = env_cubemap_shader;
+        gl.shaders["env_cubemap"].uniforms( phong_uniforms );
     },
     append: function (node) {
         node.appendChild(this.context.canvas);
