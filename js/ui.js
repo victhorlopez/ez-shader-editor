@@ -30,7 +30,7 @@ vik.ui = (function () {
             name: 'main_layout',
             parent_layout: null,
             panels: [
-                { type: 'top', size: 30 }, // so far top not used
+                { type: 'top', size: 30, content:"<button onclick='vik.app.compile()'>Compile</button>" }, // so far top not used
                 { type: 'main' },
                 { type: 'left', size: '25%', resizable: true },
                 { type: 'right', size: '270', resizable: true}
