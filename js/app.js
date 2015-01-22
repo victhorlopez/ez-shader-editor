@@ -12,6 +12,7 @@ vik.app = (function() {
     var gcanvas = null;
     var graph = null;
     var renderer = null;
+    var main_node = null;
     module.init = function() {
         window.addEventListener("load", vik.ui.init());
         loadContent();
@@ -30,12 +31,12 @@ vik.app = (function() {
         camera.position = [0, 0.5, 1.8];
         camera.target = [0, 0.5, 0];
         var scene = new EZ.EScene();
-        var node = new EZ.EMesh();
-        node.mesh = "sphere";
-        node.setTexture("cubemap","cubemap");
-        node.shader = "env_reflection";
-        node.position = [0, 0.5, 0];
-        scene.addChild(node);
+        main_node = new EZ.EMesh();
+        main_node.mesh = "sphere";
+        main_node.setTexture("cubemap","cubemap");
+        main_node.shader = "env_reflection";
+        main_node.position = [0, 0.5, 0];
+        scene.addChild(main_node);
 
         var box = new EZ.EMesh();
         box.mesh = "box";
@@ -48,7 +49,7 @@ vik.app = (function() {
 
         scene.addChild(camera);
 
-        node = new EZ.EMesh();
+        var node = new EZ.EMesh();
         node.mesh = "grid";
         node.flags.primitive = gl.LINES;
         node.scale = [50,50,50];
@@ -96,8 +97,12 @@ vik.app = (function() {
 
         graph.runStep(1);
         gcanvas.draw(true,true);
-
-
+        gl.shaders["current"] = graph.shader_output;
+        for(var i in graph.shader_textures){
+            var texture_name = graph.shader_textures[i];
+            main_node.setTexture(texture_name, texture_name);
+        }
+        main_node.shader = "current";
     }
 
     module.resize = function () {

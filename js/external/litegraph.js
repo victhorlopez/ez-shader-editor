@@ -4755,7 +4755,7 @@ var ShaderConstructor = {};
 
 
 
-ShaderConstructor.getCode = function (code, uniforms) {
+ShaderConstructor.createShader = function (code, uniforms) {
 
     var vertex_code = this.getVertexCode(code,  uniforms);
     var fragment_code = this.getFragmentCode(code,  uniforms);
@@ -4763,6 +4763,7 @@ ShaderConstructor.getCode = function (code, uniforms) {
     console.log(vertex_code);
     console.log("fragment:");
     console.log(fragment_code);
+    return new GL.Shader(vertex_code,fragment_code);
 }
 
 ShaderConstructor.getVertexCode = function (code, uniforms) {

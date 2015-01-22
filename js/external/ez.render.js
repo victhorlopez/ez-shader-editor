@@ -436,15 +436,21 @@ EZ.Renderer.prototype = {
     },
 
     loadAssets: function () {
-        var options = {lat: 64, size: 0.5};
-        options["long"] = 64;
+        var options = {lat: 128, size: 0.5};
+        options["long"] = 128;
         this.addMesh("sphere", GL.Mesh.sphere(options));
         this.addMesh("cylinder", GL.Mesh.cylinder({height: 2, radius: 0.1}));
         this.addMesh("circle", GL.Mesh.circle({xz: true}));
         this.addMesh("grid", GL.Mesh.grid({size: 1, lines: 50}));
         this.addMesh("box", GL.Mesh.box({size: 1}));
         this.addMesh("plane", GL.Mesh.box({size:50}));
-        gl.textures["cubemap"] = GL.Texture.cubemapFromURL( "assets/cube2.jpg", {minFilter: gl.NEAREST});
+        this.addMesh("plane", GL.Mesh.box({size:50}));
+        this.addMesh("monkey", GL.Mesh.fromURL("assets/meshes/suzanne.obj"));
+        // useful when you don't find a texture
+        gl.textures = {};
+        gl.textures["notfound"] = new GL.Texture(1,1,{ filter: gl.NEAREST, pixel_data: new Uint8Array([0,0,0,255]) });
+        gl.textures["white"] = new GL.Texture(1,1,{ filter: gl.NEAREST, pixel_data: new Uint8Array([255,255,255,255]) });
+        gl.textures["cubemap"] = GL.Texture.cubemapFromURL( "assets/textures/cube2.jpg", {minFilter: gl.NEAREST});
         this.createShaders();
     },
 
@@ -627,7 +633,43 @@ EZ.Renderer.prototype = {
         gl.shaders["env_reflection"] = env_reflection_shader;
         gl.shaders["env_reflection"].uniforms( phong_uniforms );
 
-       
+        var env_refraction_shader = new Shader('\
+				precision highp float;\
+				attribute vec3 a_vertex;\
+				attribute vec3 a_normal;\
+				varying vec3 v_pos;\
+				varying vec3 v_normal;\
+				uniform mat4 u_mvp;\
+				uniform mat4 u_model;\
+				void main() {\
+					v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\
+					v_normal = (u_model * vec4(a_normal,0.0)).xyz;\
+					gl_Position = u_mvp * vec4(a_vertex,1.0);\
+				}\
+				', '\
+				precision highp float;\
+				varying vec3 v_normal;\
+				varying vec3 v_pos;\
+				varying vec3 v_refr;\
+				uniform vec3 u_eye;\
+				uniform vec4 u_color;\
+				uniform vec3 u_lightvector;\
+				uniform samplerCube u_cubemap_texture;\
+				void main() {\
+                  vec3 N = normalize(v_normal);\
+				  vec3 I = normalize(v_pos - u_eye);\
+				  vec3 refr = refract(I,N, (0.666));\
+				  vec4 RR_color = u_color * textureCube( u_cubemap_texture, refr);\
+				  gl_FragColor = RR_color;\
+				}\
+			');
+
+//        vec4 RR_color = u_color * textureCube( u_cubemap_texture, RR);\
+//				  vec4 RL_color = u_color * textureCube( u_cubemap_texture, RF);\
+//				  float reflectionFactor = 0.5 + 15.0 * pow(1.0 + dot(I, N), 2.0);\
+//				  vec4 color = mix(RR_color, RL_color, reflectionFactor);\
+        gl.shaders["env_refraction"] = env_refraction_shader;
+        gl.shaders["env_refraction"].uniforms( phong_uniforms );
     },
     append: function (node) {
         node.appendChild(this.context.canvas);
