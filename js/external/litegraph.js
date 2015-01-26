@@ -1118,7 +1118,7 @@ LGraphCanvas.prototype.setCanvas = function(canvas)
     });
 
     //droping files
-    canvas.ondragover = function () { console.log('hover'); return false; };
+    canvas.ondragover = function () { /*console.log('hover');*/ return false; };
     canvas.ondragend = function () { console.log('out'); return false; };
     canvas.ondrop = function (e) {
         e.preventDefault();
@@ -3241,7 +3241,7 @@ LGraphNode.prototype._ctor = function( title )
 
 
     this.shader_piece = null;
-    this.code = {};
+    this.codes = {}; // 0 it's vertes 1 it's fragment
 }
 
 /**
@@ -4121,6 +4121,14 @@ LGraphNode.prototype.getInputNodes = function()
     return r;
 }
 
+LGraphNode.prototype.getInputCode = function(link_id)
+{
+    var nodes = this.getInputNodes();
+    return nodes[link_id].codes;
+
+}
+
+
 
 
 // *************************************************************
@@ -4689,6 +4697,215 @@ if( !window["requestAnimationFrame"] )
         });
 }
 
+/**
+ * Created by vik on 26/01/2015.
+ */
+
+
+
+function CodePiece()
+{
+    this.header = {}; // map for custom uniforms or variants
+    this.body = "";
+    this.includes = {}; // map for standard uniforms
+    this.output_var = "";
+    this.scope = "";
+}
+
+
+CodePiece.prototype.getBody = function()
+{
+    return this.body;
+};
+
+CodePiece.prototype.setBody = function(s)
+{
+    this.body = s;
+};
+
+CodePiece.prototype.getHeader = function()
+{
+    return this.header;
+};
+
+CodePiece.prototype.setHeader = function(map)
+{
+    // we set the includes object
+    for(var k in map) this.header[k] = 1;
+};
+
+CodePiece.prototype.addHeaderLine = function(s)
+{
+    this.header[s] = 1;
+};
+
+// format needs to be {a:smth , b: smth};
+CodePiece.prototype.setIncludes = function(inc)
+{
+    // we set the includes object
+    for(var k in inc) this.includes[k] = 1;
+};
+
+CodePiece.prototype.setOutputVar = function(out)
+{
+    this.output_var = out;
+};
+
+CodePiece.prototype.getOutputVar = function()
+{
+    return this.output_var;
+};
+
+// fragment or vertex
+CodePiece.prototype.setScope = function(scope)
+{
+   this.scope = scope;
+};
+
+CodePiece.prototype.merge = function (input_code)
+{
+    this.setBody( input_code.getBody().concat(this.body) );
+
+    for (var inc in input_code.getHeader()) { this.header[inc] = input_code.includes[inc]; }
+    // we merge the includes
+    for (var inc in input_code.includes) { this.includes[inc] = input_code.includes[inc]; }
+};
+var ShaderConstructor = {};
+
+
+// codes it's [vertex, fragment]
+ShaderConstructor.createShader = function (codes) {
+
+    var vertex = codes[0];
+    var fragment = codes[1];
+
+    var vertex_code = this.createVertexCode(vertex);
+    var fragment_code = this.createFragmentCode(fragment);
+    console.log("vertex:");
+    console.log(vertex_code);
+    console.log("fragment:");
+    console.log(fragment_code);
+    return new GL.Shader(vertex_code,fragment_code);
+}
+
+ShaderConstructor.createVertexCode = function (code, uniforms) {
+
+    var includes = code.includes;
+    // header
+    var r = "\
+            precision highp float;\n\
+			attribute vec3 a_vertex;\n\
+			attribute vec3 a_normal;\n\
+			attribute vec2 a_coord;\n\
+			";
+    if (includes["v_coord"])
+        r += "varying vec2 v_coord;\n\
+            ";
+    if (includes["v_normal"])
+        r += "varying vec3 v_normal;\n\
+            ";
+    if (includes["v_pos"])
+        r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_eye"])
+        r += "uniform vec3 u_eye;\n\
+            ";
+    r += "uniform mat4 u_mvp;\n\
+		    uniform mat4 u_model;\n";
+
+    for(var k in code.getHeader())
+        r += k;
+
+    // body
+    r += "void main() {\n\
+            ";
+    if (includes["v_pos"])
+        r += "v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n\
+            ";
+    r += code.getBody();
+    r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
+            }\n\
+			";
+    return r;
+
+
+}
+
+ShaderConstructor.createFragmentCode = function (code) {
+    var includes = code.includes;
+    // header
+    var r = "\
+            precision highp float;\n\
+			";
+    if (includes["v_coord"])
+        r += "varying vec2 v_coord;\n\
+            ";
+    if (includes["v_normal"])
+        r += "varying vec3 v_normal;\n\
+            ";
+    if (includes["v_pos"])
+        r += "varying vec3 v_pos;\n\
+            ";
+    if (includes["u_eye"])
+        r += "uniform vec3 u_eye;\n\
+            ";
+    for(var k in code.getHeader())
+        r += k;
+    // body
+    r += "void main() {\n\
+            ";
+    r += code.getBody();
+    r += "gl_FragColor = "+code.getOutputVar()+";\n";
+
+    r += "\n}\n\
+			";
+
+    return r;
+
+
+}
+
+
+
+
+
+
+
+var PCameraToPixelWS = {};
+
+PCameraToPixelWS.id = "cameratopixelws";
+PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
+PCameraToPixelWS.already_included = false; // TODO add multiple times same line
+
+PCameraToPixelWS.getVertexCode = function (output, input) {
+    return "";
+}
+
+PCameraToPixelWS.getFragmentCode = function (output, input) {
+    return "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye); \n\
+            ";
+}
+
+
+PCameraToPixelWS.getCode = function (output, input) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, input));
+    vertex.setIncludes(PCameraToPixelWS.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input));
+    fragment.setIncludes(PCameraToPixelWS.includes);
+    fragment.setOutputVar("camera_to_pixel_ws");
+
+    PCameraToPixelWS.already_included = true;
+
+    return [vertex, fragment];
+}
+
+
+
+
+
 var PPixelNormalWS = {};
 
 PPixelNormalWS.id = "pixel_normal_ws";
@@ -4696,14 +4913,12 @@ PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
 PPixelNormalWS.already_included = false;
 
 PPixelNormalWS.getVertexCode = function (output, input) {
-    if(!PPixelNormalWS.already_included )
-        var code = "v_normal = u_model * vec4(a_normal, 0.0);\
+        var code = "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n\
                 ";
     return code;
 }
 
 PPixelNormalWS.getFragmentCode = function (output, input) {
-    if(!PPixelNormalWS.already_included )
         var code = "vec3 pixel_normal_ws = v_normal;\n\
             ";
 
@@ -4712,17 +4927,22 @@ PPixelNormalWS.getFragmentCode = function (output, input) {
 
 
 PPixelNormalWS.getCode = function (output, input) {
-    var c = {};
-    c.fragment ={};
-    c.vertex ={};
-    c.vertex.uniforms = "";
-    c.fragment.uniforms = "";
-    c.vertex.body = this.getVertexCode(output, input);
-    c.fragment.body = this.getFragmentCode(output, input);
-    PPixelNormalWS.already_included =  true;
-    c.includes = {u_model: 1, a_normal: 1, v_normal: 1};
-    return c;
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, input));
+    vertex.setIncludes(PPixelNormalWS.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input));
+    fragment.setIncludes(PPixelNormalWS.includes);
+    fragment.setOutputVar("pixel_normal_ws");
+
+    PPixelNormalWS.already_included = true;
+
+    return [vertex, fragment];
 }
+
+
+
 
 
 var PReflect = {};
@@ -4741,90 +4961,69 @@ PReflect.getVertexCode = function(output,incident, normal) {
 
 
 PReflect.getFragmentCode = function(output,incident, normal) {
-    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
-        reflect.includes[incident]= 1;
 
-    var code = "vec3 "+output+"= reflect("+incident+","+normal+");";
+    var code = "vec3 "+output+"= reflect("+incident+","+normal+");\n\
+            ";
+    return code;
+}
+
+PReflect.getCode = function (output, incident, normal) {
+
+
+    var vertex = new CodePiece();
+    vertex.setIncludes(PReflect.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, incident, normal));
+    fragment.setIncludes(PReflect.includes);
+    fragment.setOutputVar(output);
+
+    return [vertex, fragment];
+}
+
+
+
+
+
+
+
+
+
+var PTextureSampleCube = {};
+
+PTextureSampleCube.id = "texture_sample_cube";
+PTextureSampleCube.includes = {};
+
+PTextureSampleCube.getVertexCode = function (output, input, texture_id) {
+    return "";
+}
+
+PTextureSampleCube.getFragmentCode = function (output, input, texture_id) {
+    if(!input)
+        throw("input for sample cube not defined")
+    var code = "vec4 " + output + " = textureCube(" + texture_id + ", " + input + ");\n\
+                ";
     return code;
 }
 
 
-var ShaderConstructor = {};
+PTextureSampleCube.getCode = function (output, input, texture_id) {
 
+    var vertex = new CodePiece();
+    vertex.setIncludes(PTextureSampleCube.includes);
 
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input, texture_id));
+    fragment.addHeaderLine("uniform samplerCube "+texture_id+";\n      ");
+    fragment.setIncludes(PTextureSampleCube.includes);
+    fragment.setOutputVar(output);
 
-
-ShaderConstructor.createShader = function (code, uniforms) {
-
-    var vertex_code = this.getVertexCode(code,  uniforms);
-    var fragment_code = this.getFragmentCode(code,  uniforms);
-    console.log("vertex:");
-    console.log(vertex_code);
-    console.log("fragment:");
-    console.log(fragment_code);
-    return new GL.Shader(vertex_code,fragment_code);
+    return [vertex, fragment];
 }
 
-ShaderConstructor.getVertexCode = function (code, uniforms) {
-    var vertex_code = code.vertex.body;
-    var includes = code.includes;
-    // header
-    var r = "\
-            precision highp float;\n\
-			attribute vec3 a_vertex;\n\
-			attribute vec3 a_normal;\n\
-			attribute vec2 a_coord;\n\
-			";
-    if (includes["v_coord"])
-        r += "varying vec2 v_coord;\n\
-            ";
-    if (includes["v_normal"])
-        r += "varying vec3 v_normal;\n\
-            ";
-    r += "uniform mat4 u_mvp;\n\
-		    uniform mat4 u_model;\n";
-    r += code.vertex.uniforms  || "\
-            ";
-    // body
-    r += "void main() {\n\
-            ";
-    r += vertex_code;
-    r += "gl_Position = u_mvp * vec4(a_vertex,1.0);\n\
-            }\n\
-			";
-    return r;
 
 
-}
 
-ShaderConstructor.getFragmentCode = function (code,  uniforms) {
-    var fragment_code = code.fragment.body;
-    var includes = code.includes;
-    // header
-    var r = "\
-            precision highp float;\n\
-			";
-    if (includes["v_coord"])
-        r += "varying vec2 v_coord;\n\
-            ";
-    if (includes["v_normal"])
-        r += "varying vec3 v_normal;\n\
-            ";
-    r += code.fragment.uniforms || "\
-            ";
-    // body
-    r += "void main() {\n\
-            ";
-    r += fragment_code;
-    r += "gl_FragColor = "+code.output_var+";\n";
-
-    r += "\n}\n\
-			";
-
-    return r;
-
-
-}
 
 
 
@@ -4846,17 +5045,23 @@ PTextureSample.getFragmentCode = function (output, input, texture_id) {
 
 
 PTextureSample.getCode = function (output, input, texture_id) {
-    var c = {};
-    c.fragment ={};
-    c.vertex ={};
-    c.vertex.uniforms = "";
-    c.fragment.uniforms = "uniform sampler2D "+texture_id+";\n      ";
-    c.vertex.body = this.getVertexCode(output, input, texture_id);
-    c.fragment.body = this.getFragmentCode(output, input, texture_id);
-    c.includes = PTextureSample.includes ;
-    c.output_var = output;
-    return c;
+
+
+    var vertex = new CodePiece();
+    vertex.setIncludes(PTextureSample.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(output, input, texture_id));
+    fragment.addHeaderLine("uniform sampler2D "+texture_id+";\n      ");
+    fragment.setIncludes(PTextureSample.includes);
+    fragment.setOutputVar(output);
+
+    return [vertex, fragment];
 }
+
+
+
+
 
 
 
@@ -4865,7 +5070,7 @@ var PUVs = {};
 
 PUVs.id = "uvs";
 PUVs.includes = {a_coord:1, v_coord: 1};
-PUVs.already_included = false;
+PUVs.already_included = false; // TODO add multiple times same line
 
 PUVs.getVertexCode = function (output, input) {
     return "v_coord = a_coord;\n\
@@ -4878,18 +5083,15 @@ PUVs.getFragmentCode = function (output, input) {
 
 
 PUVs.getCode = function (output, input) {
-    var c = {};
-    c.fragment ={};
-    c.vertex ={};
-    c.vertex.uniforms = "";
-    c.fragment.uniforms = "";
-    c.vertex.body = this.getVertexCode(output, input);
-    c.fragment.body = this.getFragmentCode(output, input);
-    c.includes = {a_coord: 1, v_coord: 1};
-    c.output_var = "v_coord";
-    return c;
+    var fragment = new CodePiece();
+    fragment.setIncludes(PUVs.includes);
+    fragment.setOutputVar("v_coord");
+
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(output, input));
+    vertex.setIncludes(PUVs.includes);
+
+    PUVs.already_included = true;
+
+    return [vertex, fragment];
 }
-
-
-
-LiteGraph.ShaderLib = {};
