@@ -435,6 +435,11 @@ EZ.Renderer.prototype = {
         this.context.meshes[name] = mesh;
     },
 
+    addTextureFromURL: function (name, url) {
+        gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST});
+    },
+
+
     loadAssets: function () {
         var options = {lat: 128, size: 0.5};
         options["long"] = 128;

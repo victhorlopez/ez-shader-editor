@@ -26,7 +26,7 @@ vik.app = (function() {
         renderer = new EZ.Renderer();
         renderer.createCanvas(container.width(), container.height());
         renderer.append(container[0]);
-
+        renderer.addTextureFromURL("ball", "assets/textures/NewTennisBallColor.jpg");
         var camera = new EZ.ECamera(45, gl.canvas.width / gl.canvas.height, 1, 1000);
         camera.position = [0, 0.5, 1.8];
         camera.target = [0, 0.5, 0];
