@@ -77,9 +77,9 @@ vik.app = (function() {
         }
 
 
-        var node_vec = LiteGraph.createNode("texture/TextureCoords");
-        node_vec.pos = [200,200];
-        graph.add(node_vec);
+        var node_uvs = LiteGraph.createNode("texture/TextureCoords");
+        node_uvs.pos = [200,200];
+        graph.add(node_uvs);
 
         var node_tex = LiteGraph.createNode("texture/textureSample");
         node_tex.pos = [400,200];
@@ -93,14 +93,12 @@ vik.app = (function() {
         node_shader.pos = [1000,600];
         graph.add(node_shader);
 
-        node_vec.connect(0,node_tex,0 );
-        node_tex.connect(1,node_shader,0 );
-        node_tex.connect(0,node_prev,0 );
 
 
-        var node_vec = LiteGraph.createNode("texture/PixelNormalWS");
-        node_vec.pos = [100,500];
-        graph.add(node_vec);
+
+        var node_pixel = LiteGraph.createNode("texture/PixelNormalWS");
+        node_pixel.pos = [100,500];
+        graph.add(node_pixel);
 
         var node_cam = LiteGraph.createNode("texture/CameraToPixelWS");
         node_cam.pos = [100,600];
@@ -110,20 +108,35 @@ vik.app = (function() {
         node_refl.pos = [300,550];
         graph.add(node_refl);
 
-        var node_tex = LiteGraph.createNode("texture/TextureSampleCube");
-        node_tex.pos = [500,500];
-        graph.add(node_tex);
+        var node_cube = LiteGraph.createNode("texture/TextureSampleCube");
+        node_cube.pos = [500,500];
+        graph.add(node_cube);
 
-        node_vec.connect(0,node_refl,0 );
+
+
+        var node_lerp = LiteGraph.createNode("texture/Lerp");
+        node_lerp.pos = [800,500];
+        graph.add(node_lerp);
+
+
+        node_uvs.connect(0,node_tex,0 );
+        node_tex.connect(0,node_prev,0 );
+
+        node_pixel.connect(0,node_refl,0 );
         node_cam.connect(0,node_refl,1 );
-        node_refl.connect(0,node_tex,0 );
+        node_refl.connect(0,node_cube,0 );
+
+
+        node_tex.connect(1,node_lerp,0 );
+        node_cube.connect(1,node_lerp,1 );
+        node_lerp.connect(0,node_shader,0 );
 
         function render () {
             requestAnimationFrame(render);
             renderer.render(scene, camera);
         }
         render();
-
+        module.compile();
     }
     module.compile = function(){
         graph.runStep(1);

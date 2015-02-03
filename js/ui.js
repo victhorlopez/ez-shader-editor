@@ -33,7 +33,11 @@ vik.ui = (function () {
         var obj = node.properties;
         for (var property in obj) {
             if (obj.hasOwnProperty(property)) {
-                details_gui.items.push(details_gui.add(obj, property));
+                var controller = details_gui.add(obj, property);
+                details_gui.items.push(controller);
+                controller.onChange(function(value) {
+                    vik.app.compile();
+                });
             }
         }
     }
@@ -44,7 +48,7 @@ vik.ui = (function () {
             name: 'main_layout',
             parent_layout: null,
             panels: [
-                { type: 'top', size: 30, content:"<button onclick='vik.app.compile()'>Compile</button>" }, // so far top not used
+                { type: 'top', size: 30 }, // so far top not used
                 { type: 'main' },
                 { type: 'left', size: '25%', resizable: true },
                 { type: 'right', size: '270', resizable: true}

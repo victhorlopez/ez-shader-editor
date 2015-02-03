@@ -3960,7 +3960,8 @@ LGraphNode.prototype.getInputNodes = function()
     for(var i = 0; i < this.inputs.length; i++){
         var link_id = this.inputs[i].link;
         var link = this.graph.links[link_id];
-        r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
+        if(link)
+            r.push( this.graph.getNodeById( link.origin_id ));// we knot it's 0 cause inputs only can have one link
     }
 
     return r;
@@ -3969,7 +3970,9 @@ LGraphNode.prototype.getInputNodes = function()
 LGraphNode.prototype.getInputCode = function(link_id)
 {
     var nodes = this.getInputNodes();
-    return nodes[link_id].codes;
+    if(nodes[link_id])
+        return nodes[link_id].codes;
+    return null;
 
 }
 
@@ -4823,7 +4826,7 @@ function PConstant (type, name) {
     this.includes = {u_model: 1, a_normal: 1, v_normal: 1};
 }
 
-PConstant.prototype.getVertexCode = function (output_var, scope) {
+PConstant.prototype.getVertexCode = function (output_var, value, scope) {
     if(scope == PConstant.VERTEX || scope == PConstant.BOTH){
         var code = this.type+" " +output_var+" = "+value+";\n\
                 ";
@@ -4866,23 +4869,23 @@ PMixer.id = "mixer";
 PMixer.includes = {v_pos:1, u_eye: 1};
 PMixer.already_included = false; // TODO add multiple times same line
 
-PMixer.getVertexCode = function (output, tex1, tex2, decal) {
+PMixer.getVertexCode = function (output, tex1, tex2, alpha) {
     return "";
 }
 
-PMixer.getFragmentCode = function (output, tex1, tex2, decal) {
-    return "vec4 "+output+" = mix("+tex1+","+tex2+","+decal+"); \n\
+PMixer.getFragmentCode = function (output, tex1, tex2, alpha) {
+    return "vec4 "+output+" = mix("+tex1+","+tex2+","+alpha+"); \n\
             ";
 }
 
 
-PMixer.getCode = function (output, tex1, tex2, decal) {
+PMixer.getCode = function (output, tex1, tex2, alpha) {
     var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, tex1, tex2, decal));
+    vertex.setBody(this.getVertexCode(output, tex1, tex2, alpha));
     vertex.setIncludes(PMixer.includes);
 
     var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, tex1, tex2, decal));
+    fragment.setBody(this.getFragmentCode(output, tex1, tex2, alpha));
     fragment.setIncludes(PMixer.includes);
     fragment.setOutputVar(output);
 
