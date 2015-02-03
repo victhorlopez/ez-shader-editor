@@ -25,9 +25,10 @@ vik.app = (function() {
         var container = $("#layout_layout2_panel_main div.w2ui-panel-content");
         renderer = new EZ.Renderer();
         renderer.createCanvas(container.width(), container.height());
+        renderer.context.makeCurrent();
         renderer.append(container[0]);
-        renderer.addTextureFromURL("ball", "assets/textures/NewTennisBallColor.jpg");
-        var camera = new EZ.ECamera(45, gl.canvas.width / gl.canvas.height, 1, 1000);
+        renderer.addTextureFromURL("default", "assets/textures/NewTennisBallColor.jpg");
+        var camera = new EZ.ECamera(45, renderer.context.width / renderer.context.height, 1, 1000);
         camera.position = [0, 0.5, 1.8];
         camera.target = [0, 0.5, 0];
         var scene = new EZ.EScene();
@@ -57,18 +58,26 @@ vik.app = (function() {
 
 
         // litegraph
+
         container = $("#layout_main_layout_panel_main div.w2ui-panel-content");
         var h = container.height();
         var w = container.width();
         var html = "<canvas class='graph' width='" + w + "' height='" + h + "'></canvas>";
         container.append(html);
+//        var gl_2d = GL.create({width:w,height:h, alpha:false});
+//        gl_2d.makeCurrent();
+//        container.append(gl.canvas);
+//        gl_2d.canvas.id = "maincanvas";
         graph = new LGraph();
         gcanvas = new LGraphCanvas(container.children()[0], graph);
         gcanvas.background_image = "img/grid.png";
-        //gcanvas.drawBackCanvas();
+        gcanvas.onNodeSelected = function(node)
+        {
+            vik.ui.updateLeftPanel( node );
+        }
 
 
-        var node_vec = LiteGraph.createNode("texture/UVs");
+        var node_vec = LiteGraph.createNode("texture/TextureCoords");
         node_vec.pos = [200,200];
         graph.add(node_vec);
 
@@ -117,7 +126,6 @@ vik.app = (function() {
 
     }
     module.compile = function(){
-
         graph.runStep(1);
         gcanvas.draw(true,true);
         gl.shaders["current"] = graph.shader_output;
@@ -134,11 +142,11 @@ vik.app = (function() {
         var h = parent.height();
         gcanvas.resize(w, h);
 
-        parent = gl.canvas.parentNode;
+        parent = renderer.context.canvas.parentNode;
         w = $(parent).width();
         h = $(parent).height();
 
-        if ((w > 0 || h > 0) && (w != gl.canvas.width || h != gl.canvas.height)){
+        if ((w > 0 || h > 0) && (w != renderer.context.canvas.width || h != renderer.context.canvas.height)){
             renderer.resize(w,h);
         }
 
@@ -165,6 +173,7 @@ vik.app = (function() {
 
 
     }
+
 
     return module;
 })();

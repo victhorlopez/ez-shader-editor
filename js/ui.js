@@ -24,6 +24,20 @@ vik.ui = (function () {
     }
 
 
+    module.updateLeftPanel = function( node ){
+
+        for(var i in details_gui.items){
+            details_gui.remove(details_gui.items[i]);
+        }
+        details_gui.items = [];
+        var obj = node.properties;
+        for (var property in obj) {
+            if (obj.hasOwnProperty(property)) {
+                details_gui.items.push(details_gui.add(obj, property));
+            }
+        }
+    }
+
 
     function loadLayout() {
         $('#layout').w2layout({
@@ -121,32 +135,32 @@ vik.ui = (function () {
         var text = new FizzyText();
         details_gui = new dat.GUI({
             resizable: true,
-            hideable: false
+            hideable: false,
         });
         details_gui.parent_node = $("#layout_layout2_panel_preview div.w2ui-panel-content");
         details_gui.width = details_gui.parent_node.width();
-        details_gui.add(text, 'message');
-        details_gui.add(text, 'speed', -5, 5);
-        details_gui.add(text, 'displayOutline');
-        details_gui.add(text, 'explode');
-        details_gui.addColor(text, 'color0');
-        details_gui.addColor(text, 'color1');
-        details_gui.addColor(text, 'color2');
-        details_gui.addColor(text, 'color3');
-        var f1 = details_gui.addFolder('Flow Field');
-        f1.add(text, 'speed');
-        f1.add(text, 'noiseStrength');
-
-        var f2 = details_gui.addFolder('Letters');
-        f2.add(text, 'growthSpeed');
-        f2.add(text, 'maxSize');
-        f2.add(text, 'message');
-
-        details_gui.add(text, 'noiseStrength').step(5); // Increment amount
-        details_gui.add(text, 'growthSpeed', -5, 5); // Min and max
-        details_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
-
-        f2.open();
+//        details_gui.add(text, 'message');
+//        details_gui.add(text, 'speed', -5, 5);
+//        details_gui.add(text, 'displayOutline');
+//        details_gui.add(text, 'explode');
+//        details_gui.addColor(text, 'color0');
+//        details_gui.addColor(text, 'color1');
+//        details_gui.addColor(text, 'color2');
+//        details_gui.addColor(text, 'color3');
+//        var f1 = details_gui.addFolder('Flow Field');
+//        f1.add(text, 'speed');
+//        f1.add(text, 'noiseStrength');
+//
+//        var f2 = details_gui.addFolder('Letters');
+//        f2.add(text, 'growthSpeed');
+//        f2.add(text, 'maxSize');
+//        f2.add(text, 'message');
+//
+//        details_gui.add(text, 'noiseStrength').step(5); // Increment amount
+//        details_gui.add(text, 'growthSpeed', -5, 5); // Min and max
+//        details_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
+//
+//        f2.open();
 
         details_gui.parent_node[0].appendChild(details_gui.domElement);
 
@@ -172,7 +186,6 @@ vik.ui = (function () {
         palette_gui.add(text, 'growthSpeed', -5, 5); // Min and max
         palette_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
 
-        f2.open();
 
         palette_gui.parent_node[0].appendChild(palette_gui.domElement);
 

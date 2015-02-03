@@ -80,6 +80,244 @@ LGraphCamToPixelWS.prototype.onExecute = function()
 LiteGraph.registerNodeType("texture/CameraToPixelWS", LGraphCamToPixelWS);
 
 
+
+//Constant
+function LGraphConstant()
+{
+    this.addOutput("value","number", {number:1});
+    this.properties = { value:1.0 };
+    this.editable = { property:"value", type:"number" };
+
+    this.shader_piece = new PConstant("float"); // hardcoded for testing
+}
+
+LGraphConstant.title = "Number";
+LGraphConstant.desc = "Constant value";
+
+
+LGraphConstant.prototype.setValue = function(v)
+{
+    if( typeof(v) == "string") v = parseFloat(v);
+    this.properties["value"] = v;
+    this.setDirtyCanvas(true);
+};
+
+LGraphConstant.prototype.onExecute = function()
+{
+    this.codes = this.shader_piece.getCode("float_"+this.id, this.properties["value"], PConstant.FRAGMENT); // need to check scope
+
+    this.setOutputData(0, parseFloat( this.properties["value"] ) );
+}
+
+LGraphConstant.prototype.onDrawBackground = function(ctx)
+{
+    //show the current value
+    this.outputs[0].label = this.properties["value"].toFixed(3);
+}
+
+LGraphConstant.prototype.onWidget = function(e,widget)
+{
+    if(widget.name == "value")
+        this.setValue(widget.value);
+}
+
+LiteGraph.registerNodeType("constants/Number", LGraphConstant);
+
+
+//Constant
+function LGraphConstVec2()
+{
+    this.addOutput("value","vec2", {vec2:1});
+    this.properties = { v1:1.0,
+                        v2:1.0 };
+    //this.editable = { property:"value", type:"vec2" };
+
+    this.shader_piece = new PConstant("vec2"); // hardcoded for testing
+}
+
+LGraphConstVec2.title = "ConstVec2";
+LGraphConstVec2.desc = "Constant vector2";
+
+
+LGraphConstVec2.prototype.setFloatValue = function(old_value,new_value) {
+    if( typeof(new_value) == "string") new_value = parseFloat(new_value);
+    old_value = new_value;
+}
+
+LGraphConstVec2.prototype.setValue = function(v1,v2)
+{
+    this.setFloatValue(this.properties["v1"],v1);
+    this.setFloatValue(this.properties["v2"],v2);
+    this.setDirtyCanvas(true);
+};
+
+LGraphConstVec2.prototype.onExecute = function()
+{
+    this.codes = this.shader_piece.getCode("vec2_"+this.id, this.valueToString(), PConstant.FRAGMENT); // need to check scope
+}
+
+LGraphConstVec2.prototype.onDrawBackground = function(ctx)
+{
+    //show the current value
+    this.outputs[0].label = this.valueToString();
+}
+
+LGraphConstVec2.prototype.valueToString = function()
+{
+    return "vec2("+this.properties["v1"]+","+this.properties["v2"]+")";
+}
+
+LiteGraph.registerNodeType("constants/ConstVec2", LGraphConstVec2);
+
+
+//Constant
+function LGraphConstVec3()
+{
+    this.addOutput("value","vec3", {vec3:1});
+    this.properties = { value:"1.0,1.0,1.0" };
+    this.editable = { property:"value", type:"vec3" };
+
+    this.shader_piece = new PConstant("vec3"); // hardcoded for testing
+}
+
+LGraphConstVec3.title = "ConstVec3";
+LGraphConstVec3.desc = "Constant vector3";
+
+
+LGraphConstVec3.prototype.setValue = function(v1,v2,v3)
+{
+    if( typeof(v) == "string") v = parseFloat(v);
+    this.properties["value"] = v;
+    this.setDirtyCanvas(true);
+};
+
+LGraphConstVec3.prototype.onExecute = function()
+{
+    this.codes = this.shader_piece.getCode("vec3_"+this.id, "vec3("+this.properties["value"]+")", PConstant.FRAGMENT); // need to check scope
+}
+
+LGraphConstVec3.prototype.onDrawBackground = function(ctx)
+{
+    //show the current value
+    this.outputs[0].label = this.properties["value"];
+}
+
+
+LiteGraph.registerNodeType("constants/ConstVec3", LGraphConstVec3);
+
+
+//Constant
+function LGraphConstVec4()
+{
+    this.addOutput("value","vec4", {vec4:1});
+    this.properties = { value:"1.0,1.0,1.0,1.0" };
+    this.editable = { property:"value", type:"vec4" };
+
+    this.shader_piece = new PConstant("vec4"); // hardcoded for testing
+}
+
+LGraphConstVec4.title = "ConstVec4";
+LGraphConstVec4.desc = "Constant vector4";
+
+
+LGraphConstVec4.prototype.setValue = function(v1,v2,v3,v4)
+{
+    if( typeof(v1) == "string") v1 = parseFloat(v1);
+    this.properties["value"] = v1;
+    this.setDirtyCanvas(true);
+};
+
+LGraphConstVec4.prototype.onExecute = function()
+{
+    this.codes = this.shader_piece.getCode("vec4_"+this.id, "vec4("+this.properties["value"]+")", PConstant.FRAGMENT); // need to check scope
+}
+
+LGraphConstVec4.prototype.onDrawBackground = function(ctx)
+{
+    //show the current value
+    this.outputs[0].label = this.properties["value"];
+}
+
+
+LiteGraph.registerNodeType("constants/ConstVec4", LGraphConstVec4);
+
+
+function LGraphMixer()
+{
+    this.addOutput("Result","vec4",{vec4:1, vec3:1});
+    this.addInput("A","vec3", {vec4:1, vec3:1, float:1});
+    this.addInput("B","vec3", {vec4:1, vec3:1, float:1});
+    this.addInput("alpha","float", {float:1});
+
+    this.shader_piece = PMixer; // hardcoded for testing
+}
+
+LGraphMixer.title = "Lerp";
+LGraphMixer.desc = "Lerp between A and B";
+
+LGraphMixer.prototype.onExecute = function()
+{
+    this.processInputCode();
+
+}
+
+LGraphMixer.prototype.processInputCode = function()
+{
+
+    var input_codes_l1 = this.getInputCode(0);
+    var input_codes_l2 = this.getInputCode(1);
+    var input_codes_l2 = this.getInputCode(1);
+
+    this.codes = this.shader_piece.getCode( "mixed_"+this.id, input_codes_l1[1].getOutputVar(), input_codes_l2[1].getOutputVar(), "0.5"); // output var must be fragment
+
+    this.codes[0].merge(input_codes_l1[0]);
+    this.codes[1].merge(input_codes_l1[1]);
+    this.codes[0].merge(input_codes_l2[0]);
+    this.codes[1].merge(input_codes_l2[1]);
+
+}
+
+
+LiteGraph.registerNodeType("texture/Lerp", LGraphMixer );
+
+
+function LGraphOperation()
+{
+    this.addOutput("Result","vec4",{vec4:1, vec3:1});
+    this.addInput("A","vec3", {vec4:1, vec3:1, float:1});
+    this.addInput("B","vec3", {vec4:1, vec3:1, float:1});
+
+    this.shader_piece = POperation; // hardcoded for testing
+}
+
+LGraphOperation.title = "operation";
+LGraphOperation.desc = "operation between A and B";
+
+LGraphOperation.prototype.onExecute = function()
+{
+
+    this.processInputCode();
+
+}
+
+LGraphOperation.prototype.processInputCode = function()
+{
+
+    var input_codes_l1 = this.getInputCode(0);
+    var input_codes_l2 = this.getInputCode(1);
+
+    this.codes = this.shader_piece.getCode( "result_"+this.id, "+",  input_codes_l1[1].getOutputVar(), input_codes_l2[1].getOutputVar()); // output var must be fragment
+
+    this.codes[0].merge(input_codes_l1[0]);
+    this.codes[1].merge(input_codes_l1[1]);
+    this.codes[0].merge(input_codes_l2[0]);
+    this.codes[1].merge(input_codes_l2[1]);
+
+}
+
+
+LiteGraph.registerNodeType("texture/Operation", LGraphOperation );
+
 //UVS
 function LGraphPixelNormalWS()
 {
@@ -104,7 +342,7 @@ LiteGraph.registerNodeType("texture/PixelNormalWS", LGraphPixelNormalWS);
 //**************************
 function LGraphTexturePreview()
 {
-    this.addInput("Texture","Texture");
+    this.addInput("Texture","Texture", {Texture:1, Vec3:1, Vec4:1});
     this.properties = { flipY: false };
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 }
@@ -180,8 +418,8 @@ LiteGraph.registerNodeType("texture/reflect", LGraphReflect);
 
 function LGraphTexture()
 {
-    this.addOutput("Texture","Texture");
-    this.addOutput("Color","vec4");
+    this.addOutput("Texture","Texture",{Texture:1});
+    this.addOutput("Color","vec4", {vec3:1, vec4:1});
     this.addOutput("R","R");
     this.addOutput("G","G");
     this.addOutput("B","B");
@@ -193,9 +431,9 @@ function LGraphTexture()
     this.shader_piece = PTextureSample; // hardcoded for testing
 
     // default texture
-    if(typeof(gl) != "undefined" && gl.textures["ball"]){
-        this.properties.name = "ball";
-        this._drop_texture = gl.textures["ball"];
+    if(typeof(gl) != "undefined" && gl.textures["default"]){
+        this.properties.name = "default";
+        this._drop_texture = gl.textures["default"];
     }
 }
 
@@ -461,7 +699,7 @@ window.LGraphTexture = LGraphTexture;
 function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
-    this.addOutput("Color","vec4");
+    this.addOutput("Color","vec4", {vec3:1, vec4:1});
     this.addInput("vec3","vec3");
     this.properties = {name:""};
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
@@ -553,20 +791,33 @@ window.LGraphCubemap = LGraphCubemap;
 //UVS
 function LGraphUVs()
 {
-    this.addOutput("texCoords","vec2");
+    this.addOutput("UVs","vec2", {vec2:1});
+
+    this.properties = { UTiling:1.0,
+                        VTiling:1.0 };
 
     this.shader_piece = PUVs; // hardcoded for testing
 }
 
-LGraphUVs.title = "UVs";
-LGraphUVs.desc = "The texture coordinates";
+LGraphUVs.title = "TextureCoords";
+LGraphUVs.desc = "Texture coordinates";
 
 LGraphUVs.prototype.onExecute = function()
 {
     this.codes = this.shader_piece.getCode(); // I need to check texture id
-    this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }
 
+LGraphUVs.prototype.setFloatValue = function(old_value,new_value) {
+    if( typeof(new_value) == "string") new_value = parseFloat(new_value);
+    old_value = new_value;
+}
 
-LiteGraph.registerNodeType("texture/UVs", LGraphUVs);
+LGraphUVs.prototype.setValue = function(v1,v2)
+{
+    this.setFloatValue(this.properties["UTiling"],v1);
+    this.setFloatValue(this.properties["VTiling"],v2);
+};
+
+LiteGraph.registerNodeType("texture/TextureCoords", LGraphUVs);
+
 
