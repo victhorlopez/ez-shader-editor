@@ -25,9 +25,9 @@ vik.app = (function() {
         var container = $("#layout_layout2_panel_main div.w2ui-panel-content");
         renderer = new EZ.Renderer();
         renderer.createCanvas(container.width(), container.height());
-        renderer.context.makeCurrent();
         renderer.append(container[0]);
-        renderer.addTextureFromURL("default", "assets/textures/NewTennisBallColor.jpg");
+        renderer.addTextureFromURL("default", "assets/textures/ball.jpg");
+        renderer.addTextureFromURL("noise", "assets/textures/noise.png");
         var camera = new EZ.ECamera(45, renderer.context.width / renderer.context.height, 1, 1000);
         camera.position = [0, 0.5, 1.8];
         camera.target = [0, 0.5, 0];
@@ -71,13 +71,18 @@ vik.app = (function() {
         graph = new LGraph();
         gcanvas = new LGraphCanvas(container.children()[0], graph);
         gcanvas.background_image = "img/grid.png";
+        gcanvas.autocompile = true;
         gcanvas.onNodeSelected = function(node)
         {
             vik.ui.updateLeftPanel( node );
         }
+        gcanvas.onUpdate = function(node)
+        {
+            vik.app.compile( );
+        }
 
 
-        var node_uvs = LiteGraph.createNode("texture/TextureCoords");
+        var node_uvs = LiteGraph.createNode("coordinates/textureCoords");
         node_uvs.pos = [200,200];
         graph.add(node_uvs);
 
@@ -96,11 +101,11 @@ vik.app = (function() {
 
 
 
-        var node_pixel = LiteGraph.createNode("texture/PixelNormalWS");
+        var node_pixel = LiteGraph.createNode("coordinates/pixelNormalWS");
         node_pixel.pos = [100,500];
         graph.add(node_pixel);
 
-        var node_cam = LiteGraph.createNode("texture/CameraToPixelWS");
+        var node_cam = LiteGraph.createNode("coordinates/cameraToPixelWS");
         node_cam.pos = [100,600];
         graph.add(node_cam);
 
@@ -114,12 +119,25 @@ vik.app = (function() {
 
 
 
+        var node_noise = LiteGraph.createNode("texture/textureSample");
+        node_noise.properties.name = "noise";
+        node_noise.pos = [400,-200];
+        graph.add(node_noise);
+
+
         var node_lerp = LiteGraph.createNode("texture/Lerp");
         node_lerp.pos = [800,500];
         graph.add(node_lerp);
 
+        var node_smooth= LiteGraph.createNode("texture/SmoothStep");
+        node_smooth.pos = [800,300];
+        node_smooth.properties.lower = 0.2;
+        node_smooth.properties.upper = 0.8;
+        graph.add(node_smooth);
 
         node_uvs.connect(0,node_tex,0 );
+        node_uvs.connect(0,node_noise,0 );
+        node_noise.connect(2,node_smooth,2 );
         node_tex.connect(0,node_prev,0 );
 
         node_pixel.connect(0,node_refl,0 );
@@ -130,6 +148,7 @@ vik.app = (function() {
         node_tex.connect(1,node_lerp,0 );
         node_cube.connect(1,node_lerp,1 );
         node_lerp.connect(0,node_shader,0 );
+        node_smooth.connect(0,node_lerp,2 );
 
         function render () {
             requestAnimationFrame(render);

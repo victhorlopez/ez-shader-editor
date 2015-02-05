@@ -25,15 +25,24 @@ vik.ui = (function () {
 
 
     module.updateLeftPanel = function( node ){
-
+        // remove old controllers
         for(var i in details_gui.items){
             details_gui.remove(details_gui.items[i]);
         }
         details_gui.items = [];
+        // take the properties nd its options
         var obj = node.properties;
+        var opts = node.options;
         for (var property in obj) {
             if (obj.hasOwnProperty(property)) {
-                var controller = details_gui.add(obj, property);
+
+
+                var opts_ctrl = opts ? opts[property] : undefined;
+                var min = opts_ctrl ? (opts_ctrl.min) : undefined;
+                var max = opts_ctrl ? (opts_ctrl.max) : undefined;
+                var step = opts_ctrl ? (opts_ctrl.step) : undefined;
+
+                var controller = details_gui.add(obj, property, min, max, step );
                 details_gui.items.push(controller);
                 controller.onChange(function(value) {
                     vik.app.compile();
@@ -176,19 +185,19 @@ vik.ui = (function () {
         });
         palette_gui.parent_node = $("#layout_layout3_panel_main div.w2ui-panel-content");
         palette_gui.width = palette_gui.parent_node.width();
-        palette_gui.add(text, 'message');
-        palette_gui.add(text, 'speed', -5, 5);
-        palette_gui.add(text, 'displayOutline');
-        palette_gui.add(text, 'explode');
-        palette_gui.addColor(text, 'color0');
-        palette_gui.addColor(text, 'color1');
-        palette_gui.addColor(text, 'color2');
-        palette_gui.addColor(text, 'color3');
-
-
-        palette_gui.add(text, 'noiseStrength').step(5); // Increment amount
-        palette_gui.add(text, 'growthSpeed', -5, 5); // Min and max
-        palette_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
+//        palette_gui.add(text, 'message');
+//        palette_gui.add(text, 'speed', -5, 5);
+//        palette_gui.add(text, 'displayOutline');
+//        palette_gui.add(text, 'explode');
+//        palette_gui.addColor(text, 'color0');
+//        palette_gui.addColor(text, 'color1');
+//        palette_gui.addColor(text, 'color2');
+//        palette_gui.addColor(text, 'color3');
+//
+//
+//        palette_gui.add(text, 'noiseStrength').step(5); // Increment amount
+//        palette_gui.add(text, 'growthSpeed', -5, 5); // Min and max
+//        palette_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
 
 
         palette_gui.parent_node[0].appendChild(palette_gui.domElement);
