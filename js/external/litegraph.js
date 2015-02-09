@@ -4081,7 +4081,7 @@ var LiteGraph = {
 
         title = title || base_class.title || type;
 
-        var node = new base_class( name );
+        var node = new base_class( title );
 
         node.type = type;
         if(!node.title) node.title = title;
@@ -4687,6 +4687,9 @@ CodePiece.prototype.clone = function()
     cloned.scope = this.scope;
     return cloned;
 };
+
+
+LiteGraph.CodeLib = {};
 /**
  * Created by vik on 26/01/2015.
  */
@@ -4844,6 +4847,193 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
 
 
 }
+
+
+
+
+
+
+
+
+function P1ParamFunc (type, name) {
+    this.type = type;
+    this.name = name;
+    this.id = "1paramfunc";
+    this.includes = {};
+}
+
+P1ParamFunc.prototype.getVertexCode = function (out_var, a, scope, out_type) {
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+P1ParamFunc.prototype.getFragmentCode = function (out_var, a, scope, out_type) {
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+
+/**
+ * Run N steps (cycles) of the graph
+ * @param {out_var} name of the output var
+ *  @param {a} value a in the function
+ *  @param {b} value a in the function
+ *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
+ *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
+ */
+P1ParamFunc.prototype.getCode = function (out_var, a, scope, out_type) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(out_var, a, scope, out_type));
+    vertex.setIncludes(this.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(out_var, a, scope, out_type));
+    fragment.setIncludes(this.includes );
+
+    return new ShaderCode(vertex, fragment, out_var);
+}
+
+// https://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf
+// undefined means T
+LiteGraph.CodeLib["length"] = new P1ParamFunc ("float", "length");
+LiteGraph.CodeLib["sin"] = new P1ParamFunc (undefined, "sin");
+LiteGraph.CodeLib["cos"] = new P1ParamFunc (undefined, "cos");
+LiteGraph.CodeLib["tan"] = new P1ParamFunc (undefined, "tan");
+LiteGraph.CodeLib["asin"] = new P1ParamFunc (undefined, "asin");
+LiteGraph.CodeLib["acos"] = new P1ParamFunc (undefined, "acos");
+LiteGraph.CodeLib["atan"] = new P1ParamFunc (undefined, "atan");
+LiteGraph.CodeLib["abs"] = new P1ParamFunc (undefined, "abs");
+LiteGraph.CodeLib["sign"] = new P1ParamFunc (undefined, "sign");
+LiteGraph.CodeLib["floor"] = new P1ParamFunc (undefined, "floor");
+LiteGraph.CodeLib["ceil"] = new P1ParamFunc (undefined, "ceil");
+LiteGraph.CodeLib["fract"] = new P1ParamFunc (undefined, "fract");
+
+
+
+
+
+// object representing glsl 2 param function
+function P2ParamFunc (type, name) {
+    this.type = type;
+    this.name = name;
+    this.id = "2paramfunc";
+    this.includes = {};
+}
+
+P2ParamFunc.prototype.getVertexCode = function (out_var, a, b, scope, out_type) {
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+P2ParamFunc.prototype.getFragmentCode = function (out_var, a, b, scope, out_type) {
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+/**
+ * Run N steps (cycles) of the graph
+ * @param {out_var} name of the output var
+ *  @param {a} value a in the function
+ *  @param {b} value a in the function
+ *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
+ *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
+ */
+P2ParamFunc.prototype.getCode = function (out_var, a, b, scope, out_type) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(out_var, a, b, scope, out_type));
+    vertex.setIncludes(this.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(out_var, a, b, scope, out_type));
+    fragment.setIncludes(this.includes );
+
+    return new ShaderCode(vertex, fragment, out_var);
+}
+
+// https://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf
+// undefined means T
+LiteGraph.CodeLib["distance"] = new P2ParamFunc ("float", "distance");
+LiteGraph.CodeLib["dot"] = new P2ParamFunc ("float", "dot");
+LiteGraph.CodeLib["cross"] = new P2ParamFunc ("vec3", "cross");
+LiteGraph.CodeLib["reflect"] = new P2ParamFunc (undefined, "reflect");
+LiteGraph.CodeLib["mod"] = new P2ParamFunc (undefined, "mod");
+LiteGraph.CodeLib["min"] = new P2ParamFunc (undefined, "min");
+LiteGraph.CodeLib["max"] = new P2ParamFunc (undefined, "max");
+LiteGraph.CodeLib["step"] = new P2ParamFunc (undefined, "step");
+
+
+
+
+
+
+// object representing glsl 2 param function
+function P3ParamFunc (type, name) {
+    this.type = type;
+    this.name = name;
+    this.id = "3paramfunc";
+    this.includes = {};
+}
+
+P3ParamFunc.prototype.getVertexCode = function (out_var, a, b, c, scope, out_type) {
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+","+c+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+P3ParamFunc.prototype.getFragmentCode = function (out_var, a, b, c, scope, out_type) {
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        var code = (out_type || this.type)+" " +out_var+" = "+this.name+"("+a+","+b+","+c+");\n\
+                ";
+        return code;
+    }
+    return "";
+}
+
+/**
+ * Run N steps (cycles) of the graph
+ * @param {out_var} name of the output var
+ *  @param {a} value a in the function
+ *  @param {b} value a in the function
+ *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
+ *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
+ */
+P3ParamFunc.prototype.getCode = function (out_var, a, b, c, scope, out_type) {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode(out_var, a, b, c, scope, out_type));
+    vertex.setIncludes(this.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode(out_var, a, b, c, scope, out_type));
+    fragment.setIncludes(this.includes );
+
+    return new ShaderCode(vertex, fragment, out_var);
+}
+
+// https://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf
+// undefined means T
+LiteGraph.CodeLib["distance"] = new P3ParamFunc ("float", "distance");
+LiteGraph.CodeLib["refract"] = new P3ParamFunc (undefined, "refract");
+LiteGraph.CodeLib["mix"] = new P3ParamFunc (undefined, "mix");
+
 
 
 

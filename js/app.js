@@ -28,7 +28,7 @@ vik.app = (function() {
         renderer.append(container[0]);
         renderer.addTextureFromURL("default", "assets/textures/ball.jpg");
         renderer.addTextureFromURL("noise", "assets/textures/noise.png");
-        var camera = new EZ.ECamera(45, renderer.context.width / renderer.context.height, 1, 1000);
+        var camera = new EZ.ECamera(45, renderer.context.width / renderer.context.height, 0.1, 1000);
         camera.position = [0, 0.5, 1.8];
         camera.target = [0, 0.5, 0];
         var scene = new EZ.EScene();
