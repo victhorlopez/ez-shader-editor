@@ -201,7 +201,7 @@ LGraphConstant.prototype.onWidget = function(e,widget)
         this.setValue(widget.value);
 }
 
-LiteGraph.registerNodeType("constants/Number", LGraphConstant);
+LiteGraph.registerNodeType("constants/"+LGraphConstant.title, LGraphConstant);
 
 
 //Constant
@@ -223,7 +223,7 @@ LGraphTime.prototype.onExecute = function()
 
 }
 
-LiteGraph.registerNodeType("constants/Time", LGraphTime);
+LiteGraph.registerNodeType("constants/"+LGraphTime.title , LGraphTime);
 
 
 //Constant
@@ -269,7 +269,7 @@ LGraphConstVec2.prototype.valueToString = function()
     return "vec2("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+")";
 }
 
-LiteGraph.registerNodeType("constants/ConstVec2", LGraphConstVec2);
+LiteGraph.registerNodeType("constants/"+LGraphConstVec2.title, LGraphConstVec2);
 
 
 //Constant
@@ -317,7 +317,7 @@ LGraphConstVec3.prototype.valueToString = function()
     return "vec3("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+","+this.properties["v3"].toFixed(3)+")";
 }
 
-LiteGraph.registerNodeType("constants/ConstVec3", LGraphConstVec3);
+LiteGraph.registerNodeType("constants/"+LGraphConstVec3.title, LGraphConstVec3);
 
 
 //Constant
@@ -368,7 +368,7 @@ LGraphConstVec4.prototype.valueToString = function()
     return "vec4("+this.properties["v1"].toFixed(3)+","+this.properties["v2"].toFixed(3)+","+this.properties["v3"].toFixed(3)+","+this.properties["v4"].toFixed(3)+")";
 }
 
-LiteGraph.registerNodeType("constants/ConstVec4", LGraphConstVec4);
+LiteGraph.registerNodeType("constants/"+LGraphConstVec4.title, LGraphConstVec4);
 
 //UVS
 function LGraphCamToPixelWS()
@@ -388,7 +388,7 @@ LGraphCamToPixelWS.prototype.onExecute = function()
 }
 
 
-LiteGraph.registerNodeType("coordinates/cameraToPixelWS", LGraphCamToPixelWS);
+LiteGraph.registerNodeType("coordinates/"+ LGraphCamToPixelWS.title , LGraphCamToPixelWS);
 
 
 //UVS
@@ -409,7 +409,7 @@ LGraphPixelNormalWS.prototype.onExecute = function()
 }
 
 
-LiteGraph.registerNodeType("coordinates/pixelNormalWS", LGraphPixelNormalWS);
+LiteGraph.registerNodeType("coordinates/"+LGraphPixelNormalWS.title, LGraphPixelNormalWS);
 
 
 //UVS
@@ -444,7 +444,7 @@ LGraphUVs.prototype.setValue = function(v1,v2)
     this.setFloatValue(this.properties["VTiling"],v2);
 };
 
-LiteGraph.registerNodeType("coordinates/textureCoords", LGraphUVs);
+LiteGraph.registerNodeType("coordinates/"+LGraphUVs.title , LGraphUVs);
 
 
 
@@ -466,7 +466,7 @@ LGraphVertexPosWS.prototype.onExecute = function()
 }
 
 
-LiteGraph.registerNodeType("coordinates/vertexPosWS", LGraphVertexPosWS);
+LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexPosWS);
 
 
 
@@ -524,7 +524,7 @@ LGraphShader.prototype.processInputCode = function() {
 
     var shader = this.shader_piece.createShader(color_code,normal_code,world_offset_code);
     this.graph.shader_output = shader;
-    var texture_nodes = this.graph.findNodesByType("texture/textureSample");// we need to find all the textures used in the graph
+    var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     this.graph.shader_textures = [];
     // we set all the names in one array
     // useful to render nodes
@@ -535,7 +535,7 @@ LGraphShader.prototype.processInputCode = function() {
 
 
 
-LiteGraph.registerNodeType("core/ShaderNode",LGraphShader);
+LiteGraph.registerNodeType("core/"+ LGraphShader.title ,LGraphShader);
 //**************************
 function LGraphTexturePreview()
 {
@@ -572,7 +572,7 @@ LGraphTexturePreview.prototype.onDrawBackground = function(ctx)
     ctx.restore();
 }
 
-LiteGraph.registerNodeType("texture/preview", LGraphTexturePreview );
+LiteGraph.registerNodeType("texture/"+LGraphTexturePreview.title, LGraphTexturePreview );
 window.LGraphTexturePreview = LGraphTexturePreview;
 function LGraphTexture()
 {
@@ -595,7 +595,7 @@ function LGraphTexture()
     }
 }
 
-LGraphTexture.title = "textureSample";
+LGraphTexture.title = "TextureSample";
 LGraphTexture.desc = "textureSample";
 LGraphTexture.widgets_info = {"name": { widget:"texture"} };
 
@@ -865,7 +865,7 @@ LGraphTexture.prototype.processInputCode = function()
 }
 
 
-LiteGraph.registerNodeType("texture/textureSample", LGraphTexture );
+LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;
 
 
@@ -886,7 +886,7 @@ function LGraphCubemap()
     }
 }
 
-LGraphCubemap.title = "textureSampleCube";
+LGraphCubemap.title = "TextureSampleCube";
 LGraphCubemap.desc = "textureSampleCube";
 
 LGraphCubemap.prototype.onDropFile = function(data, filename, file)
@@ -958,7 +958,7 @@ LGraphCubemap.prototype.processInputCode = function()
 }
 
 
-LiteGraph.registerNodeType("texture/TextureSampleCube", LGraphCubemap );
+LiteGraph.registerNodeType("texture/"+LGraphCubemap.title, LGraphCubemap );
 window.LGraphCubemap = LGraphCubemap;
 
 
@@ -1000,7 +1000,7 @@ LGraphVecToComps.prototype.onExecute = function()
 
 
 
-LiteGraph.registerNodeType("coordinates/VecToComps", LGraphVecToComps);
+LiteGraph.registerNodeType("coordinates/"+LGraphVecToComps.title , LGraphVecToComps);
 
 
 
@@ -1025,7 +1025,7 @@ LGraphAbs.desc = "Abs of input";
 
 
 LGraph1ParamNode.inherit(LGraphAbs);
-LiteGraph.registerNodeType("math/Abs", LGraphAbs);
+LiteGraph.registerNodeType("math/"+LGraphAbs.title, LGraphAbs);
 
 
 
@@ -1051,7 +1051,7 @@ LGraphCos.desc = "cosine of input";
 
 
 LGraph1ParamNode.inherit(LGraphCos);
-LiteGraph.registerNodeType("math/Cos", LGraphCos);
+LiteGraph.registerNodeType("math/"+LGraphCos.title, LGraphCos);
 
 
 
@@ -1076,7 +1076,7 @@ LGraphSin.desc = "sine of input";
 
 
 LGraph1ParamNode.inherit(LGraphSin);
-LiteGraph.registerNodeType("math/sin", LGraphSin);
+LiteGraph.registerNodeType("math/"+LGraphSin.title, LGraphSin);
 
 
 
@@ -1131,7 +1131,7 @@ LGraphMixer.prototype.onDrawBackground = function(ctx)
         this.inputs[2].label += "="+this.properties["alpha"].toFixed(3);
 }
 
-LiteGraph.registerNodeType("texture/Lerp", LGraphMixer );
+LiteGraph.registerNodeType("texture/"+LGraphMixer.title, LGraphMixer );
 
 
 function LGraphOperation()
@@ -1143,7 +1143,7 @@ function LGraphOperation()
     this.shader_piece = POperation; // hardcoded for testing
 }
 
-LGraphOperation.title = "operation";
+LGraphOperation.title = "Operation";
 LGraphOperation.desc = "operation between A and B";
 
 LGraphOperation.prototype.onExecute = function()
@@ -1167,7 +1167,7 @@ LGraphOperation.prototype.processInputCode = function()
 }
 
 
-LiteGraph.registerNodeType("texture/Operation", LGraphOperation );
+LiteGraph.registerNodeType("texture/"+LGraphOperation.title, LGraphOperation );
 
 //UVS
 function LGraphReflect()
@@ -1179,7 +1179,7 @@ function LGraphReflect()
     this.shader_piece = LiteGraph.CodeLib["reflect"]; // hardcoded for testing
 }
 
-LGraphReflect.title = "ReflectVector";
+LGraphReflect.title = "Reflect";
 LGraphReflect.desc = "To reflect a vector3";
 
 
@@ -1203,7 +1203,7 @@ LGraphReflect.prototype.processInputCode = function()
 
 }
 
-LiteGraph.registerNodeType("texture/reflect", LGraphReflect);
+LiteGraph.registerNodeType("texture/"+LGraphReflect.title, LGraphReflect);
 
 
 
@@ -1258,4 +1258,4 @@ LGraphSmooth.prototype.onDrawBackground = function(ctx)
         this.inputs[1].label += "="+this.properties["upper"].toFixed(3);
 }
 
-LiteGraph.registerNodeType("texture/SmoothStep", LGraphSmooth );
+LiteGraph.registerNodeType("texture/"+LGraphSmooth.title, LGraphSmooth );

@@ -127,82 +127,52 @@ vik.ui = (function () {
 
         //+ w2ui['layout2_main_tabs'].getMaximizeButton('Preview')
 
-        var FizzyText = function () {
-            this.message = 'dat.gui';
-            this.speed = 0.8;
-            this.displayOutline = false;
-            this.noiseStrength = 10;
-            this.growthSpeed = -3;
-            this.maxSize = 24;
-            this.color0 = "#ffae23"; // CSS string
-            this.color1 = [ 0, 128, 255 ]; // RGB array
-            this.color2 = [ 0, 128, 255, 0.3 ]; // RGB with alpha
-            this.color3 = { h: 350, s: 0.9, v: 0.3 }; // Hue, saturation, value
-
-            this.explode = function () {
-            };
-            // Define render logic ...
-        };
-
-
-        var text = new FizzyText();
         details_gui = new dat.GUI({
             resizable: true,
             hideable: false,
+            autoPlace: false
         });
         details_gui.parent_node = $("#layout_layout2_panel_preview div.w2ui-panel-content");
         details_gui.width = details_gui.parent_node.width();
-//        details_gui.add(text, 'message');
-//        details_gui.add(text, 'speed', -5, 5);
-//        details_gui.add(text, 'displayOutline');
-//        details_gui.add(text, 'explode');
-//        details_gui.addColor(text, 'color0');
-//        details_gui.addColor(text, 'color1');
-//        details_gui.addColor(text, 'color2');
-//        details_gui.addColor(text, 'color3');
-//        var f1 = details_gui.addFolder('Flow Field');
-//        f1.add(text, 'speed');
-//        f1.add(text, 'noiseStrength');
-//
-//        var f2 = details_gui.addFolder('Letters');
-//        f2.add(text, 'growthSpeed');
-//        f2.add(text, 'maxSize');
-//        f2.add(text, 'message');
-//
-//        details_gui.add(text, 'noiseStrength').step(5); // Increment amount
-//        details_gui.add(text, 'growthSpeed', -5, 5); // Min and max
-//        details_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
-//
-//        f2.open();
+
 
         details_gui.parent_node[0].appendChild(details_gui.domElement);
 
-
-        text = new FizzyText();
         palette_gui = new dat.GUI({
             resizable: false,
-            hideable: false
+            hideable: false,
+            autoPlace: false
         });
         palette_gui.parent_node = $("#layout_layout3_panel_main div.w2ui-panel-content");
         palette_gui.width = palette_gui.parent_node.width();
-//        palette_gui.add(text, 'message');
-//        palette_gui.add(text, 'speed', -5, 5);
-//        palette_gui.add(text, 'displayOutline');
-//        palette_gui.add(text, 'explode');
-//        palette_gui.addColor(text, 'color0');
-//        palette_gui.addColor(text, 'color1');
-//        palette_gui.addColor(text, 'color2');
-//        palette_gui.addColor(text, 'color3');
-//
-//
-//        palette_gui.add(text, 'noiseStrength').step(5); // Increment amount
-//        palette_gui.add(text, 'growthSpeed', -5, 5); // Min and max
-//        palette_gui.add(text, 'maxSize').min(0).step(0.25); // Mix and match
+        var node_types = LiteGraph.getNodeTypesCategories();
+        for(var i = node_types.length -1; i >= 0; --i){
+            if(node_types[i] !== ""){
+                var f = palette_gui.addFolder(node_types[i]);
+                var nodes = LiteGraph.getNodeTypesInCategory(node_types[i]);
+                for(var j = nodes.length -1; j >= 0; --j) {
+                    if(nodes[j]){
+                        var o = {};
+                        o[nodes[j].title] = function() {};
+                        var controller = f.add(o, nodes[j].title);
+                        var html_node = controller.__li.firstChild.firstChild;
+                        html_node.id = f.name +"/"+ controller.property;
+                        html_node.setAttribute('draggable', true);
+                        html_node.addEventListener('dragstart', function(e) {
+                            e.dataTransfer.setData('text', this.id);
+                        });
+                    }
+                }
+                f.open();
+            }
+
+        }
+
 
 
         palette_gui.parent_node[0].appendChild(palette_gui.domElement);
 
-
+// for debugging panels
 //        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +
 //            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left',true)\">Left</button>" +
 //            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +

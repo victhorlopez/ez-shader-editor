@@ -1123,6 +1123,18 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
 
         var pos = [e.canvasX, e.canvasY];
         var node = that.graph.getNodeOnPos(pos[0], pos[1]);
+
+        // if the dropEvenet has a node name like "math/sin" it will
+        // create a node on that position
+        var node_name = e.dataTransfer.getData('text');
+        if(node_name) {
+            var n = LiteGraph.createNode(node_name);
+            n.pos = pos;
+            that.graph.add(n);
+            return;
+        }
+
+
         if (!node)
             return;
 

@@ -82,34 +82,34 @@ vik.app = (function() {
         }
 
 
-        var node_uvs = LiteGraph.createNode("coordinates/textureCoords");
+        var node_uvs = LiteGraph.createNode("coordinates/TextureCoords");
         node_uvs.pos = [200,200];
         graph.add(node_uvs);
 
-        var node_tex = LiteGraph.createNode("texture/textureSample");
+        var node_tex = LiteGraph.createNode("texture/TextureSample");
         node_tex.pos = [400,200];
         graph.add(node_tex);
 
-        var node_prev = LiteGraph.createNode("texture/preview");
+        var node_prev = LiteGraph.createNode("texture/Preview");
         node_prev.pos = [1000,100];
         graph.add(node_prev);
 
-        var node_shader = LiteGraph.createNode("core/ShaderNode");
+        var node_shader = LiteGraph.createNode("core/Shader");
         node_shader.pos = [1000,600];
         graph.add(node_shader);
 
 
 
 
-        var node_pixel = LiteGraph.createNode("coordinates/pixelNormalWS");
+        var node_pixel = LiteGraph.createNode("coordinates/PixelNormalWS");
         node_pixel.pos = [100,500];
         graph.add(node_pixel);
 
-        var node_cam = LiteGraph.createNode("coordinates/cameraToPixelWS");
+        var node_cam = LiteGraph.createNode("coordinates/CameraToPixelWS");
         node_cam.pos = [100,600];
         graph.add(node_cam);
 
-        var node_refl = LiteGraph.createNode("texture/reflect");
+        var node_refl = LiteGraph.createNode("texture/Reflect");
         node_refl.pos = [300,550];
         graph.add(node_refl);
 
@@ -119,7 +119,7 @@ vik.app = (function() {
 
 
 
-        var node_noise = LiteGraph.createNode("texture/textureSample");
+        var node_noise = LiteGraph.createNode("texture/TextureSample");
         node_noise.properties.name = "noise";
         node_noise.pos = [400,-200];
         graph.add(node_noise);
