@@ -26,7 +26,7 @@ vik.app = (function() {
         renderer = new EZ.Renderer();
         renderer.createCanvas(container.width(), container.height());
         renderer.append(container[0]);
-        renderer.addTextureFromURL("default", "assets/textures/ball.jpg");
+        renderer.addTextureFromURL("ball", "assets/textures/ball.jpg");
         renderer.addTextureFromURL("noise", "assets/textures/noise.png");
         var camera = new EZ.ECamera(45, renderer.context.width / renderer.context.height, 0.1, 1000);
         camera.position = [0, 0.5, 1.8];
@@ -62,14 +62,14 @@ vik.app = (function() {
         container = $("#layout_main_layout_panel_main div.w2ui-panel-content");
         var h = container.height();
         var w = container.width();
-        var html = "<canvas class='graph' width='" + w + "' height='" + h + "'></canvas>";
+        var html = "<canvas id='graph' class='graph' width='" + w + "' height='" + h + "'></canvas>";
         container.append(html);
 //        var gl_2d = GL.create({width:w,height:h, alpha:false});
 //        gl_2d.makeCurrent();
 //        container.append(gl.canvas);
 //        gl_2d.canvas.id = "maincanvas";
         graph = new LGraph();
-        gcanvas = new LGraphCanvas(container.children()[0], graph);
+        gcanvas = new LGraphCanvas(container.children()[1], graph);
         gcanvas.background_image = "img/grid.png";
         gcanvas.autocompile = true;
         gcanvas.onNodeSelected = function(node)
@@ -81,81 +81,14 @@ vik.app = (function() {
             vik.app.compile( );
         }
 
-
-        var node_uvs = LiteGraph.createNode("coordinates/TextureCoords");
-        node_uvs.pos = [200,200];
-        graph.add(node_uvs);
-
-        var node_tex = LiteGraph.createNode("texture/TextureSample");
-        node_tex.pos = [400,200];
-        graph.add(node_tex);
-
-        var node_prev = LiteGraph.createNode("texture/Preview");
-        node_prev.pos = [1000,100];
-        graph.add(node_prev);
-
-        var node_shader = LiteGraph.createNode("core/Shader");
-        node_shader.pos = [1000,600];
-        graph.add(node_shader);
-
-
-
-
-        var node_pixel = LiteGraph.createNode("coordinates/PixelNormalWS");
-        node_pixel.pos = [100,500];
-        graph.add(node_pixel);
-
-        var node_cam = LiteGraph.createNode("coordinates/CameraToPixelWS");
-        node_cam.pos = [100,600];
-        graph.add(node_cam);
-
-        var node_refl = LiteGraph.createNode("texture/Reflect");
-        node_refl.pos = [300,550];
-        graph.add(node_refl);
-
-        var node_cube = LiteGraph.createNode("texture/TextureSampleCube");
-        node_cube.pos = [500,500];
-        graph.add(node_cube);
-
-
-
-        var node_noise = LiteGraph.createNode("texture/TextureSample");
-        node_noise.properties.name = "noise";
-        node_noise.pos = [400,-200];
-        graph.add(node_noise);
-
-
-        var node_lerp = LiteGraph.createNode("texture/Lerp");
-        node_lerp.pos = [800,500];
-        graph.add(node_lerp);
-
-        var node_smooth= LiteGraph.createNode("texture/SmoothStep");
-        node_smooth.pos = [800,300];
-        node_smooth.properties.lower = 0.2;
-        node_smooth.properties.upper = 0.8;
-        graph.add(node_smooth);
-
-        node_uvs.connect(0,node_tex,0 );
-        node_uvs.connect(0,node_noise,0 );
-        node_noise.connect(2,node_smooth,2 );
-        node_tex.connect(0,node_prev,0 );
-
-        node_pixel.connect(0,node_refl,0 );
-        node_cam.connect(0,node_refl,1 );
-        node_refl.connect(0,node_cube,0 );
-
-
-        node_tex.connect(1,node_lerp,0 );
-        node_cube.connect(1,node_lerp,1 );
-        node_lerp.connect(0,node_shader,0 );
-        node_smooth.connect(0,node_lerp,2 );
+        graph.loadFromURL("graphs/graph.json", vik.app.compile);
 
         function render () {
             requestAnimationFrame(render);
             renderer.render(scene, camera);
         }
         render();
-        module.compile();
+
     }
     module.compile = function(){
         graph.runStep(1);
@@ -166,6 +99,9 @@ vik.app = (function() {
             main_node.setTexture(texture_name, texture_name);
         }
         main_node.shader = "current";
+        var code_div = document.getElementById("code");
+        if(graph.shader_output)
+            code_div.innerHTML = graph.shader_output.vertex_code + "<br/><br/><br/>" + graph.shader_output.fragment_code;
     }
 
     module.resize = function () {
@@ -201,6 +137,57 @@ vik.app = (function() {
             data.onComplete = function () {
                 module.resize();
             }
+        });
+
+        var code_downloader = document.getElementById("download_code");
+        code_downloader.addEventListener("click",function(){
+            var json = graph.serialize();
+            var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json));
+            this.href = data;
+            return true;
+        });
+
+        var code_loader = document.getElementById("load_graph");
+        code_loader.addEventListener("click",function(){
+
+            function onComplete(list){
+
+                w2popup.open({
+                    title: 'Load Graph',
+                    body: '<div class="w2ui-inner-popup">'+list+'</div>'
+                });
+
+                var list_nodes = document.getElementById("popup-list").childNodes;
+                for(var i = list_nodes.length - 1; i>= 0; --i){
+                    list_nodes[i].addEventListener("click",function(){
+                        var graph_name = this.id.toLowerCase();
+                        graph.loadFromURL("graphs/"+graph_name+".json", vik.app.compile);
+                        w2popup.close();
+
+                    });
+                }
+            }
+
+            var request = new XMLHttpRequest();
+            request.open('GET',"graphs/list.txt");
+            request.onreadystatechange = function() {
+                if (request.readyState==4 && request.status==200) {
+                    var txt = request.responseText.split(/\r?\n/);
+                    var html = '<div class="dg"><ul id="popup-list">';
+                    for (var i in txt) {
+                        html += '<li class="cr function" id="'+ txt[i] +'"> <span class="property-name">' + txt[i] + '</span></li>';
+                    }
+                    html += '</ul></div>';
+                    onComplete(html);
+                }
+            }
+            request.send();
+
+
+
+
+
+
         });
 
 

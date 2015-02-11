@@ -531,6 +531,7 @@ LGraphShader.prototype.processInputCode = function() {
     for(var i = 0; i < texture_nodes.length; ++i){
         this.graph.shader_textures.push(texture_nodes[i].properties.name);
     }
+
 }
 
 
@@ -583,16 +584,16 @@ function LGraphTexture()
     this.addOutput("B","number", {number:1});
     this.addOutput("A","number", {number:1});
     this.addInput("UVs","vec2");
-    this.properties = {name:""};
+    this.properties = {name:"", url:""};
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSample; // hardcoded for testing
 
     // default texture
-    if(typeof(gl) != "undefined" && gl.textures["default"]){
-        this.properties.name = "default";
-        this._drop_texture = gl.textures["default"];
-    }
+//    if(typeof(gl) != "undefined" && gl.textures["default"]){
+//        this.properties.name = "default";
+//        this._drop_texture = gl.textures["default"];
+//    }
 }
 
 LGraphTexture.title = "TextureSample";
@@ -864,6 +865,19 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
+// the code is the same than LiteGraph
+LGraphTexture.prototype.configure = function(obj)
+{
+    if(obj == null) return null;
+    var r = JSON.parse( JSON.stringify( obj ) );
+
+    for(var i in r)
+        if(i != "_drop_texture")
+            this[i] = r[i];
+    this.shader_piece = PTextureSample; // hardcoded for testing
+
+
+}
 
 LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;

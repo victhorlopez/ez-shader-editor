@@ -812,6 +812,8 @@ LGraph.prototype.serialize = function()
 
     var data = {
 //		graph: this.graph,
+        shader_textures: this.shader_textures,
+        //shader_output: this.shader_output, this creates a cycle 
 
         iteration: this.iteration,
         frame: this.frame,
@@ -826,6 +828,26 @@ LGraph.prototype.serialize = function()
     return data;
 }
 
+
+/**
+ * Loads a graph from a url and calls configure
+ * @method loadFromURL
+ * @param {String} url configure a graph from a JSON string
+ * @param {Function} on_complete callback
+ */
+LGraph.prototype.loadFromURL = function (url, on_complete){
+
+    var that = this;
+    HttpRequest( url, null, function(data) {
+        var ext = url.substr(url.length - 5).toLowerCase();
+        that.configure(JSON.parse(data));
+        if(on_complete)
+            on_complete(graph);
+    }, function(err){
+        if(on_complete)
+            on_complete(null);
+    });
+}
 
 /**
  * Configure a graph from a JSON string
@@ -1789,7 +1811,8 @@ LGraphCanvas.prototype.onNodeSelected = function (n) {
 }
 
 LGraphCanvas.prototype.processNodeSelected = function (n, e) {
-    LiteGraph.dispatchEvent("hola", this);
+    if(LiteGraph.debug)
+        console.log(n);
     n.selected = true;
     if (n.onSelected)
         n.onSelected();
@@ -4756,6 +4779,8 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
     }
     try {
         var shader = new GL.Shader(vertex_code,fragment_code);
+        shader.vertex_code = vertex_code;
+        shader.fragment_code = fragment_code;
         return shader;
     }
     catch(err) {
@@ -4842,14 +4867,29 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
             ";
     for(var k in code.fragment.getHeader())
         r += k;
+    for(var k in normal.fragment.getHeader())
+        r += k;
     // body
     r += "void main() {\n\
             ";
-    var ids = code.fragment.getBodyIds();
-    var body_hash = code.fragment.getBody();
+    if (includes["v_normal"] || normal.getOutputVar())
+        r += "vec3 normal = v_normal;\n\
+            ";
+    var ids = normal.fragment.getBodyIds();
+    var body_hash = normal.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += body_hash[ids[i]];
     }
+    if(normal.getOutputVar())
+        r += "normal = "+normal.getOutputVar()+".xyz;\n\
+            ";
+
+    ids = code.fragment.getBodyIds();
+    body_hash = code.fragment.getBody();
+    for (var i = 0, l = ids.length; i < l; i++) {
+        r += body_hash[ids[i]];
+    }
+
     r += "gl_FragColor = "+code.getOutputVar()+";\n";
 
     r += "\n}\n\
@@ -5139,7 +5179,7 @@ PPixelNormalWS.getVertexCode = function (output, input) {
 }
 
 PPixelNormalWS.getFragmentCode = function (output, input) {
-        var code = "vec3 pixel_normal_ws = v_normal;\n\
+        var code = "vec3 pixel_normal_ws = normal;\n\
             ";
 
     return code;

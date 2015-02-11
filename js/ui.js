@@ -53,18 +53,35 @@ vik.ui = (function () {
 
 
     function loadLayout() {
+        // main layout
         $('#layout').w2layout({
             name: 'main_layout',
             parent_layout: null,
             panels: [
-                { type: 'top', size: 30 }, // so far top not used
-                { type: 'main' },
+                { type: 'top', size: 67,
+                    content:'<div id="top-buttons">' +
+                        '<div class="top-button"><a id="download_code" href="#" download="graph.json"><i  class="fa fa-download fa-2x"></i>Download</a></div>' +
+                        '<div class="top-button"><a id="load_graph" href="#"><i  class="fa fa-upload fa-2x"></i>Load</a></div>' +
+                        '</div>' }, // so far top not used
+                { type: 'main', content:'<div id="code" style="display:none"></div>',
+                    tabs: {
+                    active: 'Graph',
+                    tabs: [
+                        { id: 'Graph', caption: 'Graph', closable: false },
+                        { id: 'Code', caption: 'Code', closable: false }
+                    ],
+                    onClick: function (event) {
+                        $('#code').toggle();
+                        $('#graph').toggle();
+                    }
+                } },
                 { type: 'left', size: '25%', resizable: true },
                 { type: 'right', size: '270', resizable: true}
             ],
             resize_cancel: true
         });
-
+        // layout inside main_layout left panel
+        // named as layout2
         $('#layout_main_layout_panel_left').w2layout({
             name: 'layout2',
             parent_layout:'main_layout',
@@ -100,6 +117,8 @@ vik.ui = (function () {
         });
         w2ui['layout2'].content('left', w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') + w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left') );
 
+        // layout inside main_layout right panel
+        // named as layout3
         $('#layout_main_layout_panel_right').w2layout({
             name: 'layout3',
             parent_layout:'main_layout',
@@ -167,8 +186,6 @@ vik.ui = (function () {
             }
 
         }
-
-
 
         palette_gui.parent_node[0].appendChild(palette_gui.domElement);
 
