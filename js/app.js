@@ -100,8 +100,11 @@ vik.app = (function() {
         }
         main_node.shader = "current";
         var code_div = document.getElementById("code");
-        if(graph.shader_output)
-            code_div.innerHTML = graph.shader_output.vertex_code + "<br/><br/><br/>" + graph.shader_output.fragment_code;
+        if(graph.shader_output){
+            code_div.innerHTML = '<pre><code class="html"> '+graph.shader_output.vertex_code +' </pre></code><pre><code class="html"> ' + graph.shader_output.fragment_code +'</pre></code>';
+            hljs.initHighlightingOnLoad();
+        }
+
     }
 
     module.resize = function () {
