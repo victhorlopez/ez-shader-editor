@@ -21,9 +21,10 @@ vik.app = (function() {
     }
 
     module.loadTexture = function(name,url) {
-        renderer.addTextureFromURL(name, url);
         graph_gl.makeCurrent();
         graph_gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST});
+        renderer.addTextureFromURL(name, url);
+
 
     }
     module.loadCubeMap = function(name,url) {

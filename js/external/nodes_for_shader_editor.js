@@ -528,14 +528,14 @@ LGraphShader.prototype.processInputCode = function() {
     this.graph.shader_textures = [];
     // we set all the names in one array
     // useful to render nodes
-//    for(var i = 0; i < texture_nodes.length; ++i){
-//        this.graph.shader_textures.push(texture_nodes[i].properties.name);
-//    }
-//    texture_nodes = this.graph.findNodesByType("texture/"+LGraphCubemap.title);// we need to find all the textures used in the graph
-//    for(var i = 0; i < texture_nodes.length; ++i){
-//        this.graph.shader_textures.push(texture_nodes[i].properties.name);
-//    }
-    this.graph.shader_textures.push("cubemap");
+    for(var i = 0; i < texture_nodes.length; ++i){
+        this.graph.shader_textures.push(texture_nodes[i].properties.name);
+    }
+    texture_nodes = this.graph.findNodesByType("texture/"+LGraphCubemap.title);// we need to find all the textures used in the graph
+    for(var i = 0; i < texture_nodes.length; ++i){
+        this.graph.shader_textures.push(texture_nodes[i].properties.name);
+    }
+
 
 }
 
@@ -699,6 +699,7 @@ LGraphTexture.getNoiseTexture = function()
 
 LGraphTexture.prototype.onDropFile = function(data, filename, file)
 {
+    console.log(gl);
     console.log([data, filename, file]);
     if(!data)
     {
@@ -711,7 +712,8 @@ LGraphTexture.prototype.onDropFile = function(data, filename, file)
         var no_ext_name = filename.split('.')[0];
         if( typeof(data) == "string" )
             gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data );
-        else if( filename.toLowerCase().indexOf(".dds") != -1 )
+        else
+        if( filename.toLowerCase().indexOf(".dds") != -1 )
             texture = GL.Texture.fromDDSInMemory(data);
         else
         {
@@ -912,12 +914,18 @@ LGraphCubemap.prototype.onDropFile = function(data, filename, file)
     }
     else
     {
+
         var no_ext_name = filename.split('.')[0];
-        if( typeof(data) == "string" )
-            gl.textures[no_ext_name] = this._drop_texture = GL.Texture.cubemapFromURL(data);
+        if( filename.toLowerCase().indexOf(".dds") != -1 )
+            this._drop_texture  = GL.Texture.fromDDSInMemory(data);
         else
-            gl.textures[no_ext_name] =this._drop_texture = GL.Texture.fromDDSInMemory(data);
-        this.properties.name = no_ext_name;
+        {
+            var blob = new Blob([file]);
+            var url = URL.createObjectURL(blob);
+            this._drop_texture = GL.Texture.cubemapFromURL( url );
+        }
+
+
     }
 }
 

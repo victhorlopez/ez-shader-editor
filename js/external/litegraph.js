@@ -1162,15 +1162,17 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         if (!node.onDropFile)
             return;
 
+
         var file = e.dataTransfer.files[0];
         var filename = file.name;
         var ext = LGraphCanvas.getFileExtension(filename);
         //console.log(file);
-
         //prepare reader
         var reader = new FileReader();
         reader.onload = function (event) {
             //console.log(event.target);
+            if(that.gl)
+                that.gl.makeCurrent();
             var data = event.target.result;
             node.onDropFile(data, filename, file);
             that.onUpdate();
@@ -4811,9 +4813,9 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
     if (includes["u_time"])
         r += "uniform float u_time;\n";
     if (includes["u_eye"])
-        r += "uniform vec3 u_eye;\n"+
-            "uniform mat4 u_mvp;\n"+
-            "uniform mat4 u_model;\n";
+        r += "uniform vec3 u_eye;\n";
+    r +="uniform mat4 u_mvp;\n"+
+        "uniform mat4 u_model;\n";
 
     for(var k in code.vertex.getHeader())
         r += k;
