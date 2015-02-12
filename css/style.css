@@ -286,3 +286,11 @@ body div.w2ui-panel div.w2ui-panel .right_rotated_tab {
     text-align: center;
     display: block;
 }
+body .dg li.code-title {
+    padding-left: 22px;
+    border-bottom: 1px solid #555;
+    background-color: #444;
+}
+#code pre {
+    margin-top: 0px;
+}

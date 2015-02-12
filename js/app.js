@@ -101,8 +101,14 @@ vik.app = (function() {
         main_node.shader = "current";
         var code_div = document.getElementById("code");
         if(graph.shader_output){
-            code_div.innerHTML = '<pre><code class="html"> '+graph.shader_output.vertex_code +' </pre></code><pre><code class="html"> ' + graph.shader_output.fragment_code +'</pre></code>';
-            hljs.initHighlightingOnLoad();
+            code_div.innerHTML = '<div class="dg"><ul>' +
+                '<li class="code-title">Vertex Code</li>' +
+                '<pre><code class="glsl" id="vertex_code">'+graph.shader_output.vertex_code +' </pre></code>' +
+                '<li class="code-title">Fragment Code</li>'+
+                '<pre><code class="glsl" id="fragment_code">' + graph.shader_output.fragment_code +'</pre></code>' +
+                '</ul></div>';
+            hljs.highlightBlock(document.getElementById("vertex_code"));
+            hljs.highlightBlock(document.getElementById("fragment_code"));
         }
 
     }
