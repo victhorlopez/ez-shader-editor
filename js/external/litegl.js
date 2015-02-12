@@ -3648,8 +3648,11 @@
         var image = new Image();
         image.src = url;
         var that = this;
+        that.gl = gl; // BUG IMPORTANT
         image.onload = function()
         {
+            if(global.gl != that.gl) // with multiple context can bug while  you upload them
+                that.gl.makeCurrent();
             options.texture = texture;
             GL.Texture.cubemapFromImage(this, options);
             texture.ready = true;

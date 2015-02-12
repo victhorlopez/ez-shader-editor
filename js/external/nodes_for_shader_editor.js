@@ -528,9 +528,14 @@ LGraphShader.prototype.processInputCode = function() {
     this.graph.shader_textures = [];
     // we set all the names in one array
     // useful to render nodes
-    for(var i = 0; i < texture_nodes.length; ++i){
-        this.graph.shader_textures.push(texture_nodes[i].properties.name);
-    }
+//    for(var i = 0; i < texture_nodes.length; ++i){
+//        this.graph.shader_textures.push(texture_nodes[i].properties.name);
+//    }
+//    texture_nodes = this.graph.findNodesByType("texture/"+LGraphCubemap.title);// we need to find all the textures used in the graph
+//    for(var i = 0; i < texture_nodes.length; ++i){
+//        this.graph.shader_textures.push(texture_nodes[i].properties.name);
+//    }
+    this.graph.shader_textures.push("cubemap");
 
 }
 
@@ -892,12 +897,7 @@ function LGraphCubemap()
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
-
-    // default cube map
-    if(typeof(gl) != "undefined" && gl.textures["cubemap"]){
-        this.properties.name = "cubemap";
-        this._drop_texture = gl.textures["cubemap"];
-    }
+    this.properties.name = "cube";
 }
 
 LGraphCubemap.title = "TextureSampleCube";
@@ -963,7 +963,7 @@ LGraphCubemap.prototype.processInputCode = function()
 
     var input_code = this.getInputCode(0); // get input in link 0
 
-    var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
+    var texture_name = "u_" + (this.properties.name ? this.properties.name : "cubemap") + "_texture"; // TODO check if there is a texture
     var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
 
     color_code.merge(input_code);
