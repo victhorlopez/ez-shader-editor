@@ -21,7 +21,7 @@ function enableWebGLCanvas( canvas )
 
 
 	//get the context	
-	var gl = canvas.getContext("webgl");
+	var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 	if(canvas.canvas2DtoWebGL_enabled)
 		return gl;
 
@@ -306,7 +306,7 @@ function enableWebGLCanvas( canvas )
 			var ay, by, cy;
 			var tSquared, tCubed;
 
-			/* cálculo de los coeficientes polinomiales */
+			/* cï¿½lculo de los coeficientes polinomiales */
 			cx = 3.0 * (cp[1][0] - cp[0][0]);
 			bx = 3.0 * (cp[2][0] - cp[1][0]) - cx;
 			ax = cp[3][0] - cp[0][0] - cx - bx;

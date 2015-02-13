@@ -1091,7 +1091,8 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
     }
 
     var ctx = this.ctx = canvas.getContext("2d");
-    if (ctx == null) {
+    if (ctx == null)
+    {
         console.warn("This canvas seems to be WebGL, enabling WebGL renderer");
         this.enableWebGL();
     }
@@ -1776,10 +1777,10 @@ LGraphCanvas.prototype.processKeyUp = function (e) {
 }
 
 LGraphCanvas.prototype.processMouseWheel = function (e) {
+
     if (!this.graph) return;
     if (!this.allow_dragcanvas) return;
-
-    var delta = (e.wheelDeltaY != null ? e.wheelDeltaY : e.detail * -60);
+    var delta = (e.wheelDelta != null ? e.wheelDelta : e.detail * -60);
 
     this.adjustMouseEvent(e);
 

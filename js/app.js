@@ -91,9 +91,17 @@ vik.app = (function() {
         container.append(gl.canvas);
         graph_gl.canvas.id = "graph";
         graph = new LGraph();
-        gcanvas = new LGraphCanvas(gl.canvas, graph);
+
+        gcanvas = new LGraphCanvas(gl.canvas, graph, true);
+        graph_gl.animate();
+        graph_gl.ondraw = module.drawete.bind(gcanvas);
+
+
         gcanvas.background_image = "img/grid.png";
         gcanvas.autocompile = true;
+
+
+
 
         gcanvas.onClearRect = function(){
             if(gl != graph_gl)
@@ -122,7 +130,13 @@ vik.app = (function() {
 
     }
 
-
+    module.drawete = function(){
+        if(gl != graph_gl)
+            graph_gl.makeCurrent();
+        gl.clearColor(0.2,0.2,0.2,1);
+        gl.clear( gl.COLOR_BUFFER_BIT );
+        this.draw(true);
+    }
 
     module.compile = function(){
         graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
@@ -188,6 +202,11 @@ vik.app = (function() {
             }
         });
 
+        var clean_graph = document.getElementById("clean_graph");
+        clean_graph.addEventListener("click",function(){
+            graph.clear();
+        });
+
         var code_downloader = document.getElementById("download_code");
         code_downloader.addEventListener("click",function(){
             var json = graph.serialize();
@@ -231,11 +250,6 @@ vik.app = (function() {
                 }
             }
             request.send();
-
-
-
-
-
 
         });
 

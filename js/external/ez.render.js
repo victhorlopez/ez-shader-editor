@@ -362,7 +362,7 @@ EZ.CameraController = function ( renderer ) {
     };
     this.onMouseWheel= function (e) {
         var scale = Math.pow( 0.95, that.zoom_speed ); // each mousewheel is a 5% increment at speed 1
-        if(e.deltaY < 1)
+        if(e.wheelDelta > 1)
             that.scale *=0.95;
         else
             that.scale /=0.95;
@@ -439,11 +439,13 @@ EZ.Renderer.prototype = {
     },
 
     addTextureFromURL: function (name, url) {
-        this.context.makeCurrent();
+        if(this.context != window.gl)
+            this.context.makeCurrent();
         gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST});
     },
     addCubeMapFromURL: function (name, url) {
-        this.context.makeCurrent();
+        if(this.context != window.gl)
+            this.context.makeCurrent();
         gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST});
     },
 
