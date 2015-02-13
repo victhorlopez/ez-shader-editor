@@ -14,6 +14,7 @@ vik.app = (function() {
     var graph_gl = null;
     var renderer = null;
     var main_node = null;
+    var live_update = true;
     module.init = function() {
         window.addEventListener("load", vik.ui.init());
         loadContent();
@@ -97,8 +98,6 @@ vik.app = (function() {
 //        graph_gl.ondraw = module.draw.bind(gcanvas);
 
         gcanvas.background_image = "img/grid.png";
-        gcanvas.live_update = true;
-
 
 
 
@@ -115,7 +114,8 @@ vik.app = (function() {
         }
         gcanvas.onUpdate = function(node)
         {
-            vik.app.compile( );
+            if(live_update)
+                vik.app.compile();
         }
 
         module.loadTextures();
@@ -129,7 +129,7 @@ vik.app = (function() {
 
     }
 
-//    module.drawete = function(){
+//    module.draw = function(){
 //        if(gl != graph_gl)
 //            graph_gl.makeCurrent();
 //        gl.clearColor(0.2,0.2,0.2,1);
@@ -183,6 +183,11 @@ vik.app = (function() {
         vik.ui.onResize();
     }
 
+    module.setLiveUpdate = function(value){
+        live_update = value;
+        if(value) module.compile();
+    }
+
     function loadListeners(){
 
         w2ui['main_layout'].on('resize', function (target, data) {
@@ -207,6 +212,11 @@ vik.app = (function() {
 
         });
 
+        var apply_button = document.getElementById("apply");
+        apply_button.addEventListener("click",function(){
+            module.compile();
+        });
+
         var code_downloader = document.getElementById("download_code");
         code_downloader.addEventListener("click",function(){
             var json = graph.serialize();
@@ -215,20 +225,19 @@ vik.app = (function() {
             return true;
         });
 
-        var live_update = document.getElementById("live_update");
-        live_update.addEventListener("click",function(){
+        var live_update_el = document.getElementById("live_update");
+        live_update_el.addEventListener("click",function(){
             var div = this.parentNode;
             var icon = this.getElementsByTagName('i')[0];
-            if(gcanvas.live_update){
+            if(live_update){
                 div.className = div.className.replace(/pressed\b/,'');
                 icon.className = icon.className.replace(/spin\b/,'');
-
-                gcanvas.live_update = false;
+                module.setLiveUpdate(false);
 
             } else{
                 div.className = div.className +" pressed";
                 icon.className = icon.className +"spin";
-                gcanvas.live_update = true;
+                module.setLiveUpdate(true);
             }
 
         });
