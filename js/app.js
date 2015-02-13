@@ -91,10 +91,16 @@ vik.app = (function() {
         container.append(gl.canvas);
         graph_gl.canvas.id = "graph";
         graph = new LGraph();
-        gcanvas = new LGraphCanvas(gl.canvas, graph, true);
+        gcanvas = new LGraphCanvas(gl.canvas, graph);
         gcanvas.background_image = "img/grid.png";
         gcanvas.autocompile = true;
 
+        gcanvas.onClearRect = function(){
+            if(gl != graph_gl)
+                graph_gl.makeCurrent();
+            gl.clearColor(0.2,0.2,0.2,1);
+            gl.clear( gl.COLOR_BUFFER_BIT );
+        }
 
         gcanvas.onNodeSelected = function(node)
         {
@@ -105,11 +111,8 @@ vik.app = (function() {
             vik.app.compile( );
         }
 
-        graph_gl.ondraw = module.drawGraphCanvas.bind(this);
-        graph_gl.animate();
-
         module.loadTextures();
-        graph.loadFromURL("graphs/graph.json", vik.app.compile);
+        graph.loadFromURL("graphs/smoothstep.json", vik.app.compile);
 
         function render () {
             requestAnimationFrame(render);
@@ -119,16 +122,10 @@ vik.app = (function() {
 
     }
 
-    module.drawGraphCanvas = function (){
-        if(gl != graph_gl)
-            graph_gl.makeCurrent();
 
-        gl.clearColor(0.2,0.2,0.2,1);
-        gl.clear( gl.COLOR_BUFFER_BIT );
-        gcanvas.draw(true);
-    }
 
     module.compile = function(){
+        graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
         graph.runStep(1);
         gcanvas.draw(true,true);
         renderer.context.makeCurrent();

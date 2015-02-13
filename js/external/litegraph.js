@@ -1162,17 +1162,17 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         if (!node.onDropFile)
             return;
 
-
         var file = e.dataTransfer.files[0];
         var filename = file.name;
         var ext = LGraphCanvas.getFileExtension(filename);
         //console.log(file);
+
         //prepare reader
         var reader = new FileReader();
         reader.onload = function (event) {
-            //console.log(event.target);
             if(that.gl)
                 that.gl.makeCurrent();
+            //console.log(event.target);
             var data = event.target.result;
             node.onDropFile(data, filename, file);
             that.onUpdate();
@@ -1980,7 +1980,7 @@ LGraphCanvas.prototype.sendToBack = function (n) {
 
 LGraphCanvas.prototype.computeVisibleNodes = function () {
     var visible_nodes = [];
-    for (var i in this.graph._nodes) {
+    for (var i = this.graph._nodes.length -1; i >= 0; --i) {
         var n = this.graph._nodes[i];
 
         //skip rendering nodes in live mode
@@ -2080,7 +2080,7 @@ LGraphCanvas.prototype.drawFrontCanvas = function () {
         var visible_nodes = this.computeVisibleNodes();
         this.visible_nodes = visible_nodes;
 
-        for (var i in visible_nodes) {
+        for (var i = visible_nodes.length-1; i >= 0 ; --i) {
             var node = visible_nodes[i];
 
             //transform coords system
@@ -2146,6 +2146,8 @@ LGraphCanvas.prototype.drawBackCanvas = function () {
         ctx.start();
 
     //clear
+    if(this.onClearRect)
+        this.onClearRect();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //reset in case of error
@@ -2581,11 +2583,11 @@ LGraphCanvas.prototype.drawConnections = function (ctx) {
     ctx.strokeStyle = "#AAA";
     ctx.globalAlpha = this.editor_alpha;
     //for every node
-    for (var n in this.graph._nodes) {
+    for (var n = this.graph._nodes.length-1; n >= 0 ; --n) {
         var node = this.graph._nodes[n];
         //for every input (we render just inputs because it is easier as every slot can only have one input)
         if (node.inputs && node.inputs.length)
-            for (var i in node.inputs) {
+            for (var i = node.inputs.length-1; i >= 0; --i) {
                 var input = node.inputs[i];
                 if (!input || input.link == null)
                     continue;
@@ -4053,7 +4055,7 @@ var LiteGraph = {
     NODE_DEFAULT_BGCOLOR: "#444",
     NODE_DEFAULT_BOXCOLOR: "#AEF",
     NODE_SELECTED_COLOR: "#FFF",
-    NODE_DEFAULT_SHAPE: "box",
+    NODE_DEFAULT_SHAPE: "box", // round circle box
     MAX_NUMBER_OF_NODES: 1000, //avoid infinite loops
     DEFAULT_POSITION: [100,100],//default node position
     node_images_path: "",
@@ -4814,8 +4816,8 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
         r += "uniform float u_time;\n";
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
-    r +="uniform mat4 u_mvp;\n"+
-        "uniform mat4 u_model;\n";
+    r += "uniform mat4 u_mvp;\n"+
+         "uniform mat4 u_model;\n";
 
     for(var k in code.vertex.getHeader())
         r += k;
