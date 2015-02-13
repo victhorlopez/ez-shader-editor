@@ -3121,7 +3121,7 @@ LGraphNode.prototype._ctor = function( title )
     this.connections = [];
 
     //local data
-    this.properties = {};
+    this.properties =  {};
     this.data = null; //persistent local data
     this.flags = {
         //skip_title_render: true,
@@ -4130,6 +4130,9 @@ var LiteGraph = {
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
         if(!node.shader_piece) node.shader_piece = null;
         if(!node.codes) node.codes = [];
+        if(node.extraproperties)
+            for(var i in node.extraproperties)
+                node.properties[i] = node.extraproperties[i];
         //extra options
         if(options)
         {
@@ -4138,6 +4141,18 @@ var LiteGraph = {
         }
 
         return node;
+    },
+
+
+    extendNodeTypeProperties: function(base_class, method_name, proto_method)
+    {
+        if(!base_class.prototype)
+            throw("Cannot register a simple object, it must be a class with a prototype");
+
+        //extend class
+        base_class.prototype.extraproperties = base_class.prototype.extraproperties || {};
+        base_class.prototype.extraproperties[method_name] = proto_method;
+
     },
 
     /**
@@ -4612,6 +4627,12 @@ LiteGraph.dispatchEvent = function(name, obj, element)
     } else {// for IE
         element.fireEvent("on" + event.eventType, event);
     }
+}
+
+// to improve a lot
+LiteGraph.removeExtension = function(name){
+    var no_ext_name = name.split('.')[0];
+    return no_ext_name;
 }
 
 

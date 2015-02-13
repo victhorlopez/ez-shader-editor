@@ -589,7 +589,8 @@ function LGraphTexture()
     this.addOutput("B","number", {number:1});
     this.addOutput("A","number", {number:1});
     this.addInput("UVs","vec2");
-    this.properties = {name:"", url:""};
+    this.properties =  this.properties || {};
+    this.properties.name = "";
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing
@@ -870,19 +871,6 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
-// the code is the same than LiteGraph
-LGraphTexture.prototype.configure = function(obj)
-{
-    if(obj == null) return null;
-    var r = JSON.parse( JSON.stringify( obj ) );
-
-    for(var i in r)
-        if(i != "_drop_texture")
-            this[i] = r[i];
-    this.shader_piece = PTextureSample; // hardcoded for testing
-
-
-}
 
 LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;
@@ -893,11 +881,12 @@ function LGraphCubemap()
     this.addOutput("Cubemap","Cubemap");
     this.addOutput("Color","vec4", {vec3:1, vec4:1});
     this.addInput("vec3","vec3");
-    this.properties = {name:""};
+    this.properties =  this.properties || {};
+    this.properties.name = "";
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
-    this.properties.name = "cube";
+
 }
 
 LGraphCubemap.title = "TextureSampleCube";
@@ -944,17 +933,18 @@ LGraphCubemap.prototype.onExecute = function()
 
 LGraphCubemap.prototype.onDrawBackground = function(ctx)
 {
-    if( this.flags.collapsed || this.size[1] <= 20)
-        return;
 
-    if(!ctx.webgl)
-        return;
-
-    var cube_mesh = gl.meshes["cube"];
-    if(!cube_mesh)
-        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
-
-    //var view = mat4.lookAt( mat4.create(), [0,0
+//    if( this.flags.collapsed || this.size[1] <= 20)
+//        return;
+//
+//    if(!ctx.webgl)
+//        return;
+//
+//    var cube_mesh = gl.meshes["cube"];
+//    if(!cube_mesh)
+//        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
+//
+//    //var view = mat4.lookAt( mat4.create(), [0,0
 }
 
 

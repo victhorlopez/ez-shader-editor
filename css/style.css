@@ -293,3 +293,18 @@ body .dg li.code-title {
 #code pre {
     margin-top: 0px;
 }
+img.texture-selector{
+    width:100px;
+    height:100px;
+    float:right;
+}
+
+.w2ui-inner-popup .texture-popup li{
+    height:100px;
+}
+.w2ui-inner-popup .texture-popup span{
+    text-align:center;
+    height: 100px;
+    line-height: 100px;
+    width: 60%;
+}

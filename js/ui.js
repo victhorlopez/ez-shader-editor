@@ -10,11 +10,17 @@ vik.ui = (function () {
     var module = {};
     var details_gui = {};
     var palette_gui = {};
-
+    var texture_list = " ";
+    var cubemap_list = " ";
 
     module.init = function () {
         loadLayout();
+        loadImageAssetList("assets/textures/texture/",function(ret){ texture_list = ret}  );
+        loadImageAssetList("assets/textures/cubemap/", function(ret){ cubemap_list = ret} );
+        LiteGraph.extendNodeTypeProperties(LGraphTexture, "Texture", selectTexture);
+        LiteGraph.extendNodeTypeProperties(LGraphCubemap, "Cubemap", selectCubemap);
     }
+
 
     module.onResize = function () {
         details_gui.width = details_gui.parent_node.width();
@@ -36,7 +42,6 @@ vik.ui = (function () {
         for (var property in obj) {
             if (obj.hasOwnProperty(property)) {
 
-
                 var opts_ctrl = opts ? opts[property] : undefined;
                 var min = opts_ctrl ? (opts_ctrl.min) : undefined;
                 var max = opts_ctrl ? (opts_ctrl.max) : undefined;
@@ -51,7 +56,57 @@ vik.ui = (function () {
         }
     }
 
-    function addButton(id,icon_class,text, options){
+
+    // function to select a texture using a popup
+    function selectTexture(){
+
+        w2popup.open({
+            title: 'Load Texture',
+            width: 300,
+            height: 700,
+            onClose   : function (event) { console.log(event); },
+            body: '<div class="w2ui-inner-popup">'+texture_list+'</div>'
+        });
+        var that = this;
+        var list_nodes = document.getElementById("popup-list").childNodes;
+        for(var i = list_nodes.length - 1; i>= 0; --i) {
+            list_nodes[i].addEventListener("click", function () {
+                that.name = LiteGraph.removeExtension(this.id);
+                w2popup.close();
+                for (var i in details_gui.items) {
+                    details_gui.items[i].updateDisplay();
+                }
+                vik.app.compile();
+            });
+        }
+
+    }
+
+    // function to select a texture using a popup
+    function selectCubemap(){
+
+        w2popup.open({
+            title: 'Load Cubemap',
+            width: 300,
+            height: 700,
+            body: '<div class="w2ui-inner-popup">'+cubemap_list+'</div>'
+        });
+        var that = this;
+        var list_nodes = document.getElementById("popup-list").childNodes;
+        for(var i = list_nodes.length - 1; i>= 0; --i) {
+            list_nodes[i].addEventListener("click", function () {
+                that.name = LiteGraph.removeExtension(this.id);
+                w2popup.close();
+                for (var i in details_gui.items) {
+                    details_gui.items[i].updateDisplay();
+                }
+                vik.app.compile();
+            });
+        }
+
+    }
+
+    function addButtonTopBar(id,icon_class,text, options){
         options = options || {};
         var node = document.getElementById("top-buttons");
         var div = document.createElement("div");
@@ -67,6 +122,26 @@ vik.ui = (function () {
             anchor.download = options.download;
         div.appendChild(anchor);
         node.appendChild(div);
+    }
+
+    function loadImageAssetList(path, callback) {
+
+        var request = new XMLHttpRequest();
+
+        request.open('GET',path+"list.txt");
+        request.onreadystatechange = function() {
+            if (request.readyState==4 && request.status==200) {
+                var txt = request.responseText.split(/\r?\n/);
+                var html = '<div class="dg texture-popup"><ul id="popup-list">';
+                for (var i in txt) {
+                    html += '<li class="cr function" id="'+ txt[i] +'"><img src="'+path +''+ txt[i] + '" class="texture-selector"> <span class="property-name">' + txt[i] + '</span></li>';
+                    console.log(txt[i]);
+                }
+                html += '</ul></div>';
+                if(callback) callback.apply(this, [html]);
+            }
+        }
+        request.send();
     }
 
     function loadLayout() {
@@ -96,11 +171,11 @@ vik.ui = (function () {
             resize_cancel: true
         });
 
-        addButton("load_graph","fa fa-upload","Load");
-        addButton("download_code","fa fa-download","Download", {download:"graph.json"});
-        addButton("live_update","fa fa-refresh fa-spin","Live Update", {div_class:"pressed"});
-        addButton("apply","fa fa-check-circle","Apply");
-        addButton("clean_graph","fa fa-trash-o","Clean Up");
+        addButtonTopBar("load_graph","fa fa-upload","Load");
+        addButtonTopBar("download_code","fa fa-download","Download", {download:"graph.json"});
+        addButtonTopBar("live_update","fa fa-refresh fa-spin","Live Update", {div_class:"pressed"});
+        addButtonTopBar("apply","fa fa-check-circle","Apply");
+        addButtonTopBar("clean_graph","fa fa-trash-o","Clean Up");
         // layout inside main_layout left panel
         // named as layout2
         $('#layout_main_layout_panel_left').w2layout({

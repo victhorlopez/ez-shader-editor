@@ -36,9 +36,11 @@ vik.app = (function() {
     }
 
     module.loadTextures = function(name,url) {
-        module.loadTexture("ball", "assets/textures/ball.jpg");
-        module.loadTexture("noise", "assets/textures/noise.png");
-        module.loadCubeMap("cubemap", "assets/textures/cube2.jpg");
+
+        module.loadTexture("ball", "assets/textures/texture/ball.jpg");
+        module.loadTexture("noise", "assets/textures/texture/noise.png");
+        module.loadTexture("NewTennisBallColor", "assets/textures/texture/NewTennisBallColor.jpg");
+        module.loadCubeMap("cube2", "assets/textures/cubemap/cube2.jpg");
     }
 
 
@@ -137,29 +139,31 @@ vik.app = (function() {
 //        this.draw(true);
 //    }
 
-    module.compile = function(){
-        graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
-        graph.runStep(1);
-        gcanvas.draw(true,true);
-        renderer.context.makeCurrent();
-        gl.shaders["current"] = new GL.Shader(graph.shader_output.vertex_code,graph.shader_output.fragment_code);;
-        for(var i in graph.shader_textures){
-            var texture_name = graph.shader_textures[i];
-            main_node.setTexture(texture_name, texture_name);
-        }
-        main_node.shader = "current";
-        var code_div = document.getElementById("code");
-        if(graph.shader_output){
-            code_div.innerHTML = '<div class="dg"><ul>' +
-                '<li class="code-title">Vertex Code</li>' +
-                '<pre><code class="glsl" id="vertex_code">'+graph.shader_output.vertex_code +' </pre></code>' +
-                '<li class="code-title">Fragment Code</li>'+
-                '<pre><code class="glsl" id="fragment_code">' + graph.shader_output.fragment_code +'</pre></code>' +
-                '</ul></div>';
-            hljs.highlightBlock(document.getElementById("vertex_code"));
-            hljs.highlightBlock(document.getElementById("fragment_code"));
-        }
+    module.compile = function(force_compile){
+        if(live_update || force_compile){
 
+            graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
+            graph.runStep(1);
+            gcanvas.draw(true,true);
+            renderer.context.makeCurrent();
+            gl.shaders["current"] = new GL.Shader(graph.shader_output.vertex_code,graph.shader_output.fragment_code);;
+            for(var i in graph.shader_textures){
+                var texture_name = graph.shader_textures[i];
+                main_node.setTexture(texture_name, texture_name);
+            }
+            main_node.shader = "current";
+            var code_div = document.getElementById("code");
+            if(graph.shader_output){
+                code_div.innerHTML = '<div class="dg"><ul>' +
+                    '<li class="code-title">Vertex Code</li>' +
+                    '<pre><code class="glsl" id="vertex_code">'+graph.shader_output.vertex_code +' </pre></code>' +
+                    '<li class="code-title">Fragment Code</li>'+
+                    '<pre><code class="glsl" id="fragment_code">' + graph.shader_output.fragment_code +'</pre></code>' +
+                    '</ul></div>';
+                hljs.highlightBlock(document.getElementById("vertex_code"));
+                hljs.highlightBlock(document.getElementById("fragment_code"));
+            }
+        }
     }
 
     module.resize = function () {
@@ -214,7 +218,7 @@ vik.app = (function() {
 
         var apply_button = document.getElementById("apply");
         apply_button.addEventListener("click",function(){
-            module.compile();
+            module.compile(true);
         });
 
         var code_downloader = document.getElementById("download_code");
