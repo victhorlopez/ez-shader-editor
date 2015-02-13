@@ -51,16 +51,16 @@ vik.ui = (function () {
         }
     }
 
-    function addButton(id,icon_name,text, options){
+    function addButton(id,icon_class,text, options){
         options = options || {};
         var node = document.getElementById("top-buttons");
         var div = document.createElement("div");
-        div.className ="top-button";
+        div.className ="top-button " + (options.div_class || "");
         var anchor = document.createElement("a");
         anchor.id = id;
         var content = document.createTextNode(text);
         var icon = document.createElement("i");
-        icon.className  ="fa fa-"+icon_name;
+        icon.className  = icon_class;
         anchor.appendChild(icon);
         anchor.appendChild(content);
         if(options.download)
@@ -96,10 +96,11 @@ vik.ui = (function () {
             resize_cancel: true
         });
 
-        addButton("load_graph","upload","Load");
-        addButton("download_code","download","Download", {download:"graph.json"});
-        addButton("live_update","refresh fa-spin","Live Update");
-        addButton("clean_graph","trash-o","Clean Up");
+        addButton("load_graph","fa fa-upload","Load");
+        addButton("download_code","fa fa-download","Download", {download:"graph.json"});
+        addButton("live_update","fa fa-refresh fa-spin","Live Update", {div_class:"pressed"});
+        addButton("apply","fa fa-check-circle","Apply");
+        addButton("clean_graph","fa fa-trash-o","Clean Up");
         // layout inside main_layout left panel
         // named as layout2
         $('#layout_main_layout_panel_left').w2layout({

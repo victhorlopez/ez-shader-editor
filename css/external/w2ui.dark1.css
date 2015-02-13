@@ -40,9 +40,22 @@
 }
 
 .w2ui-centered {
-    display: table;
-    width: 100%;
-    height: 100%;
+    /*display: table;*/
+    /*width: 100%;*/
+    /*height: 100%;*/
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 46%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    max-height: 100%;
+    margin: 0;
+    padding: 0 10px;
+    text-align: center;
 }
 
 .w2ui-centered > div {
@@ -53,10 +66,11 @@
 }
 
 input[type=button], button {
-    border-radius: 3px;
-    border: 1px solid #242A37;
-    background-color: #536184;
-    color: #C0C8D5;
+    color: #aaa;
+    background-image: linear-gradient(#222, #3d3d3d);
+    border: 1px solid #111111;
+    border-top: none;
+    border-left-color: #333;
 }
 
 input[type=button]:hover, button:hover {

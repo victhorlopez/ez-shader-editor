@@ -73,6 +73,7 @@ var w2utils = (function () {
         isAlphaNumeric: isAlphaNumeric,
         escapeId: escapeId,
         transition: transition,
+        lang: lang,
         lock: lock,
         unlock: unlock,
         getSize: getSize,
@@ -284,6 +285,10 @@ var w2utils = (function () {
             return ';' + property + ': ' + value + '; -webkit-' + property + ': ' + value + '; -moz-' + property + ': ' + value + '; ' +
                 '-ms-' + property + ': ' + value + '; -o-' + property + ': ' + value + ';';
         }
+    }
+
+    function lang (phrase) {
+        return phrase;
     }
 
     function lock(box, msg, spinner) {
