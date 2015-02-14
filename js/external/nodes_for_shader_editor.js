@@ -477,13 +477,13 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexP
 
 function LGraphShader()
 {
-
+    this.uninstantiable = true;
     this.addInput("color","vec4", {vec4:1});
     this.addInput("normal","vec3", {vec3:1});
     this.addInput("world position offset","vec3", {vec3:1});
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
-    this.size = [200,200];
+    this.size = [125,250];
     this.shader_piece = ShaderConstructor;
 }
 

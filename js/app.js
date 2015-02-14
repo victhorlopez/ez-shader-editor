@@ -54,7 +54,7 @@ vik.app = (function() {
         renderer.color = [0.2,0.2,0.2];
 
         var camera = new EZ.ECamera(45, renderer.context.width / renderer.context.height, 0.1, 1000);
-        camera.position = [0, 0.5, 1.8];
+        camera.position = [0,0.5, 2];
         camera.target = [0, 0.5, 0];
         var scene = new EZ.EScene();
         main_node = new EZ.EMesh();

@@ -1,1 +1,1292 @@
-{"shader_textures":["noise","ball","cube2"],"iteration":98,"last_node_id":13,"last_link_id":15,"links":{"0":{"data":null,"id":0,"origin_id":0,"origin_slot":0,"target_id":1,"target_slot":0},"1":{"data":null,"id":1,"origin_id":0,"origin_slot":0,"target_id":8,"target_slot":0},"2":{"data":null,"id":2,"origin_id":8,"origin_slot":2,"target_id":10,"target_slot":2},"3":{"data":null,"id":3,"origin_id":1,"origin_slot":0,"target_id":2,"target_slot":0},"4":{"data":null,"id":4,"origin_id":4,"origin_slot":0,"target_id":6,"target_slot":0},"5":{"data":null,"id":5,"origin_id":5,"origin_slot":0,"target_id":6,"target_slot":1},"6":{"data":null,"id":6,"origin_id":6,"origin_slot":0,"target_id":7,"target_slot":0},"7":{"data":null,"id":7,"origin_id":1,"origin_slot":1,"target_id":9,"target_slot":0},"8":{"data":null,"id":8,"origin_id":7,"origin_slot":1,"target_id":9,"target_slot":1},"9":{"data":null,"id":9,"origin_id":9,"origin_slot":0,"target_id":3,"target_slot":0},"10":{"data":null,"id":10,"origin_id":10,"origin_slot":0,"target_id":9,"target_slot":2},"11":{"id":11,"origin_id":0,"origin_slot":0,"target_id":11,"target_slot":0,"data":null},"12":{"id":12,"origin_id":11,"origin_slot":1,"target_id":9,"target_slot":0,"data":null},"13":{"id":13,"origin_id":0,"origin_slot":0,"target_id":12,"target_slot":0,"data":null},"14":{"id":14,"origin_id":12,"origin_slot":2,"target_id":10,"target_slot":2,"data":null}},"config":{},"nodes":[{"id":9,"title":"Lerp","type":"texture/Lerp","pos":[800,500],"size":{"0":140,"1":48},"flags":{},"inputs":[{"link":12,"name":"A","type":"vec3","types":{"float":1,"vec3":1,"vec4":1}},{"link":8,"name":"B","type":"vec3","types":{"float":1,"vec3":1,"vec4":1}},{"label":"alpha","link":10,"name":"alpha","type":"number","types":{"float":1}}],"outputs":[{"links":[9],"name":"Result","type":"vec4","types":{"vec3":1,"vec4":1}}],"shader_piece":{"name":"mix","id":"3paramfunc","includes":{}},"codes":[{"vertex":{"header":{},"body_hash":{"794463831":"v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n","1641341615":"v_coord = a_coord;\n"},"body_ids":[794463831,1641341615],"includes":{"a_coord":1,"v_coord":1,"a_normal":1,"u_model":1,"v_normal":1,"u_eye":1,"v_pos":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_noise_texture;\n":1,"uniform sampler2D u_ball_texture;\n":1,"uniform samplerCube u_cube2_texture;\n":1},"body_hash":{"12828015":"vec3 reflect_6 = reflect(camera_to_pixel_ws,pixel_normal_ws);\n","498658087":"vec4 color_7 = textureCube(u_cube2_texture, reflect_6);\n","533039499":"vec4 color_12 = texture2D(u_noise_texture, v_coord);\n","795821817":"float smoothed_10 = smoothstep(0.200,0.800, color_12.r);\n","1515326855":"vec4 color_11 = texture2D(u_ball_texture, v_coord);\n","-413565906":"vec4 mixed_9 = mix(color_11,color_7,smoothed_10);\n","-1326236929":"vec3 pixel_normal_ws = normal;\n","-488000329":"vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n"},"body_ids":[-488000329,-1326236929,12828015,498658087,1515326855,533039499,795821817,-413565906],"includes":{"a_coord":1,"v_coord":1,"a_normal":1,"u_model":1,"v_normal":1,"u_eye":1,"v_pos":1},"scope":""},"output_var":"mixed_9"}],"properties":{"alpha":0.5}},{"id":10,"title":"SmoothStep","type":"texture/SmoothStep","pos":[765,223],"size":{"0":140,"1":48},"flags":{},"inputs":[{"label":"lower=0.200","link":null,"name":"lower","type":"number","types":{"number":1}},{"label":"upper=0.800","link":null,"name":"upper","type":"number","types":{"number":1}},{"link":14,"name":"x","type":"number","types":{"number":1}}],"outputs":[{"links":[10],"name":"Result","type":"number","types":{"number":1}}],"shader_piece":{"id":"smoothsteep","includes":{}},"codes":[{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_noise_texture;\n":1},"body_hash":{"533039499":"vec4 color_12 = texture2D(u_noise_texture, v_coord);\n","795821817":"float smoothed_10 = smoothstep(0.200,0.800, color_12.r);\n"},"body_ids":[533039499,795821817],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"smoothed_10"}],"properties":{"lower":0.2,"upper":0.8}},{"id":3,"title":"Shader","type":"core/Shader","pos":[995,293],"size":[200,200],"flags":{},"inputs":[{"link":9,"name":"color","type":"vec4","types":{"vec4":1}},{"link":null,"name":"normal","type":"vec3","types":{"vec3":1}},{"link":null,"name":"world position offset","type":"vec3","types":{"vec3":1}}],"shader_piece":{},"codes":[],"properties":{}},{"id":5,"title":"CameraToPixelWS","type":"coordinates/CameraToPixelWS","pos":[137,576],"size":{"0":145,"1":20},"flags":{},"outputs":[{"links":[5],"name":"Camera To Pixel","type":"vec3","types":{"vec3":1}}],"shader_piece":{"id":"cameratopixelws","includes":{"u_eye":1,"v_pos":1}},"codes":[{"vertex":{"header":{},"body_hash":{},"body_ids":[],"includes":{"u_eye":1,"v_pos":1},"scope":""},"fragment":{"header":{},"body_hash":{"-488000329":"vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n"},"body_ids":[-488000329],"includes":{"u_eye":1,"v_pos":1},"scope":""},"output_var":"camera_to_pixel_ws"}],"properties":{}},{"id":6,"title":"Reflect","type":"texture/Reflect","pos":[323,513],"size":{"0":140,"1":34},"flags":{},"inputs":[{"link":4,"name":"normal","type":"vec3","types":{"vec3":1}},{"link":5,"name":"vector","type":"vec3","types":{"vec3":1}}],"outputs":[{"links":[6],"name":"reflect vector","type":"vec3","types":{"vec3":1}}],"shader_piece":{"name":"reflect","id":"2paramfunc","includes":{}},"codes":[{"vertex":{"header":{},"body_hash":{"794463831":"v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n"},"body_ids":[794463831],"includes":{"a_normal":1,"u_model":1,"v_normal":1,"u_eye":1,"v_pos":1},"scope":""},"fragment":{"header":{},"body_hash":{"12828015":"vec3 reflect_6 = reflect(camera_to_pixel_ws,pixel_normal_ws);\n","-1326236929":"vec3 pixel_normal_ws = normal;\n","-488000329":"vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n"},"body_ids":[-488000329,-1326236929,12828015],"includes":{"a_normal":1,"u_model":1,"v_normal":1,"u_eye":1,"v_pos":1},"scope":""},"output_var":"reflect_6"}],"properties":{}},{"id":4,"title":"PixelNormalWS","type":"coordinates/PixelNormalWS","pos":[167,463],"size":{"0":128.1199951171875,"1":20},"flags":{},"outputs":[{"links":[4],"name":"Pixel Normal","type":"vec3","types":{"vec3":1}}],"shader_piece":{"id":"pixel_normal_ws","includes":{"a_normal":1,"u_model":1,"v_normal":1}},"codes":[{"vertex":{"header":{},"body_hash":{"794463831":"v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n"},"body_ids":[794463831],"includes":{"a_normal":1,"u_model":1,"v_normal":1},"scope":""},"fragment":{"header":{},"body_hash":{"-1326236929":"vec3 pixel_normal_ws = normal;\n"},"body_ids":[-1326236929],"includes":{"a_normal":1,"u_model":1,"v_normal":1},"scope":""},"output_var":"pixel_normal_ws"}],"properties":{}},{"id":0,"title":"TextureCoords","type":"coordinates/TextureCoords","pos":[251,188],"size":{"0":128.1199951171875,"1":20},"flags":{},"outputs":[{"links":[11,13],"name":"UVs","type":"vec2","types":{"vec2":1}}],"shader_piece":{"id":"uvs","includes":{"a_coord":1,"v_coord":1},"already_included":false},"codes":[{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{},"body_hash":{},"body_ids":[],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"v_coord"}],"properties":{"UTiling":1,"VTiling":1}},{"id":12,"title":"TextureSample","type":"texture/TextureSample","pos":[518,43],"size":[170,165],"flags":{},"inputs":[{"name":"UVs","type":"vec2","link":13}],"outputs":[{"name":"Texture","type":"Texture","types":{"Texture":1},"links":null},{"name":"Color","type":"vec4","types":{"vec3":1,"vec4":1},"links":null},{"name":"R","type":"number","types":{"number":1},"links":[14]},{"name":"G","type":"number","types":{"number":1},"links":null},{"name":"B","type":"number","types":{"number":1},"links":null},{"name":"A","type":"number","types":{"number":1},"links":null}],"shader_piece":{"id":"texture_sample","includes":{}},"codes":[null,{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_noise_texture;\n":1},"body_hash":{"533039499":"vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"},"body_ids":[533039499],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_12"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_noise_texture;\n":1},"body_hash":{"533039499":"vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"},"body_ids":[533039499],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_12.r"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_noise_texture;\n":1},"body_hash":{"533039499":"vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"},"body_ids":[533039499],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_12.g"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_noise_texture;\n":1},"body_hash":{"533039499":"vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"},"body_ids":[533039499],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_12.b"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_noise_texture;\n":1},"body_hash":{"533039499":"vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"},"body_ids":[533039499],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_12.a"}],"properties":{"name":"noise"}},{"id":11,"title":"TextureSample","type":"texture/TextureSample","pos":[520,276],"size":[170,165],"flags":{},"inputs":[{"name":"UVs","type":"vec2","link":11}],"outputs":[{"name":"Texture","type":"Texture","types":{"Texture":1},"links":null},{"name":"Color","type":"vec4","types":{"vec3":1,"vec4":1},"links":[12]},{"name":"R","type":"number","types":{"number":1},"links":null},{"name":"G","type":"number","types":{"number":1},"links":null},{"name":"B","type":"number","types":{"number":1},"links":null},{"name":"A","type":"number","types":{"number":1},"links":null}],"shader_piece":{"id":"texture_sample","includes":{}},"codes":[null,{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_ball_texture;\n":1},"body_hash":{"1515326855":"vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"},"body_ids":[1515326855],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_11"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_ball_texture;\n":1},"body_hash":{"1515326855":"vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"},"body_ids":[1515326855],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_11.r"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_ball_texture;\n":1},"body_hash":{"1515326855":"vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"},"body_ids":[1515326855],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_11.g"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_ball_texture;\n":1},"body_hash":{"1515326855":"vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"},"body_ids":[1515326855],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_11.b"},{"vertex":{"header":{},"body_hash":{"1641341615":"v_coord = a_coord;\n"},"body_ids":[1641341615],"includes":{"a_coord":1,"v_coord":1},"scope":""},"fragment":{"header":{"uniform sampler2D u_ball_texture;\n":1},"body_hash":{"1515326855":"vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"},"body_ids":[1515326855],"includes":{"a_coord":1,"v_coord":1},"scope":""},"output_var":"color_11.a"}],"properties":{"name":"ball"}},{"id":7,"title":"TextureSampleCube","type":"texture/TextureSampleCube","pos":[520,502],"size":[170,165],"flags":{},"inputs":[{"link":6,"name":"vec3","type":"vec3"}],"outputs":[{"links":null,"name":"Cubemap","type":"Cubemap"},{"links":[8],"name":"Color","type":"vec4","types":{"vec3":1,"vec4":1}}],"shader_piece":{"id":"texture_sample_cube","includes":{}},"codes":[null,{"vertex":{"header":{},"body_hash":{"794463831":"v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n"},"body_ids":[794463831],"includes":{"a_normal":1,"u_model":1,"v_normal":1,"u_eye":1,"v_pos":1},"scope":""},"fragment":{"header":{"uniform samplerCube u_cube2_texture;\n":1},"body_hash":{"12828015":"vec3 reflect_6 = reflect(camera_to_pixel_ws,pixel_normal_ws);\n","498658087":"vec4 color_7 = textureCube(u_cube2_texture, reflect_6);\n","-1326236929":"vec3 pixel_normal_ws = normal;\n","-488000329":"vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n"},"body_ids":[-488000329,-1326236929,12828015,498658087],"includes":{"a_normal":1,"u_model":1,"v_normal":1,"u_eye":1,"v_pos":1},"scope":""},"output_var":"color_7"}],"properties":{"name":"cube2"}}]}
+{
+    "config": {},
+    "iteration": 98,
+    "last_link_id": 15,
+    "last_node_id": 13,
+    "links": {
+        "0": {
+            "data": null,
+            "id": 0,
+            "origin_id": 0,
+            "origin_slot": 0,
+            "target_id": 1,
+            "target_slot": 0
+        },
+        "1": {
+            "data": null,
+            "id": 1,
+            "origin_id": 0,
+            "origin_slot": 0,
+            "target_id": 8,
+            "target_slot": 0
+        },
+        "10": {
+            "data": null,
+            "id": 10,
+            "origin_id": 10,
+            "origin_slot": 0,
+            "target_id": 9,
+            "target_slot": 2
+        },
+        "11": {
+            "data": null,
+            "id": 11,
+            "origin_id": 0,
+            "origin_slot": 0,
+            "target_id": 11,
+            "target_slot": 0
+        },
+        "12": {
+            "data": null,
+            "id": 12,
+            "origin_id": 11,
+            "origin_slot": 1,
+            "target_id": 9,
+            "target_slot": 0
+        },
+        "13": {
+            "data": null,
+            "id": 13,
+            "origin_id": 0,
+            "origin_slot": 0,
+            "target_id": 12,
+            "target_slot": 0
+        },
+        "14": {
+            "data": null,
+            "id": 14,
+            "origin_id": 12,
+            "origin_slot": 2,
+            "target_id": 10,
+            "target_slot": 2
+        },
+        "2": {
+            "data": null,
+            "id": 2,
+            "origin_id": 8,
+            "origin_slot": 2,
+            "target_id": 10,
+            "target_slot": 2
+        },
+        "3": {
+            "data": null,
+            "id": 3,
+            "origin_id": 1,
+            "origin_slot": 0,
+            "target_id": 2,
+            "target_slot": 0
+        },
+        "4": {
+            "data": null,
+            "id": 4,
+            "origin_id": 4,
+            "origin_slot": 0,
+            "target_id": 6,
+            "target_slot": 0
+        },
+        "5": {
+            "data": null,
+            "id": 5,
+            "origin_id": 5,
+            "origin_slot": 0,
+            "target_id": 6,
+            "target_slot": 1
+        },
+        "6": {
+            "data": null,
+            "id": 6,
+            "origin_id": 6,
+            "origin_slot": 0,
+            "target_id": 7,
+            "target_slot": 0
+        },
+        "7": {
+            "data": null,
+            "id": 7,
+            "origin_id": 1,
+            "origin_slot": 1,
+            "target_id": 9,
+            "target_slot": 0
+        },
+        "8": {
+            "data": null,
+            "id": 8,
+            "origin_id": 7,
+            "origin_slot": 1,
+            "target_id": 9,
+            "target_slot": 1
+        },
+        "9": {
+            "data": null,
+            "id": 9,
+            "origin_id": 9,
+            "origin_slot": 0,
+            "target_id": 3,
+            "target_slot": 0
+        }
+    },
+    "nodes": [
+        {
+            "codes": [
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "-1326236929": "vec3 pixel_normal_ws = normal;\n",
+                            "-413565906": "vec4 mixed_9 = mix(color_11,color_7,smoothed_10);\n",
+                            "-488000329": "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n",
+                            "12828015": "vec3 reflect_6 = reflect(camera_to_pixel_ws,pixel_normal_ws);\n",
+                            "1515326855": "vec4 color_11 = texture2D(u_ball_texture, v_coord);\n",
+                            "498658087": "vec4 color_7 = textureCube(u_cube2_texture, reflect_6);\n",
+                            "533039499": "vec4 color_12 = texture2D(u_noise_texture, v_coord);\n",
+                            "795821817": "float smoothed_10 = smoothstep(0.200,0.800, color_12.r);\n"
+                        },
+                        "body_ids": [
+                            -488000329,
+                            -1326236929,
+                            12828015,
+                            498658087,
+                            1515326855,
+                            533039499,
+                            795821817,
+                            -413565906
+                        ],
+                        "header": {
+                            "uniform sampler2D u_ball_texture;\n": 1,
+                            "uniform sampler2D u_noise_texture;\n": 1,
+                            "uniform samplerCube u_cube2_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "a_normal": 1,
+                            "u_eye": 1,
+                            "u_model": 1,
+                            "v_coord": 1,
+                            "v_normal": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "mixed_9",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n",
+                            "794463831": "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n"
+                        },
+                        "body_ids": [
+                            794463831,
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "a_normal": 1,
+                            "u_eye": 1,
+                            "u_model": 1,
+                            "v_coord": 1,
+                            "v_normal": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 9,
+            "inputs": [
+                {
+                    "link": 12,
+                    "name": "A",
+                    "type": "vec3",
+                    "types": {
+                        "float": 1,
+                        "vec3": 1,
+                        "vec4": 1
+                    }
+                },
+                {
+                    "link": 8,
+                    "name": "B",
+                    "type": "vec3",
+                    "types": {
+                        "float": 1,
+                        "vec3": 1,
+                        "vec4": 1
+                    }
+                },
+                {
+                    "label": "alpha",
+                    "link": 10,
+                    "name": "alpha",
+                    "type": "number",
+                    "types": {
+                        "float": 1
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "links": [
+                        9
+                    ],
+                    "name": "Result",
+                    "type": "vec4",
+                    "types": {
+                        "vec3": 1,
+                        "vec4": 1
+                    }
+                }
+            ],
+            "pos": [
+                800,
+                500
+            ],
+            "properties": {
+                "alpha": 0.5
+            },
+            "shader_piece": {
+                "id": "3paramfunc",
+                "includes": {},
+                "name": "mix"
+            },
+            "size": {
+                "0": 140,
+                "1": 48
+            },
+            "title": "Lerp",
+            "type": "texture/Lerp"
+        },
+        {
+            "codes": [
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "533039499": "vec4 color_12 = texture2D(u_noise_texture, v_coord);\n",
+                            "795821817": "float smoothed_10 = smoothstep(0.200,0.800, color_12.r);\n"
+                        },
+                        "body_ids": [
+                            533039499,
+                            795821817
+                        ],
+                        "header": {
+                            "uniform sampler2D u_noise_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "smoothed_10",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 10,
+            "inputs": [
+                {
+                    "label": "lower=0.200",
+                    "link": null,
+                    "name": "lower",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "label": "upper=0.800",
+                    "link": null,
+                    "name": "upper",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "link": 14,
+                    "name": "x",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "links": [
+                        10
+                    ],
+                    "name": "Result",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                }
+            ],
+            "pos": [
+                765,
+                223
+            ],
+            "properties": {
+                "lower": 0.20000000000000001,
+                "upper": 0.80000000000000004
+            },
+            "shader_piece": {
+                "id": "smoothsteep",
+                "includes": {}
+            },
+            "size": {
+                "0": 140,
+                "1": 48
+            },
+            "title": "SmoothStep",
+            "type": "texture/SmoothStep"
+        },
+        {
+            "codes": [],
+            "flags": {},
+            "id": 3,
+            "inputs": [
+                {
+                    "link": 9,
+                    "name": "color",
+                    "type": "vec4",
+                    "types": {
+                        "vec4": 1
+                    }
+                },
+                {
+                    "link": null,
+                    "name": "normal",
+                    "type": "vec3",
+                    "types": {
+                        "vec3": 1
+                    }
+                },
+                {
+                    "link": null,
+                    "name": "world position offset",
+                    "type": "vec3",
+                    "types": {
+                        "vec3": 1
+                    }
+                }
+            ],
+            "pos": [
+                995,
+                293
+            ],
+            "properties": {},
+            "shader_piece": {},
+            "size": [
+                125,
+                250
+            ],
+            "title": "Shader",
+            "type": "core/Shader"
+        },
+        {
+            "codes": [
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "-488000329": "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n"
+                        },
+                        "body_ids": [
+                            -488000329
+                        ],
+                        "header": {},
+                        "includes": {
+                            "u_eye": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "camera_to_pixel_ws",
+                    "vertex": {
+                        "body_hash": {},
+                        "body_ids": [],
+                        "header": {},
+                        "includes": {
+                            "u_eye": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 5,
+            "outputs": [
+                {
+                    "links": [
+                        5
+                    ],
+                    "name": "Camera To Pixel",
+                    "type": "vec3",
+                    "types": {
+                        "vec3": 1
+                    }
+                }
+            ],
+            "pos": [
+                137,
+                576
+            ],
+            "properties": {},
+            "shader_piece": {
+                "id": "cameratopixelws",
+                "includes": {
+                    "u_eye": 1,
+                    "v_pos": 1
+                }
+            },
+            "size": {
+                "0": 145,
+                "1": 20
+            },
+            "title": "CameraToPixelWS",
+            "type": "coordinates/CameraToPixelWS"
+        },
+        {
+            "codes": [
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "-1326236929": "vec3 pixel_normal_ws = normal;\n",
+                            "-488000329": "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n",
+                            "12828015": "vec3 reflect_6 = reflect(camera_to_pixel_ws,pixel_normal_ws);\n"
+                        },
+                        "body_ids": [
+                            -488000329,
+                            -1326236929,
+                            12828015
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_normal": 1,
+                            "u_eye": 1,
+                            "u_model": 1,
+                            "v_normal": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "reflect_6",
+                    "vertex": {
+                        "body_hash": {
+                            "794463831": "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n"
+                        },
+                        "body_ids": [
+                            794463831
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_normal": 1,
+                            "u_eye": 1,
+                            "u_model": 1,
+                            "v_normal": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 6,
+            "inputs": [
+                {
+                    "link": 4,
+                    "name": "normal",
+                    "type": "vec3",
+                    "types": {
+                        "vec3": 1
+                    }
+                },
+                {
+                    "link": 5,
+                    "name": "vector",
+                    "type": "vec3",
+                    "types": {
+                        "vec3": 1
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "links": [
+                        6
+                    ],
+                    "name": "reflect vector",
+                    "type": "vec3",
+                    "types": {
+                        "vec3": 1
+                    }
+                }
+            ],
+            "pos": [
+                323,
+                513
+            ],
+            "properties": {},
+            "shader_piece": {
+                "id": "2paramfunc",
+                "includes": {},
+                "name": "reflect"
+            },
+            "size": {
+                "0": 140,
+                "1": 34
+            },
+            "title": "Reflect",
+            "type": "texture/Reflect"
+        },
+        {
+            "codes": [
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "-1326236929": "vec3 pixel_normal_ws = normal;\n"
+                        },
+                        "body_ids": [
+                            -1326236929
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_normal": 1,
+                            "u_model": 1,
+                            "v_normal": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "pixel_normal_ws",
+                    "vertex": {
+                        "body_hash": {
+                            "794463831": "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n"
+                        },
+                        "body_ids": [
+                            794463831
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_normal": 1,
+                            "u_model": 1,
+                            "v_normal": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 4,
+            "outputs": [
+                {
+                    "links": [
+                        4
+                    ],
+                    "name": "Pixel Normal",
+                    "type": "vec3",
+                    "types": {
+                        "vec3": 1
+                    }
+                }
+            ],
+            "pos": [
+                167,
+                463
+            ],
+            "properties": {},
+            "shader_piece": {
+                "id": "pixel_normal_ws",
+                "includes": {
+                    "a_normal": 1,
+                    "u_model": 1,
+                    "v_normal": 1
+                }
+            },
+            "size": {
+                "0": 128.1199951171875,
+                "1": 20
+            },
+            "title": "PixelNormalWS",
+            "type": "coordinates/PixelNormalWS"
+        },
+        {
+            "codes": [
+                {
+                    "fragment": {
+                        "body_hash": {},
+                        "body_ids": [],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "v_coord",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 0,
+            "outputs": [
+                {
+                    "links": [
+                        11,
+                        13
+                    ],
+                    "name": "UVs",
+                    "type": "vec2",
+                    "types": {
+                        "vec2": 1
+                    }
+                }
+            ],
+            "pos": [
+                251,
+                188
+            ],
+            "properties": {
+                "UTiling": 1,
+                "VTiling": 1
+            },
+            "shader_piece": {
+                "already_included": false,
+                "id": "uvs",
+                "includes": {
+                    "a_coord": 1,
+                    "v_coord": 1
+                }
+            },
+            "size": {
+                "0": 128.1199951171875,
+                "1": 20
+            },
+            "title": "TextureCoords",
+            "type": "coordinates/TextureCoords"
+        },
+        {
+            "codes": [
+                null,
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "533039499": "vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            533039499
+                        ],
+                        "header": {
+                            "uniform sampler2D u_noise_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_12",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "533039499": "vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            533039499
+                        ],
+                        "header": {
+                            "uniform sampler2D u_noise_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_12.r",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "533039499": "vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            533039499
+                        ],
+                        "header": {
+                            "uniform sampler2D u_noise_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_12.g",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "533039499": "vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            533039499
+                        ],
+                        "header": {
+                            "uniform sampler2D u_noise_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_12.b",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "533039499": "vec4 color_12 = texture2D(u_noise_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            533039499
+                        ],
+                        "header": {
+                            "uniform sampler2D u_noise_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_12.a",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 12,
+            "inputs": [
+                {
+                    "link": 13,
+                    "name": "UVs",
+                    "type": "vec2"
+                }
+            ],
+            "outputs": [
+                {
+                    "links": null,
+                    "name": "Texture",
+                    "type": "Texture",
+                    "types": {
+                        "Texture": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "Color",
+                    "type": "vec4",
+                    "types": {
+                        "vec3": 1,
+                        "vec4": 1
+                    }
+                },
+                {
+                    "links": [
+                        14
+                    ],
+                    "name": "R",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "G",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "B",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "A",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                }
+            ],
+            "pos": [
+                518,
+                43
+            ],
+            "properties": {
+                "name": "noise"
+            },
+            "shader_piece": {
+                "id": "texture_sample",
+                "includes": {}
+            },
+            "size": [
+                170,
+                165
+            ],
+            "title": "TextureSample",
+            "type": "texture/TextureSample"
+        },
+        {
+            "codes": [
+                null,
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "1515326855": "vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            1515326855
+                        ],
+                        "header": {
+                            "uniform sampler2D u_ball_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_11",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "1515326855": "vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            1515326855
+                        ],
+                        "header": {
+                            "uniform sampler2D u_ball_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_11.r",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "1515326855": "vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            1515326855
+                        ],
+                        "header": {
+                            "uniform sampler2D u_ball_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_11.g",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "1515326855": "vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            1515326855
+                        ],
+                        "header": {
+                            "uniform sampler2D u_ball_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_11.b",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                },
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "1515326855": "vec4 color_11 = texture2D(u_ball_texture, v_coord);\n"
+                        },
+                        "body_ids": [
+                            1515326855
+                        ],
+                        "header": {
+                            "uniform sampler2D u_ball_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_11.a",
+                    "vertex": {
+                        "body_hash": {
+                            "1641341615": "v_coord = a_coord;\n"
+                        },
+                        "body_ids": [
+                            1641341615
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_coord": 1,
+                            "v_coord": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 11,
+            "inputs": [
+                {
+                    "link": 11,
+                    "name": "UVs",
+                    "type": "vec2"
+                }
+            ],
+            "outputs": [
+                {
+                    "links": null,
+                    "name": "Texture",
+                    "type": "Texture",
+                    "types": {
+                        "Texture": 1
+                    }
+                },
+                {
+                    "links": [
+                        12
+                    ],
+                    "name": "Color",
+                    "type": "vec4",
+                    "types": {
+                        "vec3": 1,
+                        "vec4": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "R",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "G",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "B",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                },
+                {
+                    "links": null,
+                    "name": "A",
+                    "type": "number",
+                    "types": {
+                        "number": 1
+                    }
+                }
+            ],
+            "pos": [
+                520,
+                276
+            ],
+            "properties": {
+                "name": "ball"
+            },
+            "shader_piece": {
+                "id": "texture_sample",
+                "includes": {}
+            },
+            "size": [
+                170,
+                165
+            ],
+            "title": "TextureSample",
+            "type": "texture/TextureSample"
+        },
+        {
+            "codes": [
+                null,
+                {
+                    "fragment": {
+                        "body_hash": {
+                            "-1326236929": "vec3 pixel_normal_ws = normal;\n",
+                            "-488000329": "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n",
+                            "12828015": "vec3 reflect_6 = reflect(camera_to_pixel_ws,pixel_normal_ws);\n",
+                            "498658087": "vec4 color_7 = textureCube(u_cube2_texture, reflect_6);\n"
+                        },
+                        "body_ids": [
+                            -488000329,
+                            -1326236929,
+                            12828015,
+                            498658087
+                        ],
+                        "header": {
+                            "uniform samplerCube u_cube2_texture;\n": 1
+                        },
+                        "includes": {
+                            "a_normal": 1,
+                            "u_eye": 1,
+                            "u_model": 1,
+                            "v_normal": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    },
+                    "output_var": "color_7",
+                    "vertex": {
+                        "body_hash": {
+                            "794463831": "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n"
+                        },
+                        "body_ids": [
+                            794463831
+                        ],
+                        "header": {},
+                        "includes": {
+                            "a_normal": 1,
+                            "u_eye": 1,
+                            "u_model": 1,
+                            "v_normal": 1,
+                            "v_pos": 1
+                        },
+                        "scope": ""
+                    }
+                }
+            ],
+            "flags": {},
+            "id": 7,
+            "inputs": [
+                {
+                    "link": 6,
+                    "name": "vec3",
+                    "type": "vec3"
+                }
+            ],
+            "outputs": [
+                {
+                    "links": null,
+                    "name": "Cubemap",
+                    "type": "Cubemap"
+                },
+                {
+                    "links": [
+                        8
+                    ],
+                    "name": "Color",
+                    "type": "vec4",
+                    "types": {
+                        "vec3": 1,
+                        "vec4": 1
+                    }
+                }
+            ],
+            "pos": [
+                520,
+                502
+            ],
+            "properties": {
+                "name": "cube2"
+            },
+            "shader_piece": {
+                "id": "texture_sample_cube",
+                "includes": {}
+            },
+            "size": [
+                170,
+                165
+            ],
+            "title": "TextureSampleCube",
+            "type": "texture/TextureSampleCube"
+        }
+    ],
+    "shader_textures": [
+        "noise",
+        "ball",
+        "cube2"
+    ]
+}

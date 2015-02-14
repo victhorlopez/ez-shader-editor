@@ -4204,7 +4204,8 @@ var LiteGraph = {
                 categories[ this.registered_node_types[i].category ] = 1;
         var result = [];
         for(var i in categories)
-            result.push(i);
+            if(i != "core")
+                result.push(i);
         return result;
     },
 

@@ -325,3 +325,7 @@ img.texture-selector{
     cursor: pointer;
     margin-right: 7px;
 }
+
+.mesh-changer-button:hover {
+    color:#E5E6E7;
+}
