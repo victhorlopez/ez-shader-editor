@@ -106,7 +106,7 @@ vik.ui = (function () {
 
     }
 
-    function addButtonTopBar(id,icon_class,text, options){
+    function addTopBarButton(id,icon_class,text, options){
         options = options || {};
         var node = document.getElementById("top-buttons");
         var div = document.createElement("div");
@@ -124,6 +124,38 @@ vik.ui = (function () {
         node.appendChild(div);
     }
 
+    function addMeshChangerButton(mesh,icon_class,text, options){
+        options = options || {};
+        var node = document.getElementById("mesh-changer");
+        var div = document.createElement("div");
+        div.className ="mesh-changer-button " + (options.div_class || "");
+        var anchor = document.createElement("a");
+        anchor.id = mesh;
+        anchor.title = text;
+        var icon = document.createElement("i");
+        icon.className  = icon_class;
+        anchor.appendChild(icon);
+        if(options.download)
+            anchor.download = options.download;
+        div.appendChild(anchor);
+        node.appendChild(div);
+    }
+
+    function addButtons() {
+        addTopBarButton("load_graph","fa fa-upload","Load");
+        addTopBarButton("download_code","fa fa-download","Download", {download:"graph.json"});
+        addTopBarButton("live_update","fa fa-refresh fa-spin","Live Update", {div_class:"pressed"});
+        addTopBarButton("apply","fa fa-check-circle","Apply");
+        addTopBarButton("clean_graph","fa fa-trash-o","Clean Up");
+
+        $("#layout_layout2_panel_main .w2ui-panel-content").append('<div id="mesh-changer"></div>');
+        addMeshChangerButton("sphere","fa fa-globe","Sphere");
+        addMeshChangerButton("box","fa fa-cube","Cube");
+        addMeshChangerButton("plane","fa fa-square-o","Plane");
+        addMeshChangerButton("monkey","fa fa-car","Suzanne");
+        addMeshChangerButton("","fa fa-folder-open","load");
+
+    }
     function loadImageAssetList(path, callback) {
 
         var request = new XMLHttpRequest();
@@ -171,11 +203,10 @@ vik.ui = (function () {
             resize_cancel: true
         });
 
-        addButtonTopBar("load_graph","fa fa-upload","Load");
-        addButtonTopBar("download_code","fa fa-download","Download", {download:"graph.json"});
-        addButtonTopBar("live_update","fa fa-refresh fa-spin","Live Update", {div_class:"pressed"});
-        addButtonTopBar("apply","fa fa-check-circle","Apply");
-        addButtonTopBar("clean_graph","fa fa-trash-o","Clean Up");
+
+
+
+
         // layout inside main_layout left panel
         // named as layout2
         $('#layout_main_layout_panel_left').w2layout({
@@ -212,6 +243,8 @@ vik.ui = (function () {
             resize_cancel: true
         });
         w2ui['layout2'].content('left', w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') + w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left') );
+
+
 
         // layout inside main_layout right panel
         // named as layout3
@@ -284,6 +317,8 @@ vik.ui = (function () {
         }
 
         palette_gui.parent_node[0].appendChild(palette_gui.domElement);
+
+        addButtons();
 
 // for debugging panels
 //        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +

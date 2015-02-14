@@ -49,7 +49,7 @@ vik.app = (function() {
         // ez render
         var container = $("#layout_layout2_panel_main div.w2ui-panel-content");
         renderer = new EZ.Renderer();
-        renderer.createCanvas(container.width(), container.height());
+        renderer.createCanvas(container.width(), container.height(), "preview_canvas");
         renderer.append(container[0]);
         renderer.color = [0.2,0.2,0.2];
 
@@ -282,6 +282,18 @@ vik.app = (function() {
             }
             request.send();
         });
+
+
+        var mesh_buttons = document.getElementById("mesh-changer").childNodes;
+        for (var i = 0; i < mesh_buttons.length ; i++) {
+            mesh_buttons[i].childNodes[0].addEventListener("click",function(){
+                if(this.id != ""){
+                    main_node.mesh = this.id;
+                }
+            });
+        }
+
+
 
 
     }

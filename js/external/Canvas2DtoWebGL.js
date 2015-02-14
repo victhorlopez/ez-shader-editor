@@ -106,6 +106,7 @@ function enableWebGLCanvas( canvas )
 	var global_angle = 0;
 	var viewport = vec2.fromValues(1,1);
 
+
 	ctx.translate = function(x,y)
 	{
 		tmp_vec2[0] = x;
@@ -233,6 +234,7 @@ function enableWebGLCanvas( canvas )
 
 		texture_shader.uniforms(uniforms).draw(quad_mesh);
 	}
+
 
 	ctx.createPattern = function( img )
 	{

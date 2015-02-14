@@ -308,3 +308,20 @@ img.texture-selector{
     line-height: 100px;
     width: 60%;
 }
+
+#mesh-changer {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+}
+
+.mesh-changer-button {
+    color:#aaa;
+    float:left;
+    background-image: none;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 7px;
+}

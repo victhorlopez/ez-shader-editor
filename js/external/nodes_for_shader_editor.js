@@ -630,7 +630,7 @@ LGraphTexture.MODE_VALUES = {
 
 LGraphTexture.getTexture = function(name)
 {
-    var container =  gl.textures ||LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
+    var container =  gl.textures || LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
 
     if(!container)
         throw("Cannot load texture, container of textures not found");
@@ -933,8 +933,7 @@ LGraphCubemap.prototype.onExecute = function()
 
 LGraphCubemap.prototype.onDrawBackground = function(ctx)
 {
-
-//    if( this.flags.collapsed || this.size[1] <= 20)
+    //    if( this.flags.collapsed || this.size[1] <= 20)
 //        return;
 //
 //    if(!ctx.webgl)
@@ -945,6 +944,8 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 //        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
 //
 //    //var view = mat4.lookAt( mat4.create(), [0,0
+
+
 }
 
 
