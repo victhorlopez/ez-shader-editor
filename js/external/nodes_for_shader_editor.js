@@ -385,6 +385,7 @@ LGraphCamToPixelWS.desc = "The vector from camera to pixel";
 LGraphCamToPixelWS.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 
@@ -406,6 +407,7 @@ LGraphPixelNormalWS.desc = "The normal in world space";
 LGraphPixelNormalWS.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 
@@ -431,6 +433,7 @@ LGraphUVs.desc = "Texture coordinates";
 LGraphUVs.prototype.onExecute = function()
 {
     this.codes[0] = this.shader_piece.getCode(); // I need to check texture id
+    this.codes[0].order = this.order;
 }
 
 LGraphUVs.prototype.setFloatValue = function(old_value,new_value) {
@@ -850,6 +853,7 @@ LGraphTexture.prototype.processInputCode = function()
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name); // 1 it's the color output
+        color_output.order = this.order;
 
         color_output.merge(input_code);
         var r_chan = color_output.clone();
@@ -886,7 +890,7 @@ function LGraphCubemap()
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
-
+    this.size = [170,165];
 }
 
 LGraphCubemap.title = "TextureSampleCube";
@@ -953,12 +957,12 @@ LGraphCubemap.prototype.processInputCode = function()
 {
 
     var input_code = this.getInputCode(0); // get input in link 0
-
-    var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-    var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
-
-    color_code.merge(input_code);
-
+    if(input_code){
+        var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
+        var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
+        color_code.order = this.order;
+        color_code.merge(input_code);
+    }
 
 }
 
@@ -1118,6 +1122,7 @@ LGraphMixer.prototype.processInputCode = function()
     if(code_A && code_B){
         // (out_var, a, b, c, scope, out_type)
         output_code = this.codes[0] = this.shader_piece.getCode( "mixed_"+this.id, code_A.getOutputVar(), code_B.getOutputVar(),alpha, CodePiece.FRAGMENT, "vec4"); // output var must be fragment
+        output_code.order = this.order;
         // if the alpha is an input, otherwise hardcoded
         if(code_alpha){
             output_code.merge(code_alpha);
@@ -1202,6 +1207,7 @@ LGraphReflect.prototype.processInputCode = function()
 
     // (output, incident, normal)
     var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar(), CodePiece.FRAGMENT, "vec3"); // output var must be fragment
+    output_code.order = this.order;
 
     output_code.merge(code_normal);
     output_code.merge(code_incident);

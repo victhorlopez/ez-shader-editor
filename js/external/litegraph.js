@@ -70,6 +70,8 @@ LGraph.prototype.clear = function()
     //this.graph = {};
     this.debug = true;
 
+    LiteGraph.graph_max_steps = 0;
+
     this.change();
 
     this.sendActionToCanvas("clear");
@@ -209,8 +211,71 @@ LGraph.prototype.runStep = function(num)
 
 LGraph.prototype.updateExecutionOrder = function()
 {
+    //this._nodes_in_order = this.computeExecutionBFS();
     this._nodes_in_order = this.computeExecutionOrder();
 }
+
+//This is more internal, it computes the order and returns it
+LGraph.prototype.computeExecutionBFS = function()
+{
+
+    var L = [];
+    var M = {};
+    var visited_links = {}; //to avoid repeating links
+    var visited_nodes = {}; //to avoid repeating links
+    var remaining_links = {}; //to a
+    var node_output = this.findNodesByType("core/Shader")[0]; // our main output
+    var nodes_ordered = [node_output];
+    for (var i = 0;  i < nodes_ordered.length; ++i) {
+        var n = nodes_ordered[i];
+        visited_nodes[n.id] = i; //visited in step i for last time
+        if(n.inputs){
+            for (var j = 0; j < n.inputs.length; j++) {
+                var input = n.inputs[j];
+                //not connected
+                if (input == null || input.link == null )
+                    continue;
+
+
+                var link_id = input.link;
+                var link = this.links[link_id];
+                if (!link) continue;
+
+                //already visited link (ignore it)
+//                if (visited_links[ link.id ])
+//                    continue;
+
+                var origin_node = this.getNodeById(link.origin_id);
+                if (origin_node == null) {
+                    visited_links[ link.id ] = true;
+                    continue;
+                }
+
+                visited_links[link.id] = true; //mark as visited
+                nodes_ordered.push(origin_node); //if no more links, then add to Starters array
+
+            }
+        }
+        if(i > LiteGraph.graph_max_steps){
+            throw("the graph has a loop");
+        }
+    }
+    var sortable = [];
+    for (var node_id in visited_nodes)
+        sortable.push([this.getNodeById( node_id ), visited_nodes[node_id]])
+    sortable.sort(function(a, b) {return a[1] - b[1]})
+
+    var nodes_ordered = [];
+    for(var i = sortable.length-1; i>=0; --i ){
+        var n = sortable[i][0];
+        n.order = i;
+        nodes_ordered.push(n);
+    }
+
+    return nodes_ordered;
+
+}
+
 
 //This is more internal, it computes the order and returns it
 LGraph.prototype.computeExecutionOrder = function()
@@ -293,7 +358,7 @@ LGraph.prototype.computeExecutionOrder = function()
 
     //save order number in the node
     for(var i in L)
-        L[i].order = i;
+        L[i].order = parseInt(i);
 
     return L;
 }
@@ -426,13 +491,16 @@ LGraph.prototype.remove = function(node)
         return; //cannot be removed
 
     //disconnect inputs
-    if(node.inputs)
+    if(node.inputs){
         for(var i = 0; i < node.inputs.length; i++)
         {
             var slot = node.inputs[i];
             if(slot.link != null)
                 node.disconnectInput(i);
         }
+        LiteGraph.graph_max_steps -= node.inputs.length;
+    }
+
 
     //disconnect outputs
     if(node.outputs)
@@ -444,6 +512,7 @@ LGraph.prototype.remove = function(node)
         }
 
     node.id = -1;
+
 
     //callback
     if(node.onRemoved)
@@ -4067,6 +4136,8 @@ var LiteGraph = {
     throw_errors: true,
     registered_node_types: {},
 
+    graph_max_steps:0,
+
     /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -4140,6 +4211,8 @@ var LiteGraph = {
                 node[i] = options[i];
         }
 
+        if(node.inputs)
+            this.graph_max_steps += node.inputs.length;
         return node;
     },
 
@@ -4683,14 +4756,22 @@ CodePiece.prototype.getBody = function()
     return this.body_hash;
 };
 
-CodePiece.prototype.setBody = function(s)
+CodePiece.prototype.setBody = function(s, other_order)
 {
     if(s != ""){
         var id = s.hashCode();
-        if(typeof(this.body_hash[id]) === 'undefined' ){
-            this.body_hash[id] = s;
+        if(this.body_hash[id] && this.body_hash[id].order > other_order){
+            this.body_hash[id].order = this.order;
+            var index = this.body_ids.indexOf(id);
+            this.body_ids.splice(index, 1);
             this.body_ids.unshift(id);
         }
+
+        if(typeof(this.body_hash[id]) === 'undefined' ){
+            this.body_hash[id] = {"str":s, order:this.order}; // we save the order
+            this.body_ids.unshift(id);
+        }
+
     }
 };
 
@@ -4730,7 +4811,7 @@ CodePiece.prototype.merge = function (input_code)
     var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
     for (var i = ids.length-1; i >= 0; i--) {
-        this.setBody(body_hash[ids[i]]);
+        this.setBody(body_hash[ids[i]].str, input_code.order);
     }
 
     for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
@@ -4773,6 +4854,8 @@ ShaderCode.prototype.getOutputVar = function()
 
 ShaderCode.prototype.merge = function (other_code)
 {
+    this.vertex.order = this.order;
+    this.fragment.order = this.order;
     this.vertex.merge(other_code.vertex);
     this.fragment.merge(other_code.fragment);
 
@@ -4783,6 +4866,7 @@ ShaderCode.prototype.clone = function ()
     var vertex = this.vertex.clone();
     var fragment = this.fragment.clone();
     var cloned = new ShaderCode(vertex,fragment,this.output_var);
+    cloned.order = this.order;
     return cloned;
 };
 
@@ -4852,7 +4936,7 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
     var ids = code.vertex.getBodyIds();
     var body_hash = code.vertex.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
     r += "      gl_Position = u_mvp * vec4(a_vertex,1.0);\n"+
         "}\n";
@@ -4885,7 +4969,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
     if(normal.getOutputVar())
         r += "      normal = "+normal.getOutputVar()+".xyz;\n";
@@ -4893,7 +4977,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     ids = code.fragment.getBodyIds();
     body_hash = code.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]];
+        r += "      "+body_hash[ids[i]].str;
     }
 
     r += "      gl_FragColor = "+code.getOutputVar()+";\n"+

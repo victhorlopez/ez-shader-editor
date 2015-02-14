@@ -64,7 +64,6 @@ vik.ui = (function () {
             title: 'Load Texture',
             width: 300,
             height: 700,
-            onClose   : function (event) { console.log(event); },
             body: '<div class="w2ui-inner-popup">'+texture_list+'</div>'
         });
         var that = this;
@@ -167,7 +166,6 @@ vik.ui = (function () {
                 var html = '<div class="dg texture-popup"><ul id="popup-list">';
                 for (var i in txt) {
                     html += '<li class="cr function" id="'+ txt[i] +'"><img src="'+path +''+ txt[i] + '" class="texture-selector"> <span class="property-name">' + txt[i] + '</span></li>';
-                    console.log(txt[i]);
                 }
                 html += '</ul></div>';
                 if(callback) callback.apply(this, [html]);
