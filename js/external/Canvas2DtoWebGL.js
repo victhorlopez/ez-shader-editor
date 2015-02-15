@@ -31,7 +31,7 @@ function enableWebGLCanvas( canvas )
 	var prev_gl = null;
 
 	var ctx = canvas.ctx = gl;
-	canvas.ctx.textures = {};
+	//canvas.ctx.textures = {}; why delete textures?
 	var white = vec4.fromValues(1,1,1,1);
 
 	//some generic shaders

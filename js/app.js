@@ -15,6 +15,8 @@ vik.app = (function() {
     var renderer = null;
     var main_node = null;
     var live_update = true;
+    var canvas2webgl = window.location.href.indexOf('?3d') > -1;
+    console.log(canvas2webgl);
     module.init = function() {
         window.addEventListener("load", vik.ui.init());
         loadContent();
@@ -22,13 +24,16 @@ vik.app = (function() {
     }
 
     module.loadTexture = function(name,url) {
+
         graph_gl.makeCurrent();
         graph_gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST});
+
         renderer.addTextureFromURL(name, url);
 
 
     }
     module.loadCubeMap = function(name,url) {
+
         graph_gl.makeCurrent();
         gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST});
         renderer.addCubeMapFromURL(name, url);
@@ -83,46 +88,22 @@ vik.app = (function() {
 
 
         // litegraph
-        container = $("#layout_main_layout_panel_main div.w2ui-panel-content");
-        var h = container.height();
-        var w = container.width();
-//        var html = "<canvas id='graph' class='graph' width='" + w + "' height='" + h + "'></canvas>";
-//        container.append(html);
-
-        graph_gl = GL.create({width:w,height:h-20, alpha:false});
-        graph_gl.makeCurrent();
-        container.append(gl.canvas);
-        graph_gl.canvas.id = "graph";
         graph = new LGraph();
 
-        graph.on_change = function() {
+        graph.onUpdateExecutionOrder = function() {
             module.compile(false,true);
         }
 
-        gcanvas = new LGraphCanvas(gl.canvas, graph);
+
+        module.changeCanvas();
+
+
 //        graph_gl.animate();
 //        graph_gl.ondraw = module.draw.bind(gcanvas);
 
-        gcanvas.background_image = "img/grid.png";
 
 
 
-        gcanvas.onClearRect = function(){
-            if(gl != graph_gl)
-                graph_gl.makeCurrent();
-            gl.clearColor(0.2,0.2,0.2,1);
-            gl.clear( gl.COLOR_BUFFER_BIT );
-        }
-
-        gcanvas.onNodeSelected = function(node)
-        {
-            vik.ui.updateLeftPanel( node );
-        }
-        gcanvas.onUpdate = function(node)
-        {
-//            if(live_update)
-//                vik.app.compile();
-        }
 
         module.loadTextures();
         graph.loadFromURL("graphs/smoothstep.json", vik.app.compile);
@@ -135,20 +116,18 @@ vik.app = (function() {
 
     }
 
-//    module.draw = function(){
-//        if(gl != graph_gl)
-//            graph_gl.makeCurrent();
-//        gl.clearColor(0.2,0.2,0.2,1);
-//        gl.clear( gl.COLOR_BUFFER_BIT );
-//        this.draw(true);
-//    }
 
     module.compile = function(force_compile, draw){
         if(live_update || force_compile){
-            graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
+            if(canvas2webgl)
+                graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
+            else
+                renderer.context.makeCurrent();
+
             graph.runStep(1);
             if(draw)
                 gcanvas.draw(true,true);
+
             renderer.context.makeCurrent();
             if(graph.shader_output){
                 try {
@@ -156,11 +135,13 @@ vik.app = (function() {
                 }
                 catch(err) {
                     gl.shaders["current"] = gl.shaders["notfound"];
-                    console.log("vertex:");
-                    console.log(graph.shader_output.vertex_code);
-                    console.log("fragment:");
-                    console.log(graph.shader_output.fragment_code);
-                    console.error(err);
+                    if(LiteGraph.debug){
+                        console.log("vertex:");
+                        console.log(graph.shader_output.vertex_code);
+                        console.log("fragment:");
+                        console.log(graph.shader_output.fragment_code);
+                        console.error(err);
+                    }
                 }
             } else
                 gl.shaders["current"] = gl.shaders["notfound"];
@@ -189,10 +170,6 @@ vik.app = (function() {
         var w = parent.width();
         var h = parent.height();
         gcanvas.resize(w, h);
-        graph_gl.makeCurrent();
-        gl.canvas.width = w;
-        gl.canvas.height = h;
-        gl.viewport(0, 0, w, h);
 
         parent = renderer.context.canvas.parentNode;
         w = $(parent).width();
@@ -208,6 +185,53 @@ vik.app = (function() {
     module.setLiveUpdate = function(value){
         live_update = value;
         if(live_update) module.compile();
+    }
+
+    module.changeCanvas = function(){
+        var container = $("#layout_main_layout_panel_main div.w2ui-panel-content");
+        $("#layout_main_layout_panel_main div.w2ui-panel-content canvas").remove();
+        var h = container.height();
+        var w = container.width();
+        if(!graph_gl){
+            graph_gl = GL.create({width:w,height:h-20, alpha:false});
+            graph_gl.canvas.id = "graph";
+        }
+        if(gcanvas)
+            gcanvas.stopRendering();
+
+        if(canvas2webgl){
+            graph_gl.makeCurrent();
+            graph_gl.canvas.className = "";
+            container.append(gl.canvas);
+            gcanvas = new LGraphCanvas(gl.canvas, graph);
+        } else {
+            renderer.context.makeCurrent();
+            var html = "<canvas id='graph' class='graph' width='" + w + "' height='" + h + "'></canvas>";
+            container.append(html);
+            gcanvas = new LGraphCanvas(document.getElementById("graph"), graph);
+        }
+        gcanvas.background_image = "img/grid.png";
+
+        gcanvas.onClearRect = function(){
+            if(canvas2webgl){
+                gl.clearColor(0.2,0.2,0.2,1);
+                gl.clear( gl.COLOR_BUFFER_BIT );
+            }
+        }
+
+        gcanvas.onNodeSelected = function(node)
+        {
+            vik.ui.updateLeftPanel( node );
+        }
+        // we put a timeout so the application can download the textures
+        setTimeout(function(){ module.compile(true,true); }, 1);
+
+
+    }
+
+
+    module.changeGraph = function(graph_name) {
+        graph.loadFromURL("graphs/"+graph_name+".json", vik.app.compile);
     }
 
     function loadListeners(){
@@ -230,7 +254,7 @@ vik.app = (function() {
 
         var clean_graph = document.getElementById("clean_graph");
         clean_graph.addEventListener("click",function(){
-            w2confirm('Are you sure you want to delete the graph?', function (btn) { if(btn == "Yes"){ graph.clear(); } })
+            w2confirm('Are you sure you want to delete the graph?', function (btn) { if(btn == "Yes"){ graph.clear(); module.compile(true); } })
 
         });
 
@@ -264,6 +288,23 @@ vik.app = (function() {
 
         });
 
+        var change_canvas_but = document.getElementById("change_canvas");
+        change_canvas_but.addEventListener("click",function(){
+            var div = this.parentNode;
+            if(!canvas2webgl){
+                canvas2webgl = true;
+                this.childNodes[1].nodeValue = "WebGL";
+            } else {
+                canvas2webgl = false;
+                this.childNodes[1].nodeValue = "Canvas";
+            }
+
+            module.changeCanvas();
+
+        });
+
+
+
 
         var code_loader = document.getElementById("load_graph");
         code_loader.addEventListener("click",function(){
@@ -279,7 +320,7 @@ vik.app = (function() {
                 for(var i = list_nodes.length - 1; i>= 0; --i){
                     list_nodes[i].addEventListener("click",function(){
                         var graph_name = this.id.toLowerCase();
-                        graph.loadFromURL("graphs/"+graph_name+".json", vik.app.compile);
+                        module.changeGraph(graph_name);
                         w2popup.close();
 
                     });

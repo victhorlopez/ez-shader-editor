@@ -146,12 +146,13 @@ vik.ui = (function () {
         addTopBarButton("live_update","fa fa-refresh fa-spin","Live Update", {div_class:"pressed"});
         addTopBarButton("apply","fa fa-check-circle","Apply");
         addTopBarButton("clean_graph","fa fa-trash-o","Clean Up");
+        addTopBarButton("change_canvas","fa fa-cubes","Canvas", {div_class:"pressed"});
 
         $("#layout_layout2_panel_main .w2ui-panel-content").append('<div id="mesh-changer"></div>');
         addMeshChangerButton("sphere","fa fa-globe","Sphere");
         addMeshChangerButton("box","fa fa-cube","Cube");
         addMeshChangerButton("plane","fa fa-square-o","Plane");
-        addMeshChangerButton("monkey","fa fa-car","Suzanne");
+        addMeshChangerButton("monkey","fa fa-user","Suzanne");
         addMeshChangerButton("","fa fa-folder-open","load");
 
     }

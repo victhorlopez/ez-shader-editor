@@ -223,6 +223,9 @@ LGraph.prototype.updateExecutionOrder = function()
 {
     //this._nodes_in_order = this.computeExecutionBFS();
     this._nodes_in_order = this.computeExecutionOrder();
+    if(this.onUpdateExecutionOrder){
+        this.onUpdateExecutionOrder();
+    }
 }
 
 //This is more internal, it computes the order and returns it
@@ -1070,6 +1073,8 @@ LGraphCanvas.prototype.clear = function () {
 
     this.connections_width = 4;
 
+    //this.is_rendering = false;
+
     if (this.onClear) this.onClear();
     //this.UIinit();
 }
@@ -1394,8 +1399,12 @@ LGraphCanvas.prototype.startRendering = function () {
     renderFrame.call(this);
 
     function renderFrame() {
-        if (!this.pause_rendering)
+        if (!this.pause_rendering){
+//            if(this.ctx && this.ctx.webgl)
+//                this.ctx.makeCurrent();
             this.draw();
+        }
+
 
         var window = this.getCanvasWindow();
         if (this.is_rendering)
@@ -1568,7 +1577,7 @@ LGraphCanvas.prototype.processMouseDown = function (e) {
      */
 
     this.graph.change();
-    this.onUpdate(); // callback
+
 
     //this is to ensure to defocus(blur) if a text input element is on focus
     if (!ref_window.document.activeElement || (ref_window.document.activeElement.nodeName.toLowerCase() != "input" && ref_window.document.activeElement.nodeName.toLowerCase() != "textarea"))
@@ -2798,6 +2807,12 @@ LGraphCanvas.prototype.resize = function (width, height) {
     if (this.canvas.width == width && this.canvas.height == height)
         return;
 
+    if(this.ctx && this.ctx.webgl){
+        this.ctx.makeCurrent();
+        gl.canvas.width = width;
+        gl.canvas.height = height;
+        gl.viewport(0, 0, width, height);
+    }
     this.canvas.width = width;
     this.canvas.height = height;
     this.bgcanvas.width = this.canvas.width;
@@ -4894,10 +4909,13 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
     var vertex_code = this.createVertexCode(color_code, normal_code, world_offset_code);
     var fragment_code = this.createFragmentCode(color_code, normal_code, world_offset_code);
     if(LiteGraph.debug){
-        console.log("vertex:");
-        console.log(vertex_code);
-        console.log("fragment:");
-        console.log(fragment_code);
+        console.log("compiling code");
+//        if(LiteGraph.showcode){
+//            console.log("vertex:");
+//            console.log(vertex_code);
+//            console.log("fragment:");
+//            console.log(fragment_code);
+//        }
     }
 
     var shader = {};

@@ -777,7 +777,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
 
 
     //Different texture? then get it from the GPU
-    if(this._last_preview_tex != this._last_tex)
+    //if(this._last_preview_tex != this._last_tex)
     {
         if(ctx.webgl)
         {
