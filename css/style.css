@@ -28,8 +28,12 @@ body .dg .title {
     user-select: none;
 }
 
+body .dg .property-name{
+    width :100%;
+}
+
 body .dg.main {
-    //box-shadow: 0 0 8px rgba(0,0,0,0.7);
+    /*box-shadow: 0 0 8px rgba(0,0,0,0.7);*/
 }
 
 @media only screen and (max-width : 1350px) {

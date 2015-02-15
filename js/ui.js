@@ -75,7 +75,7 @@ vik.ui = (function () {
                 for (var i in details_gui.items) {
                     details_gui.items[i].updateDisplay();
                 }
-                vik.app.compile();
+                vik.app.compile(false,true);
             });
         }
 
@@ -99,7 +99,7 @@ vik.ui = (function () {
                 for (var i in details_gui.items) {
                     details_gui.items[i].updateDisplay();
                 }
-                vik.app.compile();
+                vik.app.compile(false,true);
             });
         }
 
@@ -191,8 +191,15 @@ vik.ui = (function () {
                         { id: 'Code', caption: 'Code', closable: false }
                     ],
                     onClick: function (event) {
-                        $('#code').toggle();
-                        $('#graph').toggle();
+                        console.log(event);
+                        if(event.tab.id == "Graph"){
+                            $('#code').hide();
+                            $('#graph').show();
+                        } else {
+                            $('#code').show();
+                            $('#graph').hide();
+                        }
+
                     }
                 } },
                 { type: 'left', size: '25%', resizable: true },

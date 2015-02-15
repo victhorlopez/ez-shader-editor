@@ -937,7 +937,7 @@ LGraphCubemap.prototype.onExecute = function()
 
 LGraphCubemap.prototype.onDrawBackground = function(ctx)
 {
-    //    if( this.flags.collapsed || this.size[1] <= 20)
+//        if( this.flags.collapsed || this.size[1] <= 20)
 //        return;
 //
 //    if(!ctx.webgl)
@@ -947,8 +947,8 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 //    if(!cube_mesh)
 //        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
 //
-//    //var view = mat4.lookAt( mat4.create(), [0,0
-
+//    if(this._last_tex)
+//        ctx.drawImage(this._last_tex,this.size[1]* 0.05,this.size[1]* 0.2,this.size[0]* 0.75,this.size[1]* 0.75);
 
 }
 

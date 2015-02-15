@@ -235,6 +235,85 @@ function enableWebGLCanvas( canvas )
 		texture_shader.uniforms(uniforms).draw(quad_mesh);
 	}
 
+    var cube_mesh = gl.meshes["cube"];
+    if(!cube_mesh)
+        cube_mesh = gl.meshes["cube"] = GL.Mesh.cube({size:1});
+
+    var persp = mat4.create();
+    var view = mat4.create();
+    var model = mat4.create();
+    var mvp = mat4.create();
+    var temp = mat4.create();
+    mat4.perspective(persp, 45 * DEG2RAD, gl.canvas.width / gl.canvas.height, 0.1, 1000);
+    mat4.lookAt(view, [0,30,30],[0,0,0], [0,1,0]);
+    //basic phong shader
+    var shader = new Shader('\
+				precision highp float;\
+				attribute vec3 a_vertex;\
+				attribute vec3 a_normal;\
+				attribute vec2 a_coord;\
+				varying vec3 v_normal;\
+				varying vec2 v_coord;\
+				uniform mat4 u_mvp;\
+				uniform mat4 u_model;\
+				void main() {\
+					v_coord = a_coord;\
+					v_normal = (u_model * vec4(a_normal,0.0)).xyz;\
+					gl_Position = u_mvp * vec4(a_vertex,1.0);\
+				}\
+				', '\
+				precision highp float;\
+				varying vec3 v_normal;\
+				varying vec2 v_coord;\
+				uniform vec3 u_lightvector;\
+				uniform vec4 u_color;\
+				uniform samplerCube u_texture;\
+				void main() {\
+				  vec3 N = normalize(v_normal);\
+				  vec4 color = u_color * textureCube( u_texture, v_normal);\
+				  gl_FragColor = color * max(0.0, dot(u_lightvector,N));\
+				}\
+			');
+
+    shader.uniforms({
+        u_color: [1,1,1,1],
+        u_lightvector: vec3.normalize(vec3.create(),[1,1,1]),
+        u_model: model,
+        u_texture: 0,
+        u_mvp: mvp
+    });
+
+
+//    ctx.drawCube= function( img, x, y, w, h )
+//    {
+//
+//
+//        if(!img || img.width == 0 || img.height == 0) return;
+//
+//        var tex = getTexture(img);
+//        if(!tex) return;
+//        var texx = new GL.Texture(w,h);
+//
+//        tex.bind(0);
+//        texx.drawTo(shader.draw,cube_mesh, shader);
+//        tex.unbind(0);
+//
+//        tmp_vec2[0] = x; tmp_vec2[1] = y;
+//        tmp_vec2b[0] = w === undefined ? tex.width : w;
+//        tmp_vec2b[1] = h === undefined ? tex.height : h;
+//
+//        texx.bind(0);
+//        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.imageSmoothingEnabled ? gl.LINEAR : gl.NEAREST );
+//
+//        uniforms.u_color = this.tintImages ? this._fillColor : white;
+//        uniforms.u_position = tmp_vec2;
+//        uniforms.u_size = tmp_vec2b;
+//        uniforms.u_transform = this._matrix;
+//        uniforms.u_viewport = viewport;
+//
+//        texture_shader.uniforms(uniforms).draw(quad_mesh);
+//    }
+
 
 	ctx.createPattern = function( img )
 	{

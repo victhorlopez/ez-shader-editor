@@ -139,12 +139,13 @@ vik.app = (function() {
 //        this.draw(true);
 //    }
 
-    module.compile = function(force_compile){
+    module.compile = function(force_compile, draw){
         if(live_update || force_compile){
 
             graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
             graph.runStep(1);
-            gcanvas.draw(true,true);
+            if(draw)
+                gcanvas.draw(true,true);
             renderer.context.makeCurrent();
             gl.shaders["current"] = new GL.Shader(graph.shader_output.vertex_code,graph.shader_output.fragment_code);;
             for(var i in graph.shader_textures){

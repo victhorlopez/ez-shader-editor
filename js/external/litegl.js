@@ -3088,7 +3088,7 @@
      * @method drawTo
      * @param {Function} callback function that does all the rendering inside this texture
      */
-    Texture.prototype.drawTo = function(callback, params)
+    Texture.prototype.drawTo = function(callback, params, caller)
     {
         var gl = this.gl;
 
@@ -3158,8 +3158,8 @@
 
         gl.viewport(0, 0, this.width, this.height);
 
-        if(gl._current_texture_drawto)
-            throw("Texture.drawTo: Cannot use drawTo from inside another drawTo");
+//        if(gl._current_texture_drawto)
+//            throw("Texture.drawTo: Cannot use drawTo from inside another drawTo");
 
         gl._current_texture_drawto = this;
         gl._current_fbo_color = framebuffer;
@@ -3173,7 +3173,7 @@
         {
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.handler, 0);
             gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
-            callback(this, params);
+            callback(caller, params);
         }
         else if(this.texture_type == gl.TEXTURE_CUBE_MAP)
         {
