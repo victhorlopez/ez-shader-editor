@@ -95,6 +95,10 @@ vik.app = (function() {
         graph_gl.canvas.id = "graph";
         graph = new LGraph();
 
+        graph.on_change = function() {
+            module.compile(false,true);
+        }
+
         gcanvas = new LGraphCanvas(gl.canvas, graph);
 //        graph_gl.animate();
 //        graph_gl.ondraw = module.draw.bind(gcanvas);
@@ -116,8 +120,8 @@ vik.app = (function() {
         }
         gcanvas.onUpdate = function(node)
         {
-            if(live_update)
-                vik.app.compile();
+//            if(live_update)
+//                vik.app.compile();
         }
 
         module.loadTextures();
@@ -141,13 +145,26 @@ vik.app = (function() {
 
     module.compile = function(force_compile, draw){
         if(live_update || force_compile){
-
             graph_gl.makeCurrent(); // we change the context so stuff like downloading from the gpu in execution doesn't bug
             graph.runStep(1);
             if(draw)
                 gcanvas.draw(true,true);
             renderer.context.makeCurrent();
-            gl.shaders["current"] = new GL.Shader(graph.shader_output.vertex_code,graph.shader_output.fragment_code);;
+            if(graph.shader_output){
+                try {
+                    gl.shaders["current"] = new GL.Shader(graph.shader_output.vertex_code,graph.shader_output.fragment_code);
+                }
+                catch(err) {
+                    gl.shaders["current"] = gl.shaders["notfound"];
+                    console.log("vertex:");
+                    console.log(graph.shader_output.vertex_code);
+                    console.log("fragment:");
+                    console.log(graph.shader_output.fragment_code);
+                    console.error(err);
+                }
+            } else
+                gl.shaders["current"] = gl.shaders["notfound"];
+
             for(var i in graph.shader_textures){
                 var texture_name = graph.shader_textures[i];
                 main_node.setTexture(texture_name, texture_name);
@@ -190,7 +207,7 @@ vik.app = (function() {
 
     module.setLiveUpdate = function(value){
         live_update = value;
-        if(value) module.compile();
+        if(live_update) module.compile();
     }
 
     function loadListeners(){
@@ -213,7 +230,7 @@ vik.app = (function() {
 
         var clean_graph = document.getElementById("clean_graph");
         clean_graph.addEventListener("click",function(){
-            w2confirm('Are you sure you want to delete the graph?', function (btn) { if(btn == "Yes") graph.clear(); })
+            w2confirm('Are you sure you want to delete the graph?', function (btn) { if(btn == "Yes"){ graph.clear(); } })
 
         });
 

@@ -44,6 +44,8 @@ LGraph.prototype.clear = function()
     //nodes
     this._nodes = [];
     this._nodes_by_id = {};
+    this._nodes_in_order = [];
+
 
     //links
     this.last_link_id = 0;
@@ -70,7 +72,15 @@ LGraph.prototype.clear = function()
     //this.graph = {};
     this.debug = true;
 
+    // flag controllig if we are configuring a graph
+    // useful to not call change() on the set up
+    this.configuring = false;
+
+    this.shader_output = null;
+
     LiteGraph.graph_max_steps = 0;
+
+
 
     this.change();
 
@@ -471,7 +481,8 @@ LGraph.prototype.add = function(node, skip_compute_order)
 
     this.setDirtyCanvas(true);
 
-    this.change();
+    if(!this.configuring)
+        this.change();
 
     return node; //to chain actions
 }
@@ -891,7 +902,7 @@ LGraph.prototype.serialize = function()
         links: LiteGraph.cloneObject( this.links ),
 
         config: this.config,
-        nodes: nodes_info
+        _nodes: nodes_info
     };
 
     return data;
@@ -927,11 +938,13 @@ LGraph.prototype.configure = function(data, keep_old)
     if(!keep_old)
         this.clear();
 
+    this.configuring = true;
     var nodes = data.nodes;
 
     //copy all stored fields
     for (var i in data)
-        this[i] = data[i];
+        if(i != "nodes")
+            this[i] = data[i];
 
     var error = false;
 
@@ -953,9 +966,10 @@ LGraph.prototype.configure = function(data, keep_old)
         this.add(node, true); //add before configure, otherwise configure cannot create links
         node.configure(n_info);
     }
-
+    this.configuring = false;
     this.updateExecutionOrder();
     this.setDirtyCanvas(true,true);
+    this.change();
     return error;
 }
 
@@ -1779,7 +1793,6 @@ LGraphCanvas.prototype.processMouseUp = function (e) {
      */
 
     this.graph.change();
-    this.onUpdate();
     e.stopPropagation();
     e.preventDefault();
     return false;
@@ -1873,9 +1886,7 @@ LGraphCanvas.prototype.processMouseWheel = function (e) {
     return false; // prevent default
 }
 
-LGraphCanvas.prototype.onUpdate = function () {
 
-}
 
 LGraphCanvas.prototype.onNodeSelected = function (n) {
 
@@ -4888,20 +4899,13 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
         console.log("fragment:");
         console.log(fragment_code);
     }
-    try {
-        var shader = {};
-        shader.vertex_code = vertex_code;
-        shader.fragment_code = fragment_code;
-        return shader;
-    }
-    catch(err) {
-        console.log("vertex:");
-        console.log(vertex_code);
-        console.log("fragment:");
-        console.log(fragment_code);
-        console.error(err);
-    }
-    return null;
+
+    var shader = {};
+    shader.vertex_code = vertex_code;
+    shader.fragment_code = fragment_code;
+    return shader;
+
+
 
 }
 

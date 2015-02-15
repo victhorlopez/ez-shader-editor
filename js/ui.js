@@ -191,7 +191,6 @@ vik.ui = (function () {
                         { id: 'Code', caption: 'Code', closable: false }
                     ],
                     onClick: function (event) {
-                        console.log(event);
                         if(event.tab.id == "Graph"){
                             $('#code').hide();
                             $('#graph').show();
