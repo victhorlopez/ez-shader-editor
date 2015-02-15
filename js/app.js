@@ -86,7 +86,6 @@ vik.app = (function() {
         node.scale = [50,50,50];
         //scene.addChild(node);
 
-
         // litegraph
         graph = new LGraph();
 
@@ -96,10 +95,6 @@ vik.app = (function() {
 
 
         module.changeCanvas();
-
-
-//        graph_gl.animate();
-//        graph_gl.ondraw = module.draw.bind(gcanvas);
 
 
 
@@ -135,7 +130,7 @@ vik.app = (function() {
                 }
                 catch(err) {
                     gl.shaders["current"] = gl.shaders["notfound"];
-                    if(LiteGraph.debug){
+                    if(LiteGraph.showcode){
                         console.log("vertex:");
                         console.log(graph.shader_output.vertex_code);
                         console.log("fragment:");
@@ -223,6 +218,17 @@ vik.app = (function() {
         {
             vik.ui.updateLeftPanel( node );
         }
+
+        gcanvas.onDropFile = function(data, filename, file){
+            if(canvas2webgl)
+                renderer.context.makeCurrent();
+            else
+                graph_gl.makeCurrent();
+
+            var tex = LGraphTexture.loadTextureFromFile(data, filename, file);
+
+        }
+
         // we put a timeout so the application can download the textures
         setTimeout(function(){ module.compile(true,true); }, 1);
 
@@ -235,6 +241,11 @@ vik.app = (function() {
     }
 
     function loadListeners(){
+
+        window.addEventListener("contentChange",function(){
+           vik.app.compile();
+        });
+
 
         w2ui['main_layout'].on('resize', function (target, data) {
             data.onComplete = function () {
@@ -294,9 +305,11 @@ vik.app = (function() {
             if(!canvas2webgl){
                 canvas2webgl = true;
                 this.childNodes[1].nodeValue = "WebGL";
+                LiteGraph.current_ctx = LiteGraph.CANVAS_WEBGL;
             } else {
                 canvas2webgl = false;
                 this.childNodes[1].nodeValue = "Canvas";
+                LiteGraph.current_ctx = LiteGraph.CANVAS_2D;
             }
 
             module.changeCanvas();

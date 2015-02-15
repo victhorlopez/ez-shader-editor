@@ -223,9 +223,8 @@ LGraph.prototype.updateExecutionOrder = function()
 {
     //this._nodes_in_order = this.computeExecutionBFS();
     this._nodes_in_order = this.computeExecutionOrder();
-    if(this.onUpdateExecutionOrder){
-        this.onUpdateExecutionOrder();
-    }
+
+    LiteGraph.dispatchEvent("contentChange", null, null);
 }
 
 //This is more internal, it computes the order and returns it
@@ -1264,7 +1263,9 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
             //console.log(event.target);
             var data = event.target.result;
             node.onDropFile(data, filename, file);
-            that.onUpdate();
+            if(that.onDropFile)
+                that.onDropFile(data, filename, file);
+            LiteGraph.dispatchEvent("contentChange", null, null);
         };
 
         //read data
@@ -4164,6 +4165,10 @@ var LiteGraph = {
 
     graph_max_steps:0,
 
+    CANVAS_WEBGL: 1,
+    CANVAS_2D: 2,
+    current_ctx: 0,
+
     /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -4908,15 +4913,6 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
 
     var vertex_code = this.createVertexCode(color_code, normal_code, world_offset_code);
     var fragment_code = this.createFragmentCode(color_code, normal_code, world_offset_code);
-    if(LiteGraph.debug){
-        console.log("compiling code");
-//        if(LiteGraph.showcode){
-//            console.log("vertex:");
-//            console.log(vertex_code);
-//            console.log("fragment:");
-//            console.log(fragment_code);
-//        }
-    }
 
     var shader = {};
     shader.vertex_code = vertex_code;
@@ -4929,7 +4925,10 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
 
 ShaderConstructor.createVertexCode = function (code, normal,offset) {
 
-    var includes = code.vertex.includes;
+    var includes = {};
+    for (var line in code.vertex.includes) { includes[line] = 1; }
+    for (var line in normal.vertex.includes) { includes[line] = 1; }
+    for (var line in offset.vertex.includes) { includes[line] = 1; }
     // header
     var r = "precision highp float;\n"+
         "attribute vec3 a_vertex;\n"+
@@ -4937,7 +4936,7 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
         "attribute vec2 a_coord;\n";
     if (includes["v_coord"])
         r += "varying vec2 v_coord;\n";
-    if (includes["v_normal"])
+    if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE)
         r += "varying vec3 v_normal;\n";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
@@ -4967,12 +4966,16 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
 }
 
 ShaderConstructor.createFragmentCode = function (code,normal,offset) {
-    var includes = code.fragment.includes;
+
+    var includes = {};
+    for (var line in code.fragment.includes) { includes[line] = 1; }
+    for (var line in normal.fragment.includes) { includes[line] = 1; }
+    for (var line in offset.fragment.includes) { includes[line] = 1; }
     // header
     var r = "precision highp float;\n";
     if (includes["v_coord"])
         r += "varying vec2 v_coord;\n";
-    if (includes["v_normal"])
+    if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
         r += "varying vec3 v_normal;\n";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
@@ -4980,6 +4983,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
         r += "uniform float u_time;\n";
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
+    r += "uniform vec4 u_color;\n";
     for(var k in code.fragment.getHeader())
         r += k;
     for(var k in normal.fragment.getHeader())
@@ -5002,7 +5006,7 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
         r += "      "+body_hash[ids[i]].str;
     }
 
-    r += "      gl_FragColor = "+code.getOutputVar()+";\n"+
+    r += "       gl_FragColor = "+code.getOutputVar()+";\n"+
         "}";
 
     return r;
