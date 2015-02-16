@@ -4,8 +4,8 @@
 
 function LGraph1ParamNode()
 {
-    this.addOutput("result","vec3", this.getOutputTypes() );
-    this.addInput("A","vec3", this.getInputTypes());
+    this.addOutput("result","notype", this.getOutputTypes(), this.getOutputExtraInfo() );
+    this.addInput("A","notype", this.getInputTypes(), this.getInputExtraInfo());
 
 
     this.shader_piece = LiteGraph.CodeLib[this.getCodeName()]; // hardcoded for testing
@@ -73,6 +73,15 @@ LGraph1ParamNode.prototype.getCodeName = function()
     return this.code_name;
 }
 
+LGraph1ParamNode.prototype.getInputExtraInfo = function()
+{
+    return this.in_extra_info;
+}
+
+LGraph1ParamNode.prototype.getOutputExtraInfo = function()
+{
+    return this.out_extra_info;
+}
 
 //LiteGraph.registerNodeType("texture/reflect", LGraphReflect);
 
@@ -591,7 +600,7 @@ function LGraphTexture()
     this.addOutput("G","number", {number:1});
     this.addOutput("B","number", {number:1});
     this.addOutput("A","number", {number:1});
-    this.addInput("UVs","vec2");
+    this.addInput("UVs","vec2", {vec2:1});
     this.properties =  this.properties || {};
     this.properties.name = "";
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
@@ -1095,8 +1104,10 @@ LiteGraph.registerNodeType("math/"+LGraphCos.title, LGraphCos);
 function LGraphSin()
 {
     this.code_name = "sin";
-    this.output_types = {number:1, vec3:1, vec4:1, vec2:1};
-    this.intput_types = {number:1, vec3:1, vec4:1, vec2:1};
+    this.output_types = { };
+    this.out_extra_info = {types_list: {number:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_types = { };
+    this.in_extra_info = {types_list: {number:1, vec3:1, vec4:1, vec2:1},   use_t:1};
     this.output_type = "float";
     LGraph1ParamNode.call( this);
     console.log(this);
