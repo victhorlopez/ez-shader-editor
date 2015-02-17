@@ -3394,8 +3394,10 @@
             var image = new Image();
             image.src = url;
             var that = this;
+            that.gl = gl;
             image.onload = function()
             {
+                that.gl.makeCurrent();
                 options.texture = texture;
                 GL.Texture.fromImage(this, options);
                 delete texture["ready"]; //texture.ready = true;

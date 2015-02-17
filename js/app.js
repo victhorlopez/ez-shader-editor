@@ -249,9 +249,6 @@ vik.app = (function() {
 
         }
 
-        // we put a timeout so the application can download the textures
-        setTimeout(function(){ module.compile(true,true); }, 1);
-
 
     }
 
