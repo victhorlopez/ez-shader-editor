@@ -917,13 +917,13 @@ LGraph.prototype.serialize = function()
  * @param {String} url configure a graph from a JSON string
  * @param {Function} on_complete callback
  */
-LGraph.prototype.loadFromURL = function (url, on_complete){
+LGraph.prototype.loadFromURL = function (url, on_complete, params){
 
     var that = this;
     HttpRequest( url, null, function(data) {
         that.configure(JSON.parse(data));
         if(on_complete)
-            on_complete(graph);
+            on_complete(params);
     }, function(err){
         if(on_complete)
             on_complete(null);

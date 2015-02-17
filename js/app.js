@@ -23,31 +23,54 @@ vik.app = (function() {
         loadListeners();
     }
 
-    module.loadTexture = function(name,url) {
+    module.loadTexture = function(name,url, sync_load) {
 
+        sync_load.sync_info.callbacksToComplete += 2;
         graph_gl.makeCurrent();
-        graph_gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST});
+        graph_gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete);
 
-        renderer.addTextureFromURL(name, url);
+        renderer.addTextureFromURL(name, url, sync_load.onComplete);
 
 
     }
-    module.loadCubeMap = function(name,url) {
+    module.loadCubeMap = function(name,url, sync_load) {
 
+        sync_load.sync_info.callbacksToComplete += 2;
         graph_gl.makeCurrent();
-        gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST});
-        renderer.addCubeMapFromURL(name, url);
+        gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete);
+        renderer.addCubeMapFromURL(name, url, sync_load.onComplete);
 
     }
 
     module.loadTextures = function(name,url) {
 
-        module.loadTexture("ball", "assets/textures/texture/ball.jpg");
-        module.loadTexture("noise", "assets/textures/texture/noise.png");
-        module.loadTexture("NewTennisBallColor", "assets/textures/texture/NewTennisBallColor.jpg");
-        module.loadCubeMap("cube2", "assets/textures/cubemap/cube2.jpg");
+        var sync_info =  {
+            callbacksToComplete: 0,
+            callbacksCompleted: 0,
+            callback: module.loadGraph
+        };
+        var sync_load = {
+            sync_info: sync_info,
+            onComplete: function( ){
+                sync_info.callbacksCompleted++;
+                if(sync_info.callbacksCompleted == sync_info.callbacksToComplete) {
+                    sync_info.callback();
+                }
+            }
+        };
+        module.loadTexture("ball", "assets/textures/texture/ball.jpg", sync_load);
+        module.loadTexture("noise", "assets/textures/texture/noise.png", sync_load);
+        module.loadTexture("NewTennisBallColor", "assets/textures/texture/NewTennisBallColor.jpg", sync_load);
+        module.loadCubeMap("cube2", "assets/textures/cubemap/cube2.jpg", sync_load);
+
     }
 
+    module.loadGraph = function() {
+
+        graph.loadFromURL("graphs/smoothstep.json", vik.app.compile, [true,true]);
+
+
+    }
 
     function loadContent() {
 
@@ -101,7 +124,7 @@ vik.app = (function() {
 
 
         module.loadTextures();
-        graph.loadFromURL("graphs/smoothstep.json", vik.app.compile);
+
 
         function render () {
             requestAnimationFrame(render);

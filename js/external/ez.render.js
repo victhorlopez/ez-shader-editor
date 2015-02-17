@@ -471,15 +471,15 @@ EZ.Renderer.prototype = {
         this.context.meshes[name] = mesh;
     },
 
-    addTextureFromURL: function (name, url) {
+    addTextureFromURL: function (name, url, callback) {
         if(this.context != window.gl)
             this.context.makeCurrent();
-        gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST});
+        gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, callback);
     },
-    addCubeMapFromURL: function (name, url) {
+    addCubeMapFromURL: function (name, url, callback) {
         if(this.context != window.gl)
             this.context.makeCurrent();
-        gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST});
+        gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, callback);
     },
 
 
