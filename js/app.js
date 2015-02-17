@@ -25,7 +25,7 @@ vik.app = (function() {
 
     module.loadTexture = function(name,url, sync_load) {
 
-        sync_load.sync_info.callbacksToComplete += 2;
+        sync_load.data.callbacksToComplete += 2;
         graph_gl.makeCurrent();
         graph_gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete);
 
@@ -35,7 +35,7 @@ vik.app = (function() {
     }
     module.loadCubeMap = function(name,url, sync_load) {
 
-        sync_load.sync_info.callbacksToComplete += 2;
+        sync_load.data.callbacksToComplete += 2;
         graph_gl.makeCurrent();
         gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete);
         renderer.addCubeMapFromURL(name, url, sync_load.onComplete);
@@ -44,30 +44,31 @@ vik.app = (function() {
 
     module.loadTextures = function(name,url) {
 
-        var sync_info =  {
+        var data =  {
             callbacksToComplete: 0,
             callbacksCompleted: 0,
             callback: module.loadGraph
         };
         var sync_load = {
-            sync_info: sync_info,
+            data: data,
             onComplete: function( ){
-                sync_info.callbacksCompleted++;
-                if(sync_info.callbacksCompleted == sync_info.callbacksToComplete) {
-                    sync_info.callback();
+                data.callbacksCompleted++;
+                if(data.callbacksCompleted == data.callbacksToComplete) {
+                    data.callback();
                 }
             }
         };
         module.loadTexture("ball", "assets/textures/texture/ball.jpg", sync_load);
         module.loadTexture("noise", "assets/textures/texture/noise.png", sync_load);
         module.loadTexture("NewTennisBallColor", "assets/textures/texture/NewTennisBallColor.jpg", sync_load);
+        module.loadTexture("BasketballColor", "assets/textures/texture/BasketballColor.jpg", sync_load);
         module.loadCubeMap("cube2", "assets/textures/cubemap/cube2.jpg", sync_load);
 
     }
 
     module.loadGraph = function() {
 
-        graph.loadFromURL("graphs/smoothstep.json", vik.app.compile, [true,true]);
+        graph.loadFromURL("graphs/reflection.json", vik.app.compile, [true,true]);
 
 
     }
@@ -118,10 +119,6 @@ vik.app = (function() {
 
 
         module.changeCanvas();
-
-
-
-
 
         module.loadTextures();
 

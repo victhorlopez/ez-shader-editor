@@ -1,5 +1,3 @@
 Reflection
-SmoothStep
-Random Complex
-Random Complex2
-Random Complex3
+Simple_smoothstep
+Complex1
