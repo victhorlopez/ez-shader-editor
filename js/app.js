@@ -16,7 +16,7 @@ vik.app = (function() {
     var main_node = null;
     var live_update = true;
     var canvas2webgl = window.location.href.indexOf('?3d') > -1;
-    console.log(canvas2webgl);
+    LiteGraph.current_ctx = LiteGraph.CANVAS_2D;
     module.init = function() {
         window.addEventListener("load", vik.ui.init());
         loadContent();
@@ -26,8 +26,7 @@ vik.app = (function() {
     module.loadTexture = function(name,url, sync_load) {
 
         sync_load.data.callbacksToComplete += 2;
-        graph_gl.makeCurrent();
-        graph_gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete);
+        graph_gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete, graph_gl);
 
         renderer.addTextureFromURL(name, url, sync_load.onComplete);
 
@@ -36,8 +35,7 @@ vik.app = (function() {
     module.loadCubeMap = function(name,url, sync_load) {
 
         sync_load.data.callbacksToComplete += 2;
-        graph_gl.makeCurrent();
-        gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete);
+        graph_gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, sync_load.onComplete, graph_gl);
         renderer.addCubeMapFromURL(name, url, sync_load.onComplete);
 
     }
@@ -240,14 +238,13 @@ vik.app = (function() {
         }
 
         gcanvas.onDropFile = function(data, filename, file){
-            if(canvas2webgl)
-                renderer.context.makeCurrent();
-            else
-                graph_gl.makeCurrent();
-
-            var tex = LGraphTexture.loadTextureFromFile(data, filename, file);
+            var gl = canvas2webgl ? renderer.context : graph_gl;
+            var tex = LGraphTexture.loadTextureFromFile(data, filename, file, null, gl);
 
         }
+        module.compile(true,true);
+        // we put a timeout so the application can download the textures
+        //setTimeout(function(){ }, 1);
 
 
     }
@@ -259,8 +256,9 @@ vik.app = (function() {
 
     function loadListeners(){
 
-        window.addEventListener("contentChange",function(){
-           vik.app.compile();
+        window.addEventListener("contentChange",function(force_compile, draw){
+           vik.app.compile(force_compile, draw);
+            console.log("content changed");
         });
 
 

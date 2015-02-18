@@ -3393,11 +3393,8 @@
         {
             var image = new Image();
             image.src = url;
-            var that = this;
-            that.gl = gl;
             image.onload = function()
             {
-                that.gl.makeCurrent();
                 options.texture = texture;
                 GL.Texture.fromImage(this, options);
                 delete texture["ready"]; //texture.ready = true;
@@ -3561,7 +3558,8 @@
      * @param {Object} options
      * @return {Texture} the texture
      */
-    Texture.cubemapFromImages = function(images, options) {
+    Texture.cubemapFromImages = function(images, options, gl) {
+        gl = gl || global.gl;
         options = options || {};
         if(images.length != 6)
             throw "missing images to create cubemap";
@@ -3602,7 +3600,8 @@
      * @param {Object} options
      * @return {Texture} the texture
      */
-    Texture.cubemapFromImage = function(image, options) {
+    Texture.cubemapFromImage = function(image, options, gl) {
+        gl = gl || global.gl;
         options = options || {};
 
         if(image.width != (image.height / 6) && image.height % 6 != 0)
@@ -3622,7 +3621,7 @@
             images.push(canvas);
         }
 
-        return Texture.cubemapFromImages(images, options);
+        return Texture.cubemapFromImages(images, options, gl);
     };
 
     /**
@@ -3632,13 +3631,14 @@
      * @param {Object} options
      * @return {Texture} the texture
      */
-    Texture.cubemapFromURL = function(url, options, on_complete) {
+    Texture.cubemapFromURL = function(url, options, on_complete, gl) {
+        gl = gl || global.gl;
         options = options || {};
         options.texture_type = gl.TEXTURE_CUBE_MAP;
-        var texture = options.texture || new GL.Texture(1, 1, options);
+        var texture = options.texture || new GL.Texture(1, 1, options, gl);
 
         texture.bind();
-        Texture.setUploadOptions(options);
+        Texture.setUploadOptions(options, gl);
         var default_color = options.temp_color || [0,0,0,255];
         var temp_color = options.type == gl.FLOAT ? new Float32Array(default_color) : new Uint8Array(default_color);
 
@@ -3649,14 +3649,10 @@
 
         var image = new Image();
         image.src = url;
-        var that = this;
-        image.gl = gl; // BUG IMPORTANT
         image.onload = function()
         {
-            if(global.gl != this.gl) // with multiple context can bug while  you upload them
-                this.gl.makeCurrent();
             options.texture = texture;
-            GL.Texture.cubemapFromImage(this, options);
+            GL.Texture.cubemapFromImage(this, options, gl);
             texture.ready = true;
             if(on_complete)
                 on_complete(texture);
@@ -4637,6 +4633,8 @@
          */
         gl.makeCurrent = function()
         {
+            console.log("from "+global.gl.context_id +" to "+this.context_id);
+            console.log((new Error).stack);
             global.gl = this;
         }
 

@@ -666,6 +666,7 @@ LGraphTexture.getTexture = function(name)
                 if(LiteGraph.proxy) //proxy external files
                     url = LiteGraph.proxy + url.substr(7);
             }
+
             tex = container[ name ] = GL.Texture.fromURL(url, {});
         }
     }
@@ -710,41 +711,43 @@ LGraphTexture.getNoiseTexture = function()
     return texture;
 }
 
-LGraphTexture.loadTextureFromFile = function(data, filename, file){
+LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl){
 
-    if(!data)
-    {
-        this._drop_texture = null;
-        this.properties.name = "";
-    }
-    else
+    gl = gl || window.gl;
+    if(data)
     {
         var texture = null;
         var no_ext_name = LiteGraph.removeExtension(filename);
         if( typeof(data) == "string" )
-            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data );
+            gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {}, callback, gl );
         else if( filename.toLowerCase().indexOf(".dds") != -1 )
-            texture = GL.Texture.fromDDSInMemory(data);
+            texture = GL.Texture.fromDDSInMemory(data, gl);
         else
         {
             var blob = new Blob([file]);
             var url = URL.createObjectURL(blob);
-            texture = GL.Texture.fromURL( url );
+            texture = GL.Texture.fromURL( url, {}, callback, gl  );
         }
-        texture.name = no_ext_name;;
+        texture.name = no_ext_name;
         return texture;
     }
 
 }
 
-LGraphTexture.prototype.onDropFile = function(data, filename, file)
+LGraphTexture.prototype.onDropFile = function(data, filename, file, callback, gl)
 {
-    var tex = LGraphTexture.loadTextureFromFile(data, filename, file);
-    if(tex){
-        this._drop_texture = tex;
-        this._last_tex = this._drop_texture;
-        this.properties.name = tex.name;
-        this._drop_texture.current_ctx = LiteGraph.current_ctx;
+    if(!data)
+    {
+        this._drop_texture = null;
+        this.properties.name = "";
+    } else {
+        var tex = LGraphTexture.loadTextureFromFile(data, filename, file, callback, gl);
+        if(tex){
+            this._drop_texture = tex;
+            this._last_tex = this._drop_texture;
+            this.properties.name = tex.name;
+            this._drop_texture.current_ctx = LiteGraph.current_ctx;
+        }
     }
 }
 
@@ -807,7 +810,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
         {
             this._canvas = this._last_tex;
         }
-        else
+        else if( !this._drop_texture || this._drop_texture && !this._drop_texture.hasOwnProperty("ready"))
         {
             var tex_canvas = LGraphTexture.generateLowResTexturePreview(this._last_tex);
             if(!tex_canvas)

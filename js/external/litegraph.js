@@ -1258,14 +1258,14 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
         //prepare reader
         var reader = new FileReader();
         reader.onload = function (event) {
-            if(that.gl)
-                that.gl.makeCurrent();
             //console.log(event.target);
             var data = event.target.result;
-            node.onDropFile(data, filename, file);
+            node.onDropFile(data, filename, file, null, gl);
             if(that.onDropFile)
                 that.onDropFile(data, filename, file);
             LiteGraph.dispatchEvent("contentChange", null, null);
+
+
         };
 
         //read data
