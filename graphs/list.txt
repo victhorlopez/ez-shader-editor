@@ -1,3 +1,4 @@
 Reflection
 Simple_smoothstep
 Complex1
+Strips

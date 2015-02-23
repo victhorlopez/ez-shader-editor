@@ -299,10 +299,20 @@ vik.ui = (function () {
         palette_gui.parent_node = $("#layout_layout3_panel_main div.w2ui-panel-content");
         palette_gui.width = palette_gui.parent_node.width();
         var node_types = LiteGraph.getNodeTypesCategories();
+        node_types.sort(function(a, b){
+            if(a < b) return 1;
+            if(a > b) return -1;
+            return 0;
+        });
         for(var i = node_types.length -1; i >= 0; --i){
             if(node_types[i] !== ""){
                 var f = palette_gui.addFolder(node_types[i]);
                 var nodes = LiteGraph.getNodeTypesInCategory(node_types[i]);
+                nodes.sort(function(a, b){
+                    if(a.title < b.title) return 1;
+                    if(a.title > b.title) return -1;
+                    return 0;
+                });
                 for(var j = nodes.length -1; j >= 0; --j) {
                     if(nodes[j]){
                         var o = {};
@@ -331,6 +341,7 @@ vik.ui = (function () {
 //            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +
 //            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('preview',true )\">Preview</button>" +
 //            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main' ,true)\">main</button>");
+
     }
 
     return module;

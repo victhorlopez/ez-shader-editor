@@ -4633,8 +4633,6 @@
          */
         gl.makeCurrent = function()
         {
-            console.log("from "+global.gl.context_id +" to "+this.context_id);
-            console.log((new Error).stack);
             global.gl = this;
         }
 
