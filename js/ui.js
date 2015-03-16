@@ -47,7 +47,15 @@ vik.ui = (function () {
                 var max = opts_ctrl ? (opts_ctrl.max) : undefined;
                 var step = opts_ctrl ? (opts_ctrl.step) : undefined;
 
-                var controller = details_gui.add(obj, property, min, max, step );
+                var controller = null;
+                console.log(obj);
+                if(obj[property].hasOwnProperty("multichoice")){
+                    controller = details_gui.add(obj, property, obj[property].multichoice );
+
+                }
+
+                else
+                    controller = details_gui.add(obj, property, min, max, step );
                 details_gui.items.push(controller);
                 controller.onChange(function(value) {
                     vik.app.compile();

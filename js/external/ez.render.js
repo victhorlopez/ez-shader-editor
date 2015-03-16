@@ -453,13 +453,14 @@ EZ.Renderer = function (options) {
         u_view: {},
         u_viewprojection: {},
         u_model: {},
-        u_mvp: this.mvp_matrix
+        u_mvp: this.mvp_matrix,
     };
 
     // time vars
     this.now = getTime();
     this.then = this.now;
     this.dt = 0;
+    this.total_time = 0;
 };
 
 EZ.Renderer.prototype = {
@@ -472,14 +473,10 @@ EZ.Renderer.prototype = {
     },
 
     addTextureFromURL: function (name, url, callback) {
-        if(this.context != window.gl)
-            this.context.makeCurrent();
-        gl.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, callback);
+        this.context.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, callback, this.context);
     },
     addCubeMapFromURL: function (name, url, callback) {
-        if(this.context != window.gl)
-            this.context.makeCurrent();
-        gl.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, callback);
+        this.context.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, callback, this.context);
     },
 
 
@@ -521,7 +518,8 @@ EZ.Renderer.prototype = {
             u_view: cam.view,
             u_viewprojection: cam.view_projection,
             u_model: entity.global_transform,
-            u_mvp: this.mvp_matrix
+            u_mvp: this.mvp_matrix,
+            u_time: this.total_time
         };
     },
     clearContext: function(){
@@ -530,7 +528,8 @@ EZ.Renderer.prototype = {
     },
     update: function() {
         this.now = getTime();
-        var dt = (this.now - this.then )* 0.001;;
+        var dt = (this.now - this.then )* 0.001;
+        this.total_time += dt;
         if( this.current_scene )
             this.current_scene.update(dt);
         this.cam_controller.update(dt);

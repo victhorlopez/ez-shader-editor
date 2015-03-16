@@ -66,7 +66,7 @@ vik.app = (function() {
 
     module.loadGraph = function() {
 
-        graph.loadFromURL("graphs/reflection.json", vik.app.compile, [true,true]);
+        graph.loadFromURL("graphs/empty_graph.json", vik.app.compile, [true,true]);
 
 
     }
@@ -280,7 +280,7 @@ vik.app = (function() {
 
         var clean_graph = document.getElementById("clean_graph");
         clean_graph.addEventListener("click",function(){
-            w2confirm('Are you sure you want to delete the graph?', function (btn) { if(btn == "Yes"){ graph.clear(); module.compile(true); } })
+            w2confirm('Are you sure you want to delete the graph?', function (btn) { if(btn == "Yes"){ graph.clear(); module.loadGraph(); } })
 
         });
 

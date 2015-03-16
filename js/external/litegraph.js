@@ -1696,7 +1696,7 @@ LGraphNode.prototype._ctor = function( title )
     this.codes = []; //output codes in each output link channel
 
 
-    this.T_types = {}; // template type
+    this.T_types = {}; // template types
     this.in_using_T = 0; // number of inputs using T types
     this.in_conected_using_T = 0; // number of connected inputs  using T types
 }
@@ -2267,10 +2267,10 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
             output.links = [];
         output.links.push({id:node.id, slot: -1});
     }
-    else if( !output.type ||  //generic output
-        !node.inputs[target_slot].type || //generic input
+    else if( //!output.type ||  //generic output
+        //!node.inputs[target_slot].type || //generic input
         output.type == node.inputs[target_slot].type || //same type
-        LiteGraph.compareNodeTypes(output,node.inputs[target_slot])) //compare with multiple types
+        node.compareNodeTypes(this,output,target_slot)) //compare with multiple types
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
         //var link = [ this.graph.last_link_id++, this.id, slot, node.id, target_slot ];
@@ -2286,7 +2286,6 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
             node.infereTypes( output, target_slot, this);
         }
 
-        console.log(node);
         this.setDirtyCanvas(false,true);
         this.graph.onConnectionChange();
     }
@@ -2572,7 +2571,6 @@ LGraphNode.prototype.collapse = function()
  * Forces the node to do not move or realign on Z
  * @method pin
  **/
-
 LGraphNode.prototype.pin = function(v)
 {
     if(v === undefined)
@@ -2615,6 +2613,11 @@ LGraphNode.prototype.onGetNullCode = function(slot)
 
 }
 
+/**
+ * increments the counter of the inputs using template vars
+ * and then updates the inputs type with the output given
+ * @method infereTypes
+ **/
 LGraphNode.prototype.infereTypes = function( output, target_slot)
 {
     this.in_conected_using_T++;
@@ -2674,6 +2677,41 @@ LGraphNode.prototype.resetTypes = function( )
 //            out.label = null; // as it can have more than one property atm we extract the first one
 //        }
 //    }
+}
+
+/**
+ * increments the counter of the inputs using template vars
+ * and then updates the inputs type with the output given
+ * @method infereTypes
+ **/
+LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slot, slot_id)
+{
+    var input_slot = this.inputs[slot_id];
+    var out_types = null;
+    var in_types = null;
+    var ret = false;
+    if(connection_slot.use_t){
+        out_types = Object.keys(connecting_node.T_types) == 0 ? null : connecting_node.T_types;
+    } else {
+        out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
+    }
+    out_types = Object.keys(connection_slot.types).length ? connection_slot.types : connection_slot.types_list;
+    if(input_slot.use_t){
+        in_types = Object.keys(this.T_types) == 0 ? null : this.T_types;
+        ret = true;
+    }  else if (Object.keys(input_slot.types).length)
+        in_types = input_slot.types;
+    else
+        in_types = input_slot.types_list;
+
+    if(!out_types || !in_types )
+        return ret;
+    for (key in out_types) {
+        if (in_types.hasOwnProperty(key)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -3339,8 +3377,11 @@ LGraphCanvas.prototype.processMouseMove = function (e) {
                 var slot = this.isOverNodeInput(n, e.canvasX, e.canvasY, pos);
                 if (slot != -1 && n.inputs[slot]) {
                     var slot_type = n.inputs[slot].type;
-                    if (slot_type == this.connecting_output.type || !slot_type || !this.connecting_output.type)
-                        this._highlight_input = pos;
+                    //if (slot_type == this.connecting_output.type || !slot_type || !this.connecting_output.type)
+                     if(this.connecting_node != null &&
+                        (this.connecting_output.type == n.inputs[slot].type ||
+                        n.compareNodeTypes(this.connecting_node, this.connecting_output,  slot)))
+                            this._highlight_input = pos;
                 }
                 else
                     this._highlight_input = null;
@@ -4124,9 +4165,10 @@ LGraphCanvas.prototype.drawNode = function (node, ctx) {
                 var slot = node.inputs[i];
 
                 ctx.globalAlpha = editor_alpha;
-                if (this.connecting_node != null && this.connecting_output.type != 0 && node.inputs[i].type != 0 &&
-                    (this.connecting_output.type != node.inputs[i].type && !LiteGraph.compareNodeTypes(this.connecting_output, node.inputs[i])))
-                    ctx.globalAlpha = 0.4 * editor_alpha;
+                if (this.connecting_node != null  &&
+                    (this.connecting_output.type != node.inputs[i].type &&
+                    !node.compareNodeTypes(this.connecting_node, this.connecting_output, i)))
+                        ctx.globalAlpha = 0.4 * editor_alpha;
 
                 ctx.fillStyle = slot.link != null ? "#7F7" : "#AAA";
 
@@ -5005,11 +5047,11 @@ var ShaderConstructor = {};
 
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (color_code, normal_code, world_offset_code) {
+ShaderConstructor.createShader = function (albedo,normal,emission,specular,gloss,alpha,offset) {
 
 
-    var vertex_code = this.createVertexCode(color_code, normal_code, world_offset_code);
-    var fragment_code = this.createFragmentCode(color_code, normal_code, world_offset_code);
+    var vertex_code = this.createVertexCode(albedo,normal,emission,specular,gloss,alpha,offset);
+    var fragment_code = this.createFragmentCode(albedo,normal,emission,specular,gloss,alpha,offset);
 
     var shader = {};
     shader.vertex_code = vertex_code;
@@ -5020,12 +5062,17 @@ ShaderConstructor.createShader = function (color_code, normal_code, world_offset
 
 }
 
-ShaderConstructor.createVertexCode = function (code, normal,offset) {
+ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,gloss,alpha,offset) {
 
     var includes = {};
-    for (var line in code.vertex.includes) { includes[line] = 1; }
-    for (var line in normal.vertex.includes) { includes[line] = 1; }
-    for (var line in offset.vertex.includes) { includes[line] = 1; }
+    for (var line in albedo.fragment.includes) { includes[line] = 1; }
+    for (var line in normal.fragment.includes) { includes[line] = 1; }
+    for (var line in emission.fragment.includes) { includes[line] = 1; }
+    for (var line in specular.fragment.includes) { includes[line] = 1; }
+    for (var line in gloss.fragment.includes) { includes[line] = 1; }
+    for (var line in alpha.fragment.includes) { includes[line] = 1; }
+    for (var line in offset.fragment.includes) { includes[line] = 1; }
+
     // header
     var r = "precision highp float;\n"+
         "attribute vec3 a_vertex;\n"+
@@ -5033,7 +5080,7 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
         "attribute vec2 a_coord;\n";
     if (includes["v_coord"])
         r += "varying vec2 v_coord;\n";
-    if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE)
+    //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE)
         r += "varying vec3 v_normal;\n";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
@@ -5044,15 +5091,20 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
     r += "uniform mat4 u_mvp;\n"+
          "uniform mat4 u_model;\n";
 
-    for(var k in code.vertex.getHeader())
+    for(var k in albedo.vertex.getHeader())
         r += k;
 
     // body
     r += "void main() {\n";
     if (includes["v_pos"])
         r += "      v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n";
-    var ids = code.vertex.getBodyIds();
-    var body_hash = code.vertex.getBody();
+    if (includes["v_coord"])
+        r += "      v_coord = a_coord;\n";
+    r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
+
+
+    var ids = albedo.vertex.getBodyIds();
+    var body_hash = albedo.vertex.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
     }
@@ -5062,17 +5114,24 @@ ShaderConstructor.createVertexCode = function (code, normal,offset) {
     return r;
 }
 
-ShaderConstructor.createFragmentCode = function (code,normal,offset) {
+ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular,gloss,alpha,offset) {
 
     var includes = {};
-    for (var line in code.fragment.includes) { includes[line] = 1; }
+    for (var line in albedo.fragment.includes) { includes[line] = 1; }
     for (var line in normal.fragment.includes) { includes[line] = 1; }
+    for (var line in emission.fragment.includes) { includes[line] = 1; }
+    for (var line in specular.fragment.includes) { includes[line] = 1; }
+    for (var line in gloss.fragment.includes) { includes[line] = 1; }
+    for (var line in alpha.fragment.includes) { includes[line] = 1; }
     for (var line in offset.fragment.includes) { includes[line] = 1; }
+
+
+
     // header
     var r = "precision highp float;\n";
     if (includes["v_coord"])
         r += "varying vec2 v_coord;\n";
-    if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
+    //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
         r += "varying vec3 v_normal;\n";
     if (includes["v_pos"])
         r += "varying vec3 v_pos;\n";
@@ -5081,14 +5140,13 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
-    for(var k in code.fragment.getHeader())
+    for(var k in albedo.fragment.getHeader())
         r += k;
     for(var k in normal.fragment.getHeader())
         r += k;
     // body
     r += "void main() {\n";
-    if (includes["v_normal"] || normal.getOutputVar())
-        r += "      vec3 normal = v_normal;\n";
+    r += "      vec3 normal = v_normal;\n";
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
@@ -5098,13 +5156,17 @@ ShaderConstructor.createFragmentCode = function (code,normal,offset) {
     if(normal.getOutputVar())
         r += "      normal = "+normal.getOutputVar()+".xyz;\n";
 
-    ids = code.fragment.getBodyIds();
-    body_hash = code.fragment.getBody();
+    ids = albedo.fragment.getBodyIds();
+    body_hash = albedo.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
     }
 
-    r += "       gl_FragColor = "+code.getOutputVar()+";\n"+
+
+    r +="      float ambient_color = 0.1;\n" +
+        "      vec3 light_dir = normalize(vec3(0.5,0.5,0.5));\n" +
+        "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
+        "      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz + lambertian*("+albedo.getOutputVar()+").xyz, 1.0);\n" +
         "}";
 
     return r;
@@ -5379,13 +5441,11 @@ PPixelNormalWS.id = "pixel_normal_ws";
 PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
 
 PPixelNormalWS.getVertexCode = function (output, input) {
-    var code = "v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
-    return code;
+    return "";
 }
 
 PPixelNormalWS.getFragmentCode = function (output, input) {
     var code = "vec3 pixel_normal_ws = normal;\n";
-
     return code;
 }
 
@@ -5407,14 +5467,58 @@ PPixelNormalWS.getCode = function (output, input) {
 
 
 
+// object representing glsl 2 param function
+function PReflected () {
+    this.id = "reflected_vector";
+    this.includes = {v_pos:1, v_normal:1, u_eye: 1, v_coord:1};
+}
+
+PReflected.prototype.getVertexCode = function () {
+    return "";
+}
+
+PReflected.prototype.getFragmentCode = function () {
+    return  "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n" +
+            "       vec3 pixel_normal_ws = normal;\n" +
+            "       vec3 reflected_vector = reflect(camera_to_pixel_ws,pixel_normal_ws);\n";
+}
+
+/**
+ * @param {out_var} name of the output var
+ *  @param {a} value a in the function
+ *  @param {b} value a in the function
+ *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
+ *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
+ */
+PReflected.prototype.getCode = function () {
+    var vertex = new CodePiece();
+    vertex.setBody(this.getVertexCode());
+    vertex.setIncludes(this.includes);
+
+    var fragment = new CodePiece();
+    fragment.setBody(this.getFragmentCode());
+    fragment.setIncludes(this.includes );
+
+    return new ShaderCode(vertex, fragment, "reflected_vector");
+}
+
+
+
+
+
+
+
+
+
+
 var PUVs = {};
 
 PUVs.id = "uvs";
-PUVs.includes = {a_coord:1, v_coord: 1};
+PUVs.includes = { v_coord: 1};
 PUVs.already_included = false; // TODO add multiple times same line
 
 PUVs.getVertexCode = function (output, input) {
-    return "v_coord = a_coord;\n";
+    return "";
 }
 
 PUVs.getFragmentCode = function (output, input) {

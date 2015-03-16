@@ -76,7 +76,7 @@ function LGraph2ParamNode()
     this.addOutput("Result","", this.getOutputTypes(), this.getOutputExtraInfo() );
     this.addInput("A","", this.getInputTypesA(), this.getInputExtraInfoA());
     this.addInput("B","", this.getInputTypesB(), this.getInputExtraInfoB());
-    this.shader_piece = LiteGraph.CodeLib[this.getCodeName()]; // hardcoded for testing
+    this.shader_piece = LiteGraph.CodeLib[this.getCodeName()];
 
 }
 
@@ -200,6 +200,7 @@ LGraph3ParamNode.prototype.processInputCode = function()
             this.getScope(),
             this.getOutputType()); // output var must be fragment
         // if the alpha is an input, otherwise hardcoded
+        // we need to set the order into the code so the lines set up correctly
         output_code.order = this.order;
 
         if(code_C){
@@ -324,7 +325,7 @@ LiteGraph.registerNodeType("constants/"+LGraphConstant.title, LGraphConstant);
 //Constant
 function LGraphTime()
 {
-    this.addOutput("time","number", {number:1});
+    this.addOutput("time","float", {float:1});
 
     this.shader_piece = PTime; // hardcoded for testing
 }
@@ -611,17 +612,22 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexP
 function LGraphShader()
 {
     this.uninstantiable = true;
-    this.addInput("color","vec4", {vec4:1});
-    this.addInput("normal","vec3", {vec3:1});
+    this.addInput("albedo","vec3", {vec3:1});
+    this.addInput("normal","vec3", {vec3:1}); // tangent space normal, if written
+    this.addInput("emission","vec3", {vec4:1});
+    this.addInput("specular","number", {number:1}); // specular power in 0..1 range
+    this.addInput("gloss","number", {number:1});
+    this.addInput("alpha","number", {number:1});
     this.addInput("world position offset","vec3", {vec3:1});
+
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
     this.size = [125,250];
     this.shader_piece = ShaderConstructor;
 }
 
-LGraphShader.title = "Shader";
-LGraphShader.desc = "Shader Main Node";
+LGraphShader.title = "Output";
+LGraphShader.desc = "Output Main Node";
 
 
 LGraphShader.prototype.setValue = function(v)
@@ -649,13 +655,15 @@ LGraphShader.prototype.onWidget = function(e,widget)
 
 LGraphShader.prototype.processInputCode = function() {
 
-
-
     var color_code = this.getInputCode(0) || LiteGraph.EMPTY_CODE; // 0 it's the color
     var normal_code = this.getInputCode(1) || LiteGraph.EMPTY_CODE; // 1 it's the normal
-    var world_offset_code = this.getInputCode(2) || LiteGraph.EMPTY_CODE; // 1 it's the position offset
+    var emission_code = this.getInputCode(2) || LiteGraph.EMPTY_CODE; // 2 it's the emission
+    var specular_code = this.getInputCode(3) || LiteGraph.EMPTY_CODE; // 3 it's the specular
+    var gloss_code = this.getInputCode(4) || LiteGraph.EMPTY_CODE; //  4 it's the gloss
+    var alpha_code = this.getInputCode(5) || LiteGraph.EMPTY_CODE; //  5 it's the alpha
+    var world_offset_code = this.getInputCode(6) || LiteGraph.EMPTY_CODE; // 1 it's the position offset
 
-    var shader = this.shader_piece.createShader(color_code,normal_code,world_offset_code);
+    var shader = this.shader_piece.createShader(color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
     this.graph.shader_output = shader;
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     this.graph.shader_textures = [];
@@ -718,7 +726,7 @@ window.LGraphTexturePreview = LGraphTexturePreview;
 function LGraphTexture()
 {
     this.addOutput("Texture","Texture",{Texture:1});
-    this.addOutput("Color","vec4", {vec4:1});
+    this.addOutput("Color","vec3", {vec3:1});
     this.addOutput("R","float", {float:1});
     this.addOutput("G","float", {float:1});
     this.addOutput("B","float", {float:1});
@@ -726,10 +734,13 @@ function LGraphTexture()
     this.addInput("UVs","vec2", {vec2:1});
     this.properties =  this.properties || {};
     this.properties.name = "";
+    this.properties.sampler_type = {};
+    this.properties.sampler_type.multichoice = [ 'Color', 'Normal' ];
+
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
     this.shader_piece = PTextureSample; // hardcoded for testing
-
+    this.uvs_piece = PUVs;
     // default texture
 //    if(typeof(gl) != "undefined" && gl.textures["default"]){
 //        this.properties.name = "default";
@@ -954,7 +965,7 @@ LGraphTexture.prototype.onDrawBackground = function(ctx)
         ctx.translate(0,this.size[1]);
         ctx.scale(1,-1);
     }
-    ctx.drawImage(this._canvas,this.size[1]* 0.05,this.size[1]* 0.2,this.size[0]* 0.75,this.size[1]* 0.75);
+    ctx.drawImage(this._canvas,this.size[1]* 0.05,this.size[1]* 0.1,this.size[0]* 0.75,this.size[1]* 0.75);
     ctx.restore();
 }
 
@@ -998,7 +1009,8 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 LGraphTexture.prototype.processInputCode = function()
 {
 
-    var input_code = this.getInputCode(0);
+    var input_code = this.getInputCode(0) || this.onGetNullCode(0);
+
 
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
@@ -1032,6 +1044,12 @@ LGraphTexture.prototype.processInputCode = function()
 
 }
 
+LGraphTexture.prototype.onGetNullCode = function(slot)
+{
+    if(slot == 0)
+        return this.uvs_piece.getCode();
+
+}
 
 LiteGraph.registerNodeType("texture/"+LGraphTexture.title, LGraphTexture );
 window.LGraphTexture = LGraphTexture;
@@ -1041,13 +1059,14 @@ window.LGraphTexture = LGraphTexture;
 function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
-    this.addOutput("Color","vec4", {vec4:1});
+    this.addOutput("Color","vec3", {vec3:1});
     this.addInput("vec3","vec3");
     this.properties =  this.properties || {};
     this.properties.name = "";
     this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
 
     this.shader_piece = PTextureSampleCube; // hardcoded for testing
+    this.vector_piece = new PReflected();
     this.size = [170,165];
 }
 
@@ -1114,7 +1133,7 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 LGraphCubemap.prototype.processInputCode = function()
 {
 
-    var input_code = this.getInputCode(0); // get input in link 0
+    var input_code = this.getInputCode(0) || this.onGetNullCode(0); // get input in link 0
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
         var color_code = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name);
@@ -1127,6 +1146,12 @@ LGraphCubemap.prototype.processInputCode = function()
 
 }
 
+LGraphCubemap.prototype.onGetNullCode = function(slot)
+{
+    if(slot == 0)
+        return this.vector_piece.getCode();
+
+}
 
 LiteGraph.registerNodeType("texture/"+LGraphCubemap.title, LGraphCubemap );
 window.LGraphCubemap = LGraphCubemap;
@@ -1179,13 +1204,16 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVecToComps.title , LGraphVecToCo
 
 function LGraphAbs()
 {
+    this._ctor(LGraphAbs.title);
+
     this.code_name = "abs";
-    this.output_types = {float:1, vec3:1, vec4:1, vec2:1};
-    this.intput_types = {float:1, vec3:1, vec4:1, vec2:1};
-    this.output_type = "float";
+    this.output_types = null;
+    this.out_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_types = null;
+    this.in_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+
 
     LGraph1ParamNode.call( this);
-    console.log(this);
 }
 
 LGraphAbs.prototype = Object.create(LGraph1ParamNode);
@@ -1257,7 +1285,6 @@ LiteGraph.registerNodeType("math/"+LGraphSin.title, LGraphSin);
 
 function LGraphOperation()
 {
-    //this.code_name = "add";
     this.output_types = null;
     this.out_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
     this.intput_typesA = null;
@@ -1265,7 +1292,7 @@ function LGraphOperation()
     this.intput_typesB = null;
     this.in_extra_infoB = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
 
-    this.number_piece = new PConstant("float"); // hardcoded for testing
+    this.number_piece = new PConstant("float"); // hardcoded when the inputs are null
     this.properties = { A:0.0, B:0.0};
 
     LGraph2ParamNode.call( this);
@@ -1275,8 +1302,14 @@ LGraphOperation.prototype.constructor = LGraphOperation;
 
 
 
+LGraphOperation.prototype.infereTypes = function( output, target_slot) {
+    this.in_conected_using_T++;
+    var input = this.inputs[target_slot];
+    if(input.use_t && this.in_conected_using_T == 1){
+        for(var k in output.types)
+            this.T_types[k] = output.types[k];
+    }
 
-//LGraphOperation.prototype.infereTypes = function( output, target_slot) {
 //    var output_type = Object.keys(output.types)[0];
 //    if(target_slot == 2 && output_type == "number")
 //        return;
@@ -1287,7 +1320,8 @@ LGraphOperation.prototype.constructor = LGraphOperation;
 //        for (var k in output.types)
 //            this.T_types[k] = output.types[k];
 //    }
-//}
+}
+
 
 LGraphOperation.prototype.onGetNullCode = function(slot)
 {
@@ -1309,7 +1343,6 @@ LGraphOperation.prototype.onDrawBackground = function(ctx)
     if(!this.isInputConnected(1))
         this.inputs[1].label += "="+this.properties["B"].toFixed(3);
 }
-
 
 
 LiteGraph.extendClass(LGraphOperation,LGraph2ParamNode);
@@ -1355,7 +1388,7 @@ function LGraphMix()
     this.in_extra_infoA = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
     this.intput_typesB = null;
     this.in_extra_infoB = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
-    
+
     this.properties = { alpha:0.5};
     this.options = { alpha:{min:0, max:1, step:0.01}};
     this.number_piece = new PConstant("float");
