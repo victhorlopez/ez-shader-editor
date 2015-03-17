@@ -48,14 +48,12 @@ vik.ui = (function () {
                 var step = opts_ctrl ? (opts_ctrl.step) : undefined;
 
                 var controller = null;
-                console.log(obj);
-                if(obj[property].hasOwnProperty("multichoice")){
-                    controller = details_gui.add(obj, property, obj[property].multichoice );
-
+                if(node.hasOwnProperty("multichoice") && node.multichoice.hasOwnProperty(property)){
+                    controller = details_gui.add(obj, property, node.multichoice[property] );
                 }
-
                 else
                     controller = details_gui.add(obj, property, min, max, step );
+
                 details_gui.items.push(controller);
                 controller.onChange(function(value) {
                     vik.app.compile();
@@ -160,7 +158,7 @@ vik.ui = (function () {
         addMeshChangerButton("sphere","fa fa-globe","Sphere");
         addMeshChangerButton("box","fa fa-cube","Cube");
         addMeshChangerButton("plane","fa fa-square-o","Plane");
-        addMeshChangerButton("monkey","fa fa-user","Suzanne");
+        addMeshChangerButton("lee","fa fa-user","Lee");
         addMeshChangerButton("","fa fa-folder-open","load");
 
     }

@@ -614,11 +614,11 @@ function LGraphShader()
     this.uninstantiable = true;
     this.addInput("albedo","vec3", {vec3:1});
     this.addInput("normal","vec3", {vec3:1}); // tangent space normal, if written
-    this.addInput("emission","vec3", {vec4:1});
+    this.addInput("emission","vec3", {vec3:1});
     this.addInput("specular","number", {number:1}); // specular power in 0..1 range
     this.addInput("gloss","number", {number:1});
     this.addInput("alpha","number", {number:1});
-    this.addInput("world position offset","vec3", {vec3:1});
+    this.addInput("bump offset","vec3", {vec3:1});
 
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
@@ -734,8 +734,8 @@ function LGraphTexture()
     this.addInput("UVs","vec2", {vec2:1});
     this.properties =  this.properties || {};
     this.properties.name = "";
-    this.properties.sampler_type = {};
-    this.properties.sampler_type.multichoice = [ 'Color', 'Normal' ];
+    this.properties.texture_type = "Color";
+    this.multichoice = {texture_type:[ 'Color', 'Normal map', 'Bump map' ]};
 
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
@@ -1010,11 +1010,11 @@ LGraphTexture.prototype.processInputCode = function()
 {
 
     var input_code = this.getInputCode(0) || this.onGetNullCode(0);
-
+    var texture_type = this.properties.texture_type == "Normal map" ? LiteGraph.NORMAL_MAP : this.properties.texture_type == "Bump map" ?  LiteGraph.BUMP_MAP : LiteGraph.COLOR_MAP;
 
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture
-        var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name); // 1 it's the color output
+        var color_output = this.codes[1] = this.shader_piece.getCode("color_"+this.id, input_code.getOutputVar(), texture_name, texture_type); // 1 it's the color output
         color_output.order = this.order;
 
         color_output.merge(input_code);

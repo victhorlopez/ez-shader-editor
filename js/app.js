@@ -77,6 +77,7 @@ vik.app = (function() {
         var container = $("#layout_layout2_panel_main div.w2ui-panel-content");
         renderer = new EZ.Renderer();
         renderer.createCanvas(container.width(), container.height(), "preview_canvas");
+        //renderer.context.getExtension('OES_standard_derivatives');
         renderer.append(container[0]);
         renderer.color = [0.2,0.2,0.2];
 

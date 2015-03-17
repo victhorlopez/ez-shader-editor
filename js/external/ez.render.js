@@ -489,7 +489,7 @@ EZ.Renderer.prototype = {
         this.addMesh("grid", GL.Mesh.grid({size: 1, lines: 50}));
         this.addMesh("box", GL.Mesh.box({size: 1}));
         this.addMesh("plane", GL.Mesh.plane({size:1}));
-        this.addMesh("monkey", GL.Mesh.fromURL("assets/meshes/suzanne.obj"));
+        this.addMesh("lee", GL.Mesh.fromURL("assets/meshes/lee.obj"));
         // useful when you don't find a texture
         gl.textures = {};
         gl.textures["notfound"] = new GL.Texture(1,1,{ filter: gl.NEAREST, pixel_data: new Uint8Array([0,0,0,255]) });
