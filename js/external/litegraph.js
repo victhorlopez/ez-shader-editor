@@ -50,7 +50,8 @@ var LiteGraph = {
 
     COLOR_MAP:0,
     NORMAL_MAP:1,
-    BUMP_MAP:2,
+    TANGENT_MAP:2,
+    SPECULAR_MAP:3,
 
 /**
      * Register a node class so it can be listed when the user wants to create a new one
@@ -191,7 +192,7 @@ var LiteGraph = {
                 categories[ this.registered_node_types[i].category ] = 1;
         var result = [];
         for(var i in categories)
-            if(i != "core")
+           // if(i != "core")
                 result.push(i);
         return result;
     },
@@ -5164,21 +5165,30 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         r += k;
     for(var k in normal.fragment.getHeader())
         r += k;
+    for(var k in specular.fragment.getHeader())
+        r += k;
     // body
     r += "void main() {\n";
     r += "      vec3 normal = normalize(v_normal);\n";
 
+    if (includes["camera_to_pixel_ws"])
+        r += "      vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n";
+
+
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
     if(ids.length > 0){
-        //https://www.opengl.org/discussion_boards/showthread.php/162857-Computing-the-tangent-space-in-the-fragment-shader
-        r +="      vec3 Q1 = dFdx(v_pos);\n" +
-            "      vec3 Q2 = dFdy(v_pos);\n" +
-            "      vec2 st1 = dFdx(v_coord);\n" +
-            "      vec2 st2 = dFdy(v_coord);\n" +
-            "      vec3 T = normalize(Q1*st2.t - Q2*st1.t);\n" +
-            "      vec3 B = normalize(-Q1*st2.s + Q2*st1.s);\n" +
-            "      mat3 TBN = mat3(T, B, v_normal);\n";
+        // http://www.thetenthplanet.de/archives/1180
+        r+="       vec3 dp1 = dFdx( v_pos );\n" +
+            "      vec3 dp2 = dFdy( v_pos );\n" +
+            "      vec2 duv1 = dFdx( v_coord );\n" +
+            "      vec2 duv2 = dFdy( v_coord );\n" +
+            "      vec3 dp2perp = cross( dp2, v_normal );\n" +
+            "      vec3 dp1perp = cross( v_normal, dp1 );\n" +
+            "      vec3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;\n" +
+            "      vec3 bitangent = dp2perp * duv1.y + dp1perp * duv2.y;\n" +
+            "      float invmax = inversesqrt( max( dot(tangent,tangent), dot(bitangent,bitangent) ) );\n" +
+            "      mat3 TBN = mat3( tangent * invmax, bitangent * invmax, v_normal );\n";
     }
 
 
@@ -5187,8 +5197,7 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
 
     }
     if(ids.length > 0)
-        r += "      normal = "+normal.getOutputVar()+".xyz * TBN;\n" +
-             "      normal = normalize(normal);\n";
+        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
 
     ids = albedo.fragment.getBodyIds();
     body_hash = albedo.fragment.getBody();
@@ -5196,11 +5205,27 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         r += "      "+body_hash[ids[i]].str;
     }
 
+    ids = specular.fragment.getBodyIds();
+    body_hash = specular.fragment.getBody();
+    for (var i = 0, l = ids.length; i < l; i++) {
+        r += "      "+body_hash[ids[i]].str;
+    }
 
     r +="      float ambient_color = 0.3;\n" +
         "      vec3 light_dir = normalize(vec3(0.5,0.5,0.5));\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
-        "      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz + lambertian*("+albedo.getOutputVar()+").xyz, 1.0);\n" +
+        "      vec3 reflect_dir = reflect(light_dir, normal);\n" +
+        "      float spec_angle = max(dot(reflect_dir, camera_to_pixel_ws), 0.0);\n";
+
+    if(ids.length == 0){
+        r += "      float specular = pow(spec_angle, 4.0);\n";
+    } else{
+        r +="      float specular = "+specular.getOutputVar()+".r * spec_angle;\n";
+    }
+    r +="      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz +" +
+        "      lambertian*("+albedo.getOutputVar()+").xyz +" +
+        "      specular * vec3(1.0)" +
+        "      , 1.0);\n" +
         "}";
 
     return r;
@@ -5441,7 +5466,7 @@ PConstant.prototype.getCode = function (output_var, value, scope) {
 var PCameraToPixelWS = {};
 
 PCameraToPixelWS.id = "cameratopixelws";
-PCameraToPixelWS.includes = {v_pos:1, u_eye: 1};
+PCameraToPixelWS.includes = {v_pos:1, u_eye: 1, camera_to_pixel_ws:1};
 
 PCameraToPixelWS.getVertexCode = function (output, input) {
     var vertex = new CodePiece();
@@ -5451,7 +5476,7 @@ PCameraToPixelWS.getVertexCode = function (output, input) {
 
 PCameraToPixelWS.getFragmentCode = function (output, input) {
     var fragment = new CodePiece();
-    fragment.setBody("vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n");
+    fragment.setBody("");
     fragment.setIncludes(PCameraToPixelWS.includes);
     return fragment;
 }
@@ -5504,7 +5529,7 @@ PPixelNormalWS.getCode = function (output, input) {
 // object representing glsl 2 param function
 function PReflected () {
     this.id = "reflected_vector";
-    this.includes = {v_pos:1, v_normal:1, u_eye: 1, v_coord:1};
+    this.includes = {v_pos:1, v_normal:1, u_eye: 1, v_coord:1, camera_to_pixel_ws:1};
 }
 
 PReflected.prototype.getVertexCode = function () {
@@ -5512,8 +5537,7 @@ PReflected.prototype.getVertexCode = function () {
 }
 
 PReflected.prototype.getFragmentCode = function () {
-    return  "vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n" +
-            "       vec3 pixel_normal_ws = normal;\n" +
+    return  "       vec3 pixel_normal_ws = normal;\n" +
             "       vec3 reflected_vector = reflect(camera_to_pixel_ws,pixel_normal_ws);\n";
 }
 
@@ -5848,7 +5872,7 @@ PTextureSampleCube.getCode = function (output, input, texture_id) {
 var PTextureSample = {};
 
 PTextureSample.id = "texture_sample";
-PTextureSample.includes = {v_pos:1, v_coord:1};
+PTextureSample.includes = {v_pos:1, v_coord:1, camera_to_pixel_ws:1, u_eye:1};
 
 PTextureSample.getVertexCode = function (output, input, texture_id, texture_type) {
     var code = new CodePiece()
@@ -5871,26 +5895,17 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
     var code = new CodePiece();
     code.setIncludes(PTextureSample.includes);
     var code_str = "";
-    if( texture_type == LiteGraph.COLOR_MAP) {
+    code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
+    if( texture_type == LiteGraph.COLOR_MAP || texture_type == LiteGraph.SPECULAR_MAP) {
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
-        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-
-    }  else if (texture_type == LiteGraph.NORMAL_MAP){
+    }  else if (texture_type == LiteGraph.NORMAL_MAP) {
         code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
-        code_str += "      "+output+" = (2.0 * "+output+" )-1.0;\n";
-        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-    }   if( texture_type == LiteGraph.BUMP_MAP){
-        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n" +
-            "       vec3 dPositiondx = dFdx(v_pos);\n" +
-            "       vec3 dPositiondy = dFdy(v_pos);\n" +
-            "       float depth = "+output+".a;\n" +
-            "       float dDepthdx = dFdx(depth);\n" +
-            "       float dDepthdy = dFdy(depth);\n" +
-            "       dPositiondx -= 10.0 * dDepthdx * v_normal;\n" +
-            "       dPositiondy -= 10.0 * dDepthdy * v_normal;\n" +
-            "       normal = normalize(cross(dPositiondx, dPositiondy));\n";
-
-        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
+        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+    }
+    else if( texture_type == LiteGraph.TANGENT_MAP){
+        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
+        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+        code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
         code.setIncludes(PTextureSample.includes);
     }
 

@@ -615,7 +615,7 @@ function LGraphShader()
     this.addInput("albedo","vec3", {vec3:1});
     this.addInput("normal","vec3", {vec3:1}); // tangent space normal, if written
     this.addInput("emission","vec3", {vec3:1});
-    this.addInput("specular","number", {number:1}); // specular power in 0..1 range
+    this.addInput("specular","vec3", {vec3:1}); // specular power in 0..1 range
     this.addInput("gloss","number", {number:1});
     this.addInput("alpha","number", {number:1});
     this.addInput("bump offset","vec3", {vec3:1});
@@ -732,10 +732,16 @@ function LGraphTexture()
     this.addOutput("B","float", {float:1});
     this.addOutput("A","float", {float:1});
     this.addInput("UVs","vec2", {vec2:1});
+
+    // properties for for dat gui
     this.properties =  this.properties || {};
     this.properties.name = "";
     this.properties.texture_type = "Color";
-    this.multichoice = {texture_type:[ 'Color', 'Normal map', 'Bump map' ]};
+    this.multichoice = {texture_type:[ 'Color', 'Normal map', 'Specular map' ],
+                        normal_map_type:[ 'Tangent space', 'Model space' ]};
+    this.reloadonchange = {texture_type: 1};
+
+
 
     //this.size = [LGraphTexture.image_preview_size, LGraphTexture.image_preview_size];
     this.size = [170,165];
@@ -1008,9 +1014,21 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
 
 LGraphTexture.prototype.processInputCode = function()
 {
+    if(this.properties.texture_type == "Normal map") {
+        if (!this.properties.hasOwnProperty("normal_map_type"))
+            this.properties.normal_map_type = "Tangent space";
+    } else
+        delete this.properties.normal_map_type;
+
+
 
     var input_code = this.getInputCode(0) || this.onGetNullCode(0);
-    var texture_type = this.properties.texture_type == "Normal map" ? LiteGraph.NORMAL_MAP : this.properties.texture_type == "Bump map" ?  LiteGraph.BUMP_MAP : LiteGraph.COLOR_MAP;
+    var texture_type = 0;
+    if(this.properties.texture_type == "Normal map"  )
+        texture_type =  this.properties.normal_map_type == "Tangent space" ? LiteGraph.TANGENT_MAP : LiteGraph.NORMAL_MAP;
+    else
+        texture_type = LiteGraph.COLOR_MAP;
+
 
     if(input_code){
         var texture_name = "u_" + (this.properties.name ? this.properties.name : "default_name") + "_texture"; // TODO check if there is a texture

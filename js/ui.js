@@ -54,6 +54,11 @@ vik.ui = (function () {
                 else
                     controller = details_gui.add(obj, property, min, max, step );
 
+                if(node.hasOwnProperty("reloadonchange") && node.reloadonchange.hasOwnProperty(property)){
+                    controller.onFinishChange(function(value) {
+                        module.updateLeftPanel(node);
+                    });
+                }
                 details_gui.items.push(controller);
                 controller.onChange(function(value) {
                     vik.app.compile();

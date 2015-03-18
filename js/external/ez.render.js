@@ -479,7 +479,6 @@ EZ.Renderer.prototype = {
         this.context.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, callback, this.context);
     },
 
-
     loadAssets: function () {
         var options = {lat: 128, size: 0.5};
         options["long"] = 128;

@@ -86,7 +86,7 @@ vik.app = (function() {
         camera.target = [0, 0.5, 0];
         var scene = new EZ.EScene();
         main_node = new EZ.EMesh();
-        main_node.mesh = "sphere";
+        main_node.mesh = "lee";
 //        main_node.setTexture("cubemap","cubemap");
 //        main_node.shader = "env_reflection";
         main_node.position = [0, 0.5, 0];
