@@ -52,7 +52,7 @@ var LiteGraph = {
     NORMAL_MAP:1,
     TANGENT_MAP:2,
     SPECULAR_MAP:3,
-
+    BUMP_MAP:4,
 /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -5103,32 +5103,35 @@ ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,g
         r += k;
     for(var k in normal.vertex.getHeader())
         r += k;
-    for(var k in offset.vertex.getHeader())
+    for(var k in offset.fragment.getHeader())
         r += k;
 
 
     // body
     r += "void main() {\n";
-    if (includes["v_pos"])
-        r += "      v_pos = (u_model * vec4(a_vertex,1.0)).xyz;\n";
     if (includes["v_coord"])
         r += "      v_coord = a_coord;\n";
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
+    r += "      vec3 pos = a_vertex;\n";
 
-    var ids = offset.vertex.getBodyIds();
-    var body_hash = offset.vertex.getBody();
+    var ids = offset.fragment.getBodyIds();
+    var body_hash = offset.fragment.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
 
     }
-
+    if(ids.length > 0){
+        r += "      pos += a_normal * "+offset.getOutputVar()+".x * 0.3;\n";
+    }
 
     var ids = albedo.vertex.getBodyIds();
     var body_hash = albedo.vertex.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
     }
-    r += "      gl_Position = u_viewprojection * vec4(v_pos.xyz,1.0);\n"+
+    if (includes["v_pos"])
+        r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
+    r += "      gl_Position = u_mvp * vec4(pos,1.0);\n"+
         "}\n";
 
     return r;
@@ -5167,11 +5170,15 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         r += k;
     for(var k in specular.fragment.getHeader())
         r += k;
+    for(var k in gloss.fragment.getHeader())
+        r += k;
+//    for(var k in offset.fragment.getHeader())
+//        r += k;
     // body
     r += "void main() {\n";
     r += "      vec3 normal = normalize(v_normal);\n";
 
-    if (includes["camera_to_pixel_ws"])
+    //if (includes["camera_to_pixel_ws"])
         r += "      vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n";
 
 
@@ -5179,7 +5186,7 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
     var body_hash = normal.fragment.getBody();
     if(ids.length > 0){
         // http://www.thetenthplanet.de/archives/1180
-        r+="       vec3 dp1 = dFdx( v_pos );\n" +
+        r+= "      vec3 dp1 = dFdx( v_pos );\n" +
             "      vec3 dp2 = dFdy( v_pos );\n" +
             "      vec2 duv1 = dFdx( v_coord );\n" +
             "      vec2 duv2 = dFdy( v_coord );\n" +
@@ -5194,10 +5201,17 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
 
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
-
     }
     if(ids.length > 0)
         r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
+
+//    ids = offset.fragment.getBodyIds();
+//    body_hash = offset.fragment.getBody();
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
+//    if(ids.length > 0)
+//        r += "      normal = normalize("+offset.getOutputVar()+".xyz);\n";
 
     ids = albedo.fragment.getBodyIds();
     body_hash = albedo.fragment.getBody();
@@ -5210,21 +5224,35 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
     }
+    if(ids.length == 0){
+        r += "      float specular_intensity = 1.0;\n";
+    } else{
+        r +="      float specular_intensity = "+specular.getOutputVar()+";\n";
+    }
+
+    ids = gloss.fragment.getBodyIds();
+    body_hash = gloss.fragment.getBody();
+    for (var i = 0, l = ids.length; i < l; i++) {
+        r += "      "+body_hash[ids[i]].str;
+    }
+    if(ids.length == 0){
+        r += "      float gloss = 4.0;\n";
+    } else{
+        r +="      float gloss = "+gloss.getOutputVar()+";\n";
+    }
 
     r +="      float ambient_color = 0.3;\n" +
         "      vec3 light_dir = normalize(vec3(0.5,0.5,0.5));\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
         "      vec3 reflect_dir = reflect(light_dir, normal);\n" +
-        "      float spec_angle = max(dot(reflect_dir, camera_to_pixel_ws), 0.0);\n";
+        "      float spec_angle = max(dot(reflect_dir, camera_to_pixel_ws), 0.0);\n" +
+        "      float specular = pow(spec_angle, gloss);\n" +
+        "      specular = specular * specular_intensity;\n";
 
-    if(ids.length == 0){
-        r += "      float specular = pow(spec_angle, 4.0);\n";
-    } else{
-        r +="      float specular = "+specular.getOutputVar()+".r * spec_angle;\n";
-    }
+
     r +="      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz +" +
         "      lambertian*("+albedo.getOutputVar()+").xyz +" +
-        "      specular * vec3(1.0)" +
+        "      lambertian * specular * vec3(1.0)" +
         "      , 1.0);\n" +
         "}";
 
@@ -5896,18 +5924,35 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
     code.setIncludes(PTextureSample.includes);
     var code_str = "";
     code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
-    if( texture_type == LiteGraph.COLOR_MAP || texture_type == LiteGraph.SPECULAR_MAP) {
-        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
-    }  else if (texture_type == LiteGraph.NORMAL_MAP) {
-        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
+    //if( texture_type == LiteGraph.COLOR_MAP || texture_type == LiteGraph.SPECULAR_MAP) {
+    code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
+    if (texture_type == LiteGraph.NORMAL_MAP) {
         code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
     }
     else if( texture_type == LiteGraph.TANGENT_MAP){
-        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
+        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+        code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
+        code.setIncludes(PTextureSample.includes);
+    }    else if( texture_type == LiteGraph.TANGENT_MAP){
         code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
         code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
         code.setIncludes(PTextureSample.includes);
     }
+//    else if( texture_type == LiteGraph.BUMP_MAP){
+//        code_str += "      const vec2 size = vec2(2.0,0.0);\n" +
+//                    "      const ivec3 off = ivec3(-1,0,1);\n" +
+//                    "      float s11 = "+output+".x;\n" +
+//                    "      float s01 = textureOffset("+texture_id+", v_coord, off.xy).x;\n" +
+//                    "      float s21 = textureOffset("+texture_id+", v_coord, off.zy).x;\n" +
+//                    "      float s10 = textureOffset("+texture_id+", v_coord, off.yx).x;\n" +
+//                    "      float s12 = textureOffset("+texture_id+", v_coord, off.yz).x;\n" +
+//                    "      vec3 va = normalize(vec3(size.xy,s21-s01));\n" +
+//                    "      vec3 vb = normalize(vec3(size.yx,s12-s10));\n" +
+//                    "      "+output+" = vec4( cross(va,vb), s11 );\n";
+//
+//        code.setIncludes(PTextureSample.includes);
+//    }
+
 
 
 

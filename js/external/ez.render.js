@@ -487,7 +487,7 @@ EZ.Renderer.prototype = {
         this.addMesh("circle", GL.Mesh.circle({xz: true}));
         this.addMesh("grid", GL.Mesh.grid({size: 1, lines: 50}));
         this.addMesh("box", GL.Mesh.box({size: 1}));
-        this.addMesh("plane", GL.Mesh.plane({size:1}));
+        this.addMesh("plane", GL.Mesh.plane({size:1, detail:100}));
         this.addMesh("lee", GL.Mesh.fromURL("assets/meshes/lee.obj"));
         // useful when you don't find a texture
         gl.textures = {};
