@@ -51,8 +51,13 @@ vik.ui = (function () {
                 if(node.hasOwnProperty("multichoice") && node.multichoice.hasOwnProperty(property)){
                     controller = details_gui.add(obj, property, node.multichoice[property] );
                 }
-                else
+                else if( property == "color" ){
+                    controller = details_gui.addColor(obj, property );
+                }
+                else {
                     controller = details_gui.add(obj, property, min, max, step );
+                }
+
 
                 if(node.hasOwnProperty("reloadonchange") && node.reloadonchange.hasOwnProperty(property)){
                     controller.onFinishChange(function(value) {
@@ -164,6 +169,7 @@ vik.ui = (function () {
         addMeshChangerButton("box","fa fa-cube","Cube");
         addMeshChangerButton("plane","fa fa-square-o","Plane");
         addMeshChangerButton("lee","fa fa-user","Lee");
+        addMeshChangerButton("grid","fa fa-th","Toggle Grid");
         addMeshChangerButton("","fa fa-folder-open","load");
 
     }

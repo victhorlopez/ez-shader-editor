@@ -277,12 +277,66 @@ LGraph3ParamNode.prototype.getOutputExtraInfo = function()
 
 
 //Constant
+function LGraphConstColor()
+{
+    this.addOutput("color","vec4", {vec4:1});
+    this.properties = { color:"#ffffff"};
+    this.editable = { property:"value", type:"vec3" };
+
+    this.shader_piece = new PConstant("vec3"); // hardcoded for testing
+}
+
+LGraphConstColor.title = "Color";
+LGraphConstColor.desc = "Constant color";
+
+
+LGraphConstColor.prototype.onExecute = function()
+{
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.valueToString(), CodePiece.FRAGMENT); // need to check scope
+    this.codes[0].order = this.order;
+}
+
+LGraphConstColor.prototype.onDrawBackground = function(ctx)
+{
+
+}
+
+LGraphConstColor.prototype.onExecute = function()
+{
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.hexToColor(), CodePiece.FRAGMENT); // need to check scope
+    this.codes[0].order = this.order;
+}
+
+
+
+LGraphConstColor.prototype.hexToColor = function()
+{
+    // http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+    function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [
+            parseInt(result[1], 16),
+            parseInt(result[2], 16),
+            parseInt(result[3], 16)
+        ] : null;
+    };
+    var color = hexToRgb(this.properties["color"]);
+    return "vec3("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+")";
+}
+
+
+
+LiteGraph.registerNodeType("constants/"+LGraphConstColor.title, LGraphConstColor);
+
+
+
+//Constant
 function LGraphConstant()
 {
-    this.addOutput("value","number", {number:1});
+    this.addOutput("value","float", {float:1});
     this.properties = { value:1.0 };
 
-    this.editable = { property:"value", type:"number" };
+    this.editable = { property:"value", type:"float" };
 
     this.shader_piece = new PConstant("float"); // hardcoded for testing
 }
@@ -612,13 +666,13 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexP
 function LGraphShader()
 {
     this.uninstantiable = true;
-    this.addInput("albedo","vec3", {vec3:1});
-    this.addInput("normal","vec3", {vec3:1}); // tangent space normal, if written
-    this.addInput("emission","vec3", {vec3:1});
+    this.addInput("albedo","vec3", {vec3:1, vec4:1});
+    this.addInput("normal","vec3", {vec3:1, vec4:1}); // tangent space normal, if written
+    this.addInput("emission","vec3", {vec3:1, vec4:1});
     this.addInput("specular","float", {float:1}); // specular power in 0..1 range
     this.addInput("gloss","float", {float:1});
     this.addInput("alpha","float", {float:1});
-    this.addInput("displacement","vec3", {vec3:1});
+    this.addInput("displacement","vec3", {vec3:1, vec4:1});
 
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
@@ -726,7 +780,7 @@ window.LGraphTexturePreview = LGraphTexturePreview;
 function LGraphTexture()
 {
     this.addOutput("Texture","Texture",{Texture:1});
-    this.addOutput("Color","vec3", {vec3:1});
+    this.addOutput("Color","vec4", {vec4:1});
     this.addOutput("R","float", {float:1});
     this.addOutput("G","float", {float:1});
     this.addOutput("B","float", {float:1});
@@ -1084,7 +1138,7 @@ window.LGraphTexture = LGraphTexture;
 function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
-    this.addOutput("Color","vec3", {vec3:1});
+    this.addOutput("Color","vec4", {vec4:1});
     this.addInput("vec3","vec3");
     this.properties =  this.properties || {};
     this.properties.name = "";
@@ -1215,7 +1269,6 @@ LGraphVecToComps.prototype.onExecute = function()
         var v_chan = input_code.clone();
         v_chan.output_var = input_code.getOutputVar()+".v";
         this.codes[4] = v_chan;
-
     }
 }
 
@@ -1280,6 +1333,31 @@ LiteGraph.registerNodeType("math/"+LGraphCos.title, LGraphCos);
 
 
 
+function LGraphFrac()
+{
+    this.code_name = "fract";
+    this.output_types = {vec2:1, float:1, vec3:1, vec4:1 };
+    this.intput_types = { vec2:1, float:1, vec3:1, vec4:1};
+    this.output_type = "vec2";
+
+    LGraph1ParamNode.call( this);
+    console.log(this);
+}
+
+LGraphFrac.prototype = Object.create(LGraph1ParamNode); // we inherit from Entity
+LGraphFrac.prototype.constructor = LGraphSin;
+
+LGraphFrac.title = "Fract";
+LGraphFrac.desc = "fract of input";
+
+
+LiteGraph.extendClass(LGraphFrac,LGraph1ParamNode);
+LiteGraph.registerNodeType("math/"+LGraphFrac.title, LGraphFrac);
+
+
+
+
+
 function LGraphSin()
 {
     this._ctor(LGraphSin.title);
@@ -1316,6 +1394,10 @@ function LGraphOperation()
     this.in_extra_infoA = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
     this.intput_typesB = null;
     this.in_extra_infoB = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+//    this.output_types = {vec2:1, float:1, vec3:1,  vec4:1};
+//    this.intput_typesA = {vec2:1, float:1, vec3:1,  vec4:1};
+//    this.intput_typesB = {vec2:1, float:1, vec3:1, vec4:1};
+
 
     this.number_piece = new PConstant("float"); // hardcoded when the inputs are null
     this.properties = { A:0.0, B:0.0};
@@ -1413,6 +1495,8 @@ function LGraphMix()
     this.in_extra_infoA = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
     this.intput_typesB = null;
     this.in_extra_infoB = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_typesC = null;
+    this.in_extra_infoC = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
 
     this.properties = { alpha:0.5};
     this.options = { alpha:{min:0, max:1, step:0.01}};
@@ -1537,6 +1621,59 @@ LGraphMulOp.desc = "Mul the inputs";
 //LGraphMulOp.prototype.constructor = LGraphMulOp;
 LiteGraph.extendClass(LGraphMulOp,LGraphOperation);
 LiteGraph.registerNodeType("operations/"+LGraphMulOp.title, LGraphMulOp);
+
+
+
+//UVS
+function LGraphPanner()
+{
+    this.addOutput("output","vec2", {vec2:1, vec3:1});
+    this.addInput("coordinate","vec2", {vec3:1,vec2:1});
+    this.addInput("time","float", {float:1});
+    this.properties = { SpeedX:1.0,
+        SpeedY:1.0 };
+    this.options = {    SpeedX:{min:-1.0, max:1.0, step:0.001},
+        SpeedY:{min:-1.0, max:1.0, step:0.001}
+    };
+    this.shader_piece = new PPanner(); // hardcoded for testing
+    this.uvs_piece = PUVs;
+}
+
+LGraphPanner.title = "Panner";
+LGraphPanner.desc = "Moves the input";
+
+
+LGraphPanner.prototype.onExecute = function()
+{
+    this.processInputCode();
+}
+
+
+LGraphPanner.prototype.processInputCode = function()
+{
+
+    var code_input = this.getInputCode(0) || this.onGetNullCode(0);
+    var code_time = this.getInputCode(1) || LiteGraph.EMPTY_CODE;
+
+    //(out_var, input, dx, dy, scope, out_type)
+    var output_code = this.codes[0] = this.shader_piece.getCode("panner_"+this.id, code_input.getOutputVar(), code_time.getOutputVar() ,this.properties.SpeedX.toFixed(3), this.properties.SpeedY.toFixed(3), CodePiece.FRAGMENT, "vec2"); // output var must be fragment
+    output_code.order = this.order;
+
+    if(code_time != LiteGraph.EMPTY_CODE)
+        output_code.merge(code_time);
+    output_code.merge(code_input);
+
+
+}
+
+LGraphPanner.prototype.onGetNullCode = function(slot)
+{
+    if(slot == 0)
+        return this.uvs_piece.getCode();
+
+}
+
+LiteGraph.registerNodeType("operations/"+LGraphPanner.title, LGraphPanner);
 
 
 

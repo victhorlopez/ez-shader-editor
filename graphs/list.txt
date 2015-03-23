@@ -4,3 +4,5 @@ Simple_smoothstep
 Complex
 Strips
 Animated_strips
+Lee
+Water

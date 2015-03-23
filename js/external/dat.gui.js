@@ -3039,8 +3039,8 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
             var value_field = document.createElement('div');
 
             common.extend(this.__selector.style, {
-                width: '122px',
-                height: '102px',
+                width: '287px',
+                height: '107px',
                 padding: '3px',
                 backgroundColor: '#222',
                 boxShadow: '0px 1px 3px rgba(0,0,0,0.3)'
@@ -3065,7 +3065,7 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
             });
 
             common.extend(this.__saturation_field.style, {
-                width: '100px',
+                width: '262px',
                 height: '100px',
                 border: '1px solid #555',
                 marginRight: '3px',
@@ -3156,9 +3156,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
                 e.preventDefault();
 
                 var w = dom.getWidth(_this.__saturation_field);
+                var h = dom.getHeight(_this.__saturation_field);
                 var o = dom.getOffset(_this.__saturation_field);
                 var s = (e.clientX - o.left + document.body.scrollLeft) / w;
-                var v = 1 - (e.clientY - o.top + document.body.scrollTop) / w;
+                var v = 1 - (e.clientY - o.top + document.body.scrollTop) / h;
 
                 if (v > 1) v = 1;
                 else if (v < 0) v = 0;
@@ -3241,7 +3242,7 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
                     var _flip = 255 - flip;
 
                     common.extend(this.__field_knob.style, {
-                        marginLeft: 100 * this.__color.s - 7 + 'px',
+                        marginLeft: 262 * this.__color.s - 7 + 'px',
                         marginTop: 100 * (1 - this.__color.v) - 7 + 'px',
                         backgroundColor: this.__temp.toString(),
                         border: this.__field_knob_border + 'rgb(' + flip + ',' + flip + ',' + flip +')'

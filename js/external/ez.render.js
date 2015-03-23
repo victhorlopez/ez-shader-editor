@@ -67,6 +67,8 @@ EZ.Entity = function() {
     this.parent = null;
     this.children = [];
 
+    this.visible = true;
+
     //
     this.follow = null;
 };
@@ -472,11 +474,13 @@ EZ.Renderer.prototype = {
         this.context.meshes[name] = mesh;
     },
 
-    addTextureFromURL: function (name, url, callback) {
-        this.context.textures[name] = GL.Texture.fromURL( url, {minFilter: gl.NEAREST}, callback, this.context);
+    addTextureFromURL: function (name, url, params, callback) {
+        params = params || {};
+        this.context.textures[name] = GL.Texture.fromURL( url, params, callback, this.context);
     },
-    addCubeMapFromURL: function (name, url, callback) {
-        this.context.textures[name] = GL.Texture.cubemapFromURL( url, {minFilter: gl.NEAREST}, callback, this.context);
+    addCubeMapFromURL: function (name, url, params, callback) {
+        params = params || {};
+        this.context.textures[name] = GL.Texture.cubemapFromURL( url, params, callback, this.context);
     },
 
     loadAssets: function () {
@@ -520,6 +524,7 @@ EZ.Renderer.prototype = {
             u_mvp: this.mvp_matrix,
             u_time: this.total_time
         };
+
     },
     clearContext: function(){
         this.context.clearColor( this.color[0],this.color[1],this.color[2],this.color[3] );
@@ -528,6 +533,7 @@ EZ.Renderer.prototype = {
     update: function() {
         this.now = getTime();
         var dt = (this.now - this.then )* 0.001;
+        this.then = this.now;
         this.total_time += dt;
         if( this.current_scene )
             this.current_scene.update(dt);
@@ -571,7 +577,7 @@ EZ.Renderer.prototype = {
         for(var i = entities.length - 1; i >= 0; i--) {
             en = entities[i];
 
-            if (en.render){
+            if (en.render && en.visible){
                 this.setModelMatrix(en.global_transform, camera);
                 this.setUniforms(camera, en);
                 en.render(this);
