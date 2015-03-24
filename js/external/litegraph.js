@@ -627,6 +627,21 @@ LiteGraph.removeExtension = function(name){
     return no_ext_name;
 }
 
+LiteGraph.hexToColor = function( color_hex)
+{
+    // http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+    function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [
+            parseInt(result[1], 16),
+            parseInt(result[2], 16),
+            parseInt(result[3], 16)
+        ] : null;
+    };
+    var color = hexToRgb(color_hex);
+    return "vec3("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+")";
+}
+
 
 /*
  LiteGraph.createNodetypeWrapper = function( class_object )
@@ -5063,11 +5078,11 @@ var ShaderConstructor = {};
 
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,offset) {
 
 
-    var vertex_code = this.createVertexCode(albedo,normal,emission,specular,gloss,alpha,offset);
-    var fragment_code = this.createFragmentCode(albedo,normal,emission,specular,gloss,alpha,offset);
+    var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,offset);
+    var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,offset);
 
     var shader = {};
     shader.vertex_code = vertex_code;
@@ -5078,7 +5093,9 @@ ShaderConstructor.createShader = function (albedo,normal,emission,specular,gloss
 
 }
 
-ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,offset) {
+
+    var displacement_factor = properties.displacement_factor.toFixed(4);
 
     var includes = {};
     for (var line in albedo.vertex.includes) { includes[line] = 1; }
@@ -5130,7 +5147,7 @@ ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,g
 
     }
     if(ids.length > 0){
-        r += "      pos += a_normal * "+offset.getOutputVar()+".x * 0.3;\n";
+        r += "      pos += a_normal * "+offset.getOutputVar()+".x * "+displacement_factor+";\n";
     }
 
     var ids = albedo.vertex.getBodyIds();
@@ -5146,12 +5163,25 @@ ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,g
     return r;
 }
 
-ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,offset) {
 //    albedo.merge(normal);
 //    albedo.merge(emission);
 //    albedo.merge(specular);
 //    albedo.merge(gloss);
 //    albedo.merge(alpha);
+//    this.options = {
+//        gloss:{step:0.01},
+//        displacement_factor:{step:0.01},
+//        light_dir_x:{min:0, max:1, step:0.01},
+//        light_dir_y:{min:0, max:1, step:0.01},
+//        light_dir_z:{min:0, max:1, step:0.01}
+//    };
+
+    var color = LiteGraph.hexToColor(properties.color);
+    var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
+    var gloss_prop = properties.gloss.toFixed(4);
+
+
     var includes = {};
     for (var line in albedo.fragment.includes) { includes[line] = 1; }
     for (var line in normal.fragment.includes) { includes[line] = 1; }
@@ -5247,13 +5277,13 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         r += "      "+body_hash[ids[i]].str;
     }
     if(ids.length == 0){
-        r += "      float gloss = 4.0;\n";
+        r += "      float gloss = "+gloss_prop+";\n";
     } else{
         r +="      float gloss = "+gloss.getOutputVar()+";\n";
     }
 
     r +="      float ambient_color = 0.3;\n" +
-        "      vec3 light_dir = normalize(vec3(0.5,0.5,0.5));\n" +
+        "      vec3 light_dir = normalize("+light_dir+");\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
         "      vec3 reflect_dir = reflect(light_dir, normal);\n" +
         "      float spec_angle = max(dot(reflect_dir, camera_to_pixel_ws), 0.0);\n" +
@@ -5261,9 +5291,9 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
         "      specular = specular * specular_intensity;\n";
 
 
-    r +="      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz +" +
-        "      lambertian*("+albedo.getOutputVar()+").xyz +" +
-        "      lambertian * specular * vec3(1.0)" +
+    r +="      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz * "+color+" +" +
+        "      lambertian *("+albedo.getOutputVar()+").xyz *  "+color+" +" +
+        "       specular * vec3(1.0) " + // 1.0 means light color
         "      , 1.0);\n" +
         "}";
 

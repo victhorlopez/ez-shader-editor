@@ -31,12 +31,15 @@ vik.ui = (function () {
 
 
     module.updateLeftPanel = function( node ){
+
         // remove old controllers
         for(var i in details_gui.items){
             details_gui.remove(details_gui.items[i]);
         }
         details_gui.items = [];
         // take the properties nd its options
+        if(!node) return;
+
         var obj = node.properties;
         var opts = node.options;
         for (var property in obj) {

@@ -1,6 +1,6 @@
-Lee.jpg
-Lee_normal.jpg
-Lee_spec.jpg
+lee.jpg
+lee_normal.jpg
+lee_spec.jpg
 small_waves_normal.png
 small_waves2_DISP.jpg
 grass1.jpg

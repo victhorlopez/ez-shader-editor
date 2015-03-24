@@ -331,25 +331,8 @@ LGraphConstColor.prototype.onDrawBackground = function(ctx)
 
 LGraphConstColor.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, this.hexToColor(), CodePiece.FRAGMENT); // need to check scope
+    this.codes[0] = this.shader_piece.getCode("vec3_"+this.id, LiteGraph.hexToColor(this.properties["color"]), CodePiece.FRAGMENT); // need to check scope
     this.codes[0].order = this.order;
-}
-
-
-
-LGraphConstColor.prototype.hexToColor = function()
-{
-    // http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
-    function hexToRgb(hex) {
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? [
-            parseInt(result[1], 16),
-            parseInt(result[2], 16),
-            parseInt(result[3], 16)
-        ] : null;
-    };
-    var color = hexToRgb(this.properties["color"]);
-    return "vec3("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+")";
 }
 
 
@@ -736,6 +719,22 @@ function LGraphShader()
 
 
     //inputs: ["base color","metallic", "specular", "roughness", "emissive color", "opacity", "opacitiy mask", "normal", "world position offset", "world displacement", "tesselation multiplier", "subsurface color", "ambient occlusion", "refraction"],
+    this.properties = { color:"#ffffff",
+                        gloss:4.0,
+                        displacement_factor:1.0,
+                        light_dir_x: 1.0,
+                        light_dir_y: 1.0,
+                        light_dir_z: 1.0
+    };
+
+    this.options = {
+        gloss:{step:0.01},
+        displacement_factor:{step:0.01},
+        light_dir_x:{min:-1, max:1, step:0.01},
+        light_dir_y:{min:-1, max:1, step:0.01},
+        light_dir_z:{min:-1, max:1, step:0.01}
+    };
+
     this.size = [125,250];
     this.shader_piece = ShaderConstructor;
 }
@@ -787,7 +786,7 @@ LGraphShader.prototype.processInputCode = function() {
 
 
 
-    var shader = this.shader_piece.createShader(color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
+    var shader = this.shader_piece.createShader(this.properties ,color_code,normal_code,emission_code,specular_code,gloss_code,alpha_code,world_offset_code);
     this.graph.shader_output = shader;
     var texture_nodes = this.graph.findNodesByType("texture/"+LGraphTexture.title);// we need to find all the textures used in the graph
     this.graph.shader_textures = [];
