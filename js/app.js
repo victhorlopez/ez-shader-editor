@@ -65,8 +65,15 @@ vik.app = (function() {
 
 
         module.loadTexture("small_waves_normal", "assets/textures/texture/small_waves_normal.png", sync_load, {minFilter: gl.LINEAR});
-        module.loadTexture("small_waves2_DISP", "assets/textures/texture/small_waves2_DISP.jpg", sync_load, {minFilter: gl.LINEAR});
-        module.loadTexture("Lee", "assets/textures/texture/Lee.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("small_waves2_DISP", "assets/textures/texture/small_waves2_DISP.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("grass1", "assets/textures/texture/grass1.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("snow", "assets/textures/texture/snow.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("CobblesDiffuse", "assets/textures/texture/CobblesDiffuse.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("CobblesGloss", "assets/textures/texture/CobblesGloss.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("CobblesNormal", "assets/textures/texture/CobblesNormal.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("Cobbles_DISP", "assets/textures/texture/Cobbles_DISP.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("CobblesNormal_SPEC", "assets/textures/texture/Cobbles_SPEC.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.loadTexture("Lee", "assets/textures/texture/lee.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
         module.loadTexture("Lee_normal", "assets/textures/texture/Lee_normal.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
         module.loadTexture("Lee_spec", "assets/textures/texture/Lee_spec.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
         module.loadCubeMap("cube2", "assets/textures/cubemap/cube2.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
