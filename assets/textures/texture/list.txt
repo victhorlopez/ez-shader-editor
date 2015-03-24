@@ -4,6 +4,7 @@ Lee_spec.jpg
 small_waves_normal.png
 small_waves2_DISP.jpg
 grass1.jpg
+snow.jpg
 CobblesDiffuse.jpg
 CobblesGloss.jpg
 CobblesNormal.jpg
