@@ -39,7 +39,7 @@ var LiteGraph = {
 
     debug: false,
     throw_errors: true,
-    showcode:false,
+    showcode:true,
     registered_node_types: {},
 
     graph_max_steps:0,
@@ -116,6 +116,7 @@ var LiteGraph = {
         if(!node.pos) node.pos = LiteGraph.DEFAULT_POSITION.concat();
         if(!node.shader_piece) node.shader_piece = null;
         if(!node.codes) node.codes = [];
+        if(!node.node_path) node.node_path = [];
         if(node.extraproperties)
             for(var i in node.extraproperties)
                 node.properties[i] = node.extraproperties[i];
@@ -1701,7 +1702,7 @@ LGraphNode.prototype._ctor = function( title )
 
     this.shader_piece = null;
     this.codes = []; //output codes in each output link channel
-
+    this.node_path = []; //this var stores the different functions that have to be executed in one graph path
 
     this.T_types = {}; // template types
     this.in_using_T = 0; // number of inputs using T types
@@ -2612,7 +2613,15 @@ LGraphNode.prototype.getInputCode = function(slot)
     if(link)
         return this.graph.getNodeById( link.origin_id ).codes[link.origin_slot];
     return null;
+}
 
+LGraphNode.prototype.getInputNodePath = function(slot)
+{
+    var link_id = this.inputs[slot].link;
+    var link = this.graph.links[link_id];
+    if(link)
+        return this.graph.getNodeById( link.origin_id ).node_path[link.origin_slot];
+    return [];
 }
 
 LGraphNode.prototype.onGetNullCode = function(slot)
@@ -5072,17 +5081,16 @@ ShaderConstructor.createShader = function (albedo,normal,emission,specular,gloss
 ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,gloss,alpha,offset) {
 
     var includes = {};
-    for (var line in albedo.fragment.includes) { includes[line] = 1; }
-    for (var line in normal.fragment.includes) { includes[line] = 1; }
-    for (var line in emission.fragment.includes) { includes[line] = 1; }
-    for (var line in specular.fragment.includes) { includes[line] = 1; }
-    for (var line in gloss.fragment.includes) { includes[line] = 1; }
-    for (var line in alpha.fragment.includes) { includes[line] = 1; }
-    for (var line in offset.fragment.includes) { includes[line] = 1; }
+    for (var line in albedo.vertex.includes) { includes[line] = 1; }
+    for (var line in normal.vertex.includes) { includes[line] = 1; }
+    for (var line in emission.vertex.includes) { includes[line] = 1; }
+    for (var line in specular.vertex.includes) { includes[line] = 1; }
+    for (var line in gloss.vertex.includes) { includes[line] = 1; }
+    for (var line in alpha.vertex.includes) { includes[line] = 1; }
+    for (var line in offset.vertex.includes) { includes[line] = 1; }
 
     // header
-    var r = "#extension GL_OES_standard_derivatives : enable\n" +
-        "precision highp float;\n"+
+    var r = "precision highp float;\n"+
         "attribute vec3 a_vertex;\n"+
         "attribute vec3 a_normal;\n"+
         "attribute vec2 a_coord;\n";
@@ -5104,7 +5112,7 @@ ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,g
         r += k;
     for(var k in normal.vertex.getHeader())
         r += k;
-    for(var k in offset.fragment.getHeader())
+    for(var k in offset.vertex.getHeader())
         r += k;
 
 
@@ -5115,8 +5123,8 @@ ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,g
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
 
-    var ids = offset.fragment.getBodyIds();
-    var body_hash = offset.fragment.getBody();
+    var ids = offset.vertex.getBodyIds();
+    var body_hash = offset.vertex.getBody();
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
 
@@ -5139,7 +5147,11 @@ ShaderConstructor.createVertexCode = function (albedo,normal,emission,specular,g
 }
 
 ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular,gloss,alpha,offset) {
-
+//    albedo.merge(normal);
+//    albedo.merge(emission);
+//    albedo.merge(specular);
+//    albedo.merge(gloss);
+//    albedo.merge(alpha);
     var includes = {};
     for (var line in albedo.fragment.includes) { includes[line] = 1; }
     for (var line in normal.fragment.includes) { includes[line] = 1; }
@@ -5149,11 +5161,15 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
     for (var line in alpha.fragment.includes) { includes[line] = 1; }
     for (var line in offset.fragment.includes) { includes[line] = 1; }
 
-
+    var header = {};
+    for (var line in albedo.fragment.getHeader()) { header[line] = 1; }
+    for (var line in normal.fragment.getHeader()) { header[line] = 1; }
+    for (var line in specular.fragment.getHeader()) { header[line] = 1; }
+    for (var line in gloss.fragment.getHeader()) { header[line] = 1; }
 
     // header
-    var r = "#extension GL_OES_standard_derivatives : enable\n" +
-        "precision highp float;\n";
+    var r = "precision highp float;\n"+
+     "#extension GL_OES_standard_derivatives : enable\n";
     if (includes["v_coord"])
         r += "varying vec2 v_coord;\n";
     //if (includes["v_normal"] || normal != LiteGraph.EMPTY_CODE )
@@ -5165,14 +5181,8 @@ ShaderConstructor.createFragmentCode = function (albedo,normal,emission,specular
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
-    for(var k in albedo.fragment.getHeader())
-        r += k;
-    for(var k in normal.fragment.getHeader())
-        r += k;
-    for(var k in specular.fragment.getHeader())
-        r += k;
-    for(var k in gloss.fragment.getHeader())
-        r += k;
+    for(var i in header)
+        r += i;
 //    for(var k in offset.fragment.getHeader())
 //        r += k;
     // body
@@ -5790,7 +5800,7 @@ PPanner.prototype.getVertexCode = function (out_var, input, time, dx, dy, scope,
         var code = out_type+" " +out_var+" = "+input+";\n" +
             "      "+out_var+".x += "+dx+" * "+time+";\n" +
             "      "+out_var+".y += "+dy+" * "+time+";\n" +
-            "      "+out_var+".x += frac("+out_var+");\n";
+            "      "+out_var+" = fract("+out_var+");\n";
         return code;
     }
     return "";
@@ -5953,41 +5963,40 @@ var PTextureSample = {};
 PTextureSample.id = "texture_sample";
 PTextureSample.includes = {v_pos:1, v_coord:1, camera_to_pixel_ws:1, u_eye:1};
 
-PTextureSample.getVertexCode = function (output, input, texture_id, texture_type) {
-    var code = new CodePiece()
+PTextureSample.getVertexCode = function (output, input, texture_id, texture_type, scope) {
+    var code = new CodePiece();
     var code_str = "";
-    code.setIncludes(PTextureSample.includes);
-//    if( texture_type == LiteGraph.BUMP_MAP){
-//        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n" +
-//            "      v_pos = v_pos + v_normal * "+output+".r ;";
-//
-//
-//        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
-//        code.setIncludes(PTextureSample.includes);
-//    }
+    if(scope == CodePiece.VERTEX) {
+        code.setIncludes(PTextureSample.includes);
+        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
+        code.addHeaderLine("uniform sampler2D "+texture_id+";\n");
+        code.setIncludes(PTextureSample.includes);
+    }
     code.setBody(code_str);
     return code;
 }
 
-PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type) {
+PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope) {
     input = input || "v_coord";
     var code = new CodePiece();
     code.setIncludes(PTextureSample.includes);
     var code_str = "";
-    code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
-    //if( texture_type == LiteGraph.COLOR_MAP || texture_type == LiteGraph.SPECULAR_MAP) {
-    code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
-    if (texture_type == LiteGraph.NORMAL_MAP) {
-        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
-    }
-    else if( texture_type == LiteGraph.TANGENT_MAP){
-        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
-        code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-        code.setIncludes(PTextureSample.includes);
-    }    else if( texture_type == LiteGraph.TANGENT_MAP){
-        code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
-        code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-        code.setIncludes(PTextureSample.includes);
+    if(scope == CodePiece.FRAGMENT) {
+        code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
+        //if( texture_type == LiteGraph.COLOR_MAP || texture_type == LiteGraph.SPECULAR_MAP) {
+        code_str = "vec4 " + output + " = texture2D(" + texture_id + ", " + input + ");\n";
+        if (texture_type == LiteGraph.NORMAL_MAP) {
+            code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+        }
+        else if( texture_type == LiteGraph.TANGENT_MAP){
+            code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+            code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
+            code.setIncludes(PTextureSample.includes);
+        }    else if( texture_type == LiteGraph.TANGENT_MAP){
+            code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
+            code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
+            code.setIncludes(PTextureSample.includes);
+        }
     }
 //    else if( texture_type == LiteGraph.BUMP_MAP){
 //        code_str += "      const vec2 size = vec2(2.0,0.0);\n" +
@@ -6005,20 +6014,17 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
 //    }
 
 
-
-
     code.setBody(code_str);
 
     return code;
 }
 
 
-PTextureSample.getCode = function (output, input, texture_id, texture_type) {
-    var vertex = this.getVertexCode(output, input, texture_id, texture_type)
+PTextureSample.getCode = function (output, input, texture_id, texture_type, scope) {
 
+    var vertex = this.getVertexCode(output, input, texture_id, texture_type, scope);
 
-    var fragment = this.getFragmentCode(output, input, texture_id, texture_type);
-
+    var fragment = this.getFragmentCode(output, input, texture_id, texture_type, scope);
 
     return new ShaderCode(vertex, fragment, output);
 }

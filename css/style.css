@@ -306,6 +306,21 @@ body .dg li.code-title {
     border-bottom: 1px solid #555;
     background-color: #444;
 }
+#code  {
+    overflow: auto;
+}
+#code::-webkit-scrollbar {
+    background: #3d3d3d;
+    width: 11px;
+}
+
+#code::-webkit-scrollbar-thumb {
+    background: transparent;
+    width: 5px;
+    border-left: 5px solid rgba(0,0,0,0.2);
+    border-right: 6px solid rgba(0,0,0,0.2);
+    border-radius: 0;
+}
 #code pre {
     margin-top: 0px;
 }

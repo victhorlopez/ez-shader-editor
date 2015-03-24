@@ -15,6 +15,7 @@ vik.app = (function() {
     var renderer = null;
     var main_node = null;
     var node_grid = null;
+    var node_box = null;
     var live_update = true;
     var canvas2webgl = window.location.href.indexOf('?3d') > -1;
     LiteGraph.current_ctx = LiteGraph.CANVAS_2D;
@@ -64,6 +65,7 @@ vik.app = (function() {
 
 
         module.loadTexture("small_waves_normal", "assets/textures/texture/small_waves_normal.png", sync_load, {minFilter: gl.LINEAR});
+        module.loadTexture("small_waves2_DISP", "assets/textures/texture/small_waves2_DISP.jpg", sync_load, {minFilter: gl.LINEAR});
         module.loadTexture("Lee", "assets/textures/texture/Lee.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
         module.loadTexture("Lee_normal", "assets/textures/texture/Lee_normal.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
         module.loadTexture("Lee_spec", "assets/textures/texture/Lee_spec.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
@@ -85,7 +87,6 @@ vik.app = (function() {
         var container = $("#layout_layout2_panel_main div.w2ui-panel-content");
         renderer = new EZ.Renderer();
         renderer.createCanvas(container.width(), container.height(), "preview_canvas");
-        //renderer.context.getExtension('OES_standard_derivatives');
         renderer.append(container[0]);
         renderer.color = [0.2,0.2,0.2];
 
@@ -100,14 +101,14 @@ vik.app = (function() {
         main_node.position = [0, 0.5, 0];
         scene.addChild(main_node);
 //
-//        var box = new EZ.EMesh();
-//        box.mesh = "box";
-//        box.followEntity(camera);
-//        box.setSkyBox();
-//        box.shader = "cubemap";
-//        box.setTexture("cubemap","cubemap");
-//        box.scale = [50,50,50];
-//        scene.addChild(box);
+        node_box = new EZ.EMesh();
+        node_box.mesh = "box";
+        node_box.followEntity(camera);
+        node_box.setSkyBox();
+        node_box.shader = "cubemap";
+        node_box.setTexture("cube2","cube2");
+        node_box.scale = [50,50,50];
+        scene.addChild(node_box);
 
         scene.addChild(camera);
 
@@ -173,9 +174,10 @@ vik.app = (function() {
                 main_node.setTexture(texture_name, texture_name);
             }
             main_node.shader = "current";
-            var code_div = document.getElementById("code");
+            var code_div =  $("#code");//document.getElementById("code");
+            code_div.height(code_div.parent().height());
             if(graph.shader_output){
-                code_div.innerHTML = '<div class="dg"><ul>' +
+                code_div[0].innerHTML = '<div class="dg"><ul>' +
                     '<li class="code-title">Vertex Code</li>' +
                     '<pre><code class="glsl" id="vertex_code">'+graph.shader_output.vertex_code +' </pre></code>' +
                     '<li class="code-title">Fragment Code</li>'+
@@ -389,6 +391,8 @@ vik.app = (function() {
             mesh_buttons[i].childNodes[0].addEventListener("click",function(){
                 if(this.id == "grid"){
                     node_grid.visible = !node_grid.visible;
+                } else if(this.id == "cubemap"){
+                    node_box.visible = !node_box.visible;
                 } else if(this.id != ""){
                     main_node.mesh = this.id;
                 }

@@ -170,6 +170,7 @@ vik.ui = (function () {
         addMeshChangerButton("plane","fa fa-square-o","Plane");
         addMeshChangerButton("lee","fa fa-user","Lee");
         addMeshChangerButton("grid","fa fa-th","Toggle Grid");
+        addMeshChangerButton("cubemap","fa fa-file-image-o","Toggle Skybox");
         addMeshChangerButton("","fa fa-folder-open","load");
 
     }

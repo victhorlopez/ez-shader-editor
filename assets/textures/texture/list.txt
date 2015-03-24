@@ -2,3 +2,4 @@ Lee.jpg
 Lee_normal.jpg
 Lee_spec.jpg
 small_waves_normal.png
+small_waves2_DISP.jpg
