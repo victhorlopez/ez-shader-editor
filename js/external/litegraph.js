@@ -39,7 +39,7 @@ var LiteGraph = {
 
     debug: false,
     throw_errors: true,
-    showcode:true,
+    showcode:false,
     registered_node_types: {},
 
     graph_max_steps:0,
