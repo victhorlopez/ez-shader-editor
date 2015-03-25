@@ -4959,8 +4959,12 @@ CodePiece.prototype.setBody = function(s, other_order)
 {
     if(s != ""){
         var id = s.hashCode();
-        if(this.body_hash[id] && this.body_hash[id].order > other_order){
-            this.body_hash[id].order = this.order;
+        var is_order_not_defined = this.body_hash[id] && typeof(this.body_hash[id].order) === 'undefined';
+        if(is_order_not_defined)
+            var debug = 1;
+        var new_order = is_order_not_defined ? other_order : this.order;
+        if(this.body_hash[id] && this.body_hash[id].order > other_order || is_order_not_defined){
+            this.body_hash[id].order = new_order;
             var index = this.body_ids.indexOf(id);
             this.body_ids.splice(index, 1);
             this.body_ids.unshift(id);
@@ -5052,8 +5056,18 @@ ShaderCode.prototype.getOutputVar = function()
     return this.output_var;
 };
 
+ShaderCode.prototype.setOrder = function(order)
+{
+    this.order = order;
+    this.vertex.order = this.order;
+    this.fragment.order = this.order;
+};
+
+
 ShaderCode.prototype.merge = function (other_code)
 {
+    if(other_code === LiteGraph.EMPTY_CODE || this === LiteGraph.EMPTY_CODE)
+        return;
     this.vertex.order = this.order;
     this.fragment.order = this.order;
     this.vertex.merge(other_code.vertex);
@@ -5155,8 +5169,8 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     for (var i = 0, l = ids.length; i < l; i++) {
         r += "      "+body_hash[ids[i]].str;
     }
-    if (includes["v_pos"])
-        r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
+    //if (includes["v_pos"])
+    r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
     r += "      gl_Position = u_mvp * vec4(pos,1.0);\n"+
         "}\n";
 
@@ -5164,11 +5178,23 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 }
 
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,offset) {
-//    albedo.merge(normal);
-//    albedo.merge(emission);
-//    albedo.merge(specular);
-//    albedo.merge(gloss);
-//    albedo.merge(alpha);
+
+
+    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
+    var has_albedo = albedo.fragment.getBodyIds().length  > 0;
+    var has_normal = normal.fragment.getBodyIds().length  > 0;
+    var has_specular = specular.fragment.getBodyIds().length  > 0;
+    var has_gloss = gloss.fragment.getBodyIds().length  > 0;
+    var has_alpha = alpha.fragment.getBodyIds().length  > 0;
+
+    if(has_albedo && has_normal) albedo.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
+   //else normal.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
+
+    albedo.merge(normal);
+    albedo.merge(emission);
+    albedo.merge(specular);
+    albedo.merge(gloss);
+    albedo.merge(alpha);
 //    this.options = {
 //        gloss:{step:0.01},
 //        displacement_factor:{step:0.01},
@@ -5225,7 +5251,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
     var ids = normal.fragment.getBodyIds();
     var body_hash = normal.fragment.getBody();
-    if(ids.length > 0){
+    if(has_normal){
         // http://www.thetenthplanet.de/archives/1180
         r+= "      vec3 dp1 = dFdx( v_pos );\n" +
             "      vec3 dp2 = dFdy( v_pos );\n" +
@@ -5234,17 +5260,17 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
             "      vec3 dp2perp = cross( dp2, v_normal );\n" +
             "      vec3 dp1perp = cross( v_normal, dp1 );\n" +
             "      vec3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;\n" +
-            "      vec3 bitangent = dp2perp * duv1.y + dp1perp * duv2.y;\n" +
-            "      float invmax = inversesqrt( max( dot(tangent,tangent), dot(bitangent,bitangent) ) );\n" +
-            "      mat3 TBN = mat3( tangent * invmax, bitangent * invmax, v_normal );\n";
+            "      vec3 binormal = dp2perp * duv1.y + dp1perp * duv2.y;\n" +
+            "      float invmax = inversesqrt( max( dot(tangent,tangent), dot(binormal,binormal) ) );\n" +
+            "      mat3 TBN = mat3( tangent * invmax, binormal * invmax, v_normal );\n";
     }
 
 
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-    }
-    if(ids.length > 0)
-        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
+//    if(ids.length > 0)
+//        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
 
 //    ids = offset.fragment.getBodyIds();
 //    body_hash = offset.fragment.getBody();
@@ -5260,28 +5286,31 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r += "      "+body_hash[ids[i]].str;
     }
 
-    ids = specular.fragment.getBodyIds();
-    body_hash = specular.fragment.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-    }
-    if(ids.length == 0){
+//    ids = specular.fragment.getBodyIds();
+//    body_hash = specular.fragment.getBody();
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
+    if(!has_specular){
         r += "      float specular_intensity = 1.0;\n";
     } else{
         r +="      float specular_intensity = "+specular.getOutputVar()+";\n";
     }
 
-    ids = gloss.fragment.getBodyIds();
-    body_hash = gloss.fragment.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-    }
-    if(ids.length == 0){
+//    ids = gloss.fragment.getBodyIds();
+//    body_hash = gloss.fragment.getBody();
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
+    if( !has_gloss){
         r += "      float gloss = "+gloss_prop+";\n";
     } else{
         r +="      float gloss = "+gloss.getOutputVar()+";\n";
     }
 
+//    ids = normal.fragment.getBodyIds();
+//    if(ids.length > 0)
+//        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
     r +="      float ambient_color = 0.3;\n" +
         "      vec3 light_dir = normalize("+light_dir+");\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
@@ -5608,8 +5637,8 @@ PReflected.prototype.getVertexCode = function () {
 }
 
 PReflected.prototype.getFragmentCode = function () {
-    return  "       vec3 pixel_normal_ws = normal;\n" +
-            "       vec3 reflected_vector = reflect(camera_to_pixel_ws,pixel_normal_ws);\n";
+    return  "vec3 pixel_normal_ws = normal;\n" +
+            "      vec3 reflected_vector = reflect(camera_to_pixel_ws,pixel_normal_ws);\n";
 }
 
 /**
