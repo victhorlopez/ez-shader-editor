@@ -256,8 +256,16 @@ vik.app = (function() {
         }
 
         gcanvas.onDropFile = function(data, filename, file){
-            var gl = canvas2webgl ? renderer.context : graph_gl;
-            var tex = LGraphTexture.loadTextureFromFile(data, filename, file, null, gl);
+            var ext = LGraphCanvas.getFileExtension(filename);
+            if(ext = "json"){
+                var obj = JSON.parse(data);
+                graph.configure(obj);
+                main_node.mesh = obj.mesh;
+            } else {
+                var gl = canvas2webgl ? renderer.context : graph_gl;
+                var tex = LGraphTexture.loadTextureFromFile(data, filename, file, null, gl);
+            }
+
 
         }
         module.compile(true,true);
@@ -269,7 +277,6 @@ vik.app = (function() {
     module.changeGraph = function(graph_name) {
         function onComplete(data){
             main_node.mesh = data.mesh;
-            vik.app.compile();
             vik.ui.updateLeftPanel( null );
         }
 
@@ -281,7 +288,7 @@ vik.app = (function() {
 
         window.addEventListener("contentChange",function(force_compile, draw){
            vik.app.compile(force_compile, draw);
-            console.log("content changed");
+            //console.log("content changed");
         });
 
 
@@ -407,6 +414,25 @@ vik.app = (function() {
                 }
             });
         }
+
+
+        $(".search").on("input", function() {
+            var value = $(this).val().toLowerCase();
+            $("#layout_layout3_panel_main .property-name").each(function (index) {
+                if ($(this).html().toLowerCase().indexOf(value) >= 0 || value == "") {
+                    $(this).parent().parent().show();
+                }
+                else {
+                    $(this).parent().parent().hide();
+                }
+            });
+
+            $("#layout_layout3_panel_main .folder ul").each(function (index) {
+                $(this).show();
+                if($(this).children(':visible').length <= 1)
+                    $(this).hide();
+            });
+        });
 
     }
     return module;

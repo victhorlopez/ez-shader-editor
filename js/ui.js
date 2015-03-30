@@ -27,7 +27,7 @@ vik.ui = (function () {
         details_gui.domElement.style.height = details_gui.parent_node.height();
         palette_gui.width = palette_gui.parent_node.width();
         palette_gui.domElement.style.height = palette_gui.parent_node.height();
-    }
+    };
 
 
     module.updateLeftPanel = function( node ){
@@ -73,7 +73,46 @@ vik.ui = (function () {
                 });
             }
         }
+    };
+
+    module.createRightPanel = function(  ){
+        var node_types = LiteGraph.getNodeTypesCategories();
+        node_types.sort(function(a, b){
+            if(a < b) return 1;
+            if(a > b) return -1;
+            return 0;
+        });
+        for(var i = node_types.length -1; i >= 0; --i){
+            if(node_types[i] !== ""){
+                var f = palette_gui.addFolder(node_types[i]);
+                var nodes = LiteGraph.getNodeTypesInCategory(node_types[i]);
+                nodes.sort(function(a, b){
+                    if(a.title < b.title) return 1;
+                    if(a.title > b.title) return -1;
+                    return 0;
+                });
+                for(var j = nodes.length -1; j >= 0; --j) {
+                    if(nodes[j]){
+                        var o = {};
+                        o[nodes[j].title] = function() {};
+                        var controller = f.add(o, nodes[j].title);
+                        var html_node = controller.__li.firstChild.firstChild;
+                        html_node.id = f.name +"/"+ controller.property;
+                        html_node.setAttribute('draggable', true);
+                        html_node.addEventListener('dragstart', function(e) {
+                            e.dataTransfer.setData('text', this.id);
+                        });
+                    }
+                }
+                f.open();
+            }
+
+        }
+        $(palette_gui.parent_node[0]).append('<input class="search" type="search" placeholder="search">');
+        palette_gui.parent_node[0].appendChild(palette_gui.domElement);
+
     }
+
 
 
     // function to select a texture using a popup
@@ -319,40 +358,9 @@ vik.ui = (function () {
         });
         palette_gui.parent_node = $("#layout_layout3_panel_main div.w2ui-panel-content");
         palette_gui.width = palette_gui.parent_node.width();
-        var node_types = LiteGraph.getNodeTypesCategories();
-        node_types.sort(function(a, b){
-            if(a < b) return 1;
-            if(a > b) return -1;
-            return 0;
-        });
-        for(var i = node_types.length -1; i >= 0; --i){
-            if(node_types[i] !== ""){
-                var f = palette_gui.addFolder(node_types[i]);
-                var nodes = LiteGraph.getNodeTypesInCategory(node_types[i]);
-                nodes.sort(function(a, b){
-                    if(a.title < b.title) return 1;
-                    if(a.title > b.title) return -1;
-                    return 0;
-                });
-                for(var j = nodes.length -1; j >= 0; --j) {
-                    if(nodes[j]){
-                        var o = {};
-                        o[nodes[j].title] = function() {};
-                        var controller = f.add(o, nodes[j].title);
-                        var html_node = controller.__li.firstChild.firstChild;
-                        html_node.id = f.name +"/"+ controller.property;
-                        html_node.setAttribute('draggable', true);
-                        html_node.addEventListener('dragstart', function(e) {
-                            e.dataTransfer.setData('text', this.id);
-                        });
-                    }
-                }
-                f.open();
-            }
 
-        }
+        module.createRightPanel();
 
-        palette_gui.parent_node[0].appendChild(palette_gui.domElement);
 
         addButtons();
 

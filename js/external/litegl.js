@@ -3430,7 +3430,6 @@
             texture.has_mipmaps = true;
         }
         gl.bindTexture(texture.texture_type, null); //disable
-        console.log(texture);
         return texture;
     };
 

@@ -360,3 +360,58 @@ img.texture-selector{
 .mesh-changer-button:hover {
     color:#E5E6E7;
 }
+
+.search {
+    margin: 14px 23px;
+    border: 0;
+    padding: 7px 8px;
+    font-size: 12px;
+    width: 80%;
+    box-sizing: border-box;
+    border-radius: 3px;
+    background: #444;
+    border: 1px solid #444;
+    color: #999;
+}
+
+.search:focus {
+    background: #484848;
+    color: #aaa;
+    border: 1px solid rgba(255,255,255,0.1);
+    outline: 0;
+}
+
+.search::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    height: 1px;
+    width: 8px;
+    cursor: pointer;
+}
+
+.search::-webkit-search-cancel-button:before {
+    height: 1px;
+    width: 10px;
+    content: 'x';
+    font-family: Arial;
+    line-height: 0;
+    font-size: 13px;
+    color: #999;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.search::-webkit-input-placeholder {
+    color: #777;
+}
+
+.search:-moz-placeholder {
+    color: #777;
+}
+
+.search::-moz-placeholder {
+    color: #777;
+}
+
+.search:-ms-input-placeholder {
+    color: #777;
+}

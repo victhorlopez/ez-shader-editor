@@ -3037,7 +3037,7 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
 
         //read data
         var type = file.type.split("/")[0];
-        if (type == "text")
+        if (type == "text" || ext == "json")
             reader.readAsText(file);
         else if (type == "image")
             reader.readAsDataURL(file);
@@ -4935,14 +4935,16 @@ LGraphCanvas.prototype.processContextualMenu = function (node, event) {
 CodePiece.VERTEX = 1;
 CodePiece.FRAGMENT = 2;
 CodePiece.BOTH = 3;
-
-function CodePiece()
+CodePiece.ORDER_MODIFIER = 0;
+function CodePiece(order)
 {
     this.header = {}; // map for custom uniforms or variants
     this.body_hash = {}; // body hashmap
     this.body_ids = []; // body ids sorted  by insert order
     this.includes = {}; // map for standard uniforms
     this.scope = "";
+    this.order = typeof order !== 'undefined' ? order : Number.MAX_VALUE;
+    this.order -= CodePiece.ORDER_MODIFIER;
 }
 
 CodePiece.prototype.getBodyIds = function()
@@ -4957,24 +4959,22 @@ CodePiece.prototype.getBody = function()
 
 CodePiece.prototype.setBody = function(s, other_order)
 {
+
     if(s != ""){
         var id = s.hashCode();
-        var is_order_not_defined = this.body_hash[id] && typeof(this.body_hash[id].order) === 'undefined';
-        if(is_order_not_defined)
-            var debug = 1;
-        var new_order = is_order_not_defined ? other_order : this.order;
-        if(this.body_hash[id] && this.body_hash[id].order > other_order || is_order_not_defined){
-            this.body_hash[id].order = new_order;
-            var index = this.body_ids.indexOf(id);
-            this.body_ids.splice(index, 1);
+        var new_order = typeof other_order !== 'undefined' ? other_order : this.order;
+        if(this.body_hash[id] !== undefined){
+            if(this.body_hash[id].order > new_order){
+                this.body_hash[id].order = new_order;
+                var index = this.body_ids.indexOf(id);
+                this.body_ids.splice(index, 1);
+                this.body_ids.unshift(id);
+            }
+        }  else {
+            this.body_hash[id] = {"str":s, order:new_order}; // we save the order
             this.body_ids.unshift(id);
         }
-
-        if(typeof(this.body_hash[id]) === 'undefined' ){
-            this.body_hash[id] = {"str":s, order:this.order}; // we save the order
-            this.body_ids.unshift(id);
-        }
-
+       // console.log("str:"+ s + " new_order:"+this.body_hash[id].order+" old_order:"+old_order);
     }
 };
 
@@ -5014,7 +5014,8 @@ CodePiece.prototype.merge = function (input_code)
     var ids = input_code.getBodyIds();
     var body_hash = input_code.getBody();
     for (var i = ids.length-1; i >= 0; i--) {
-        this.setBody(body_hash[ids[i]].str, input_code.order);
+        var order = typeof body_hash[ids[i]].order !== 'undefined' ? body_hash[ids[i]].order : input_code.order;
+        this.setBody(body_hash[ids[i]].str, order);
     }
 
     for (var inc in input_code.getHeader()) { this.header[inc] = input_code.header[inc]; }
@@ -5068,8 +5069,6 @@ ShaderCode.prototype.merge = function (other_code)
 {
     if(other_code === LiteGraph.EMPTY_CODE || this === LiteGraph.EMPTY_CODE)
         return;
-    this.vertex.order = this.order;
-    this.fragment.order = this.order;
     this.vertex.merge(other_code.vertex);
     this.fragment.merge(other_code.fragment);
 
@@ -5090,13 +5089,28 @@ LiteGraph.EMPTY_CODE = new ShaderCode();
 
 var ShaderConstructor = {};
 
+function sortMapByValue(map)
+{
+    var tupleArray = [];
+    for (var key in map) tupleArray.push([key, map[key]]);
+    tupleArray.sort(function (a, b) { return a[1].order - b[1].order });
+    return tupleArray;
+}
 
 // codes it's [vertex, fragment]
-ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createShader = function (properties , albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
+
+    albedo.merge(normal);
+    albedo.merge(emission);
+    albedo.merge(specular);
+    albedo.merge(gloss);
+    albedo.merge(alpha);
+    albedo.merge(alphaclip);
+    albedo.merge(offset);
 
 
-    var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,offset);
-    var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,offset);
+    var vertex_code = this.createVertexCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
+    var fragment_code = this.createFragmentCode(properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset);
 
     var shader = {};
     shader.vertex_code = vertex_code;
@@ -5107,7 +5121,7 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
 
 }
 
-ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
 
     var displacement_factor = properties.displacement_factor.toFixed(4);
 
@@ -5118,6 +5132,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     for (var line in specular.vertex.includes) { includes[line] = 1; }
     for (var line in gloss.vertex.includes) { includes[line] = 1; }
     for (var line in alpha.vertex.includes) { includes[line] = 1; }
+    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
     for (var line in offset.vertex.includes) { includes[line] = 1; }
 
     // header
@@ -5141,10 +5156,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 
     for(var k in albedo.vertex.getHeader())
         r += k;
-    for(var k in normal.vertex.getHeader())
-        r += k;
-    for(var k in offset.vertex.getHeader())
-        r += k;
+
 
 
     // body
@@ -5154,21 +5166,19 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
 
-    var ids = offset.vertex.getBodyIds();
-    var body_hash = offset.vertex.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
-
-    }
-    if(ids.length > 0){
-        r += "      pos += a_normal * "+offset.getOutputVar()+".x * "+displacement_factor+";\n";
-    }
 
     var ids = albedo.vertex.getBodyIds();
     var body_hash = albedo.vertex.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
+    var sorted_map = sortMapByValue(body_hash);
+    for(var i in sorted_map){
+        r += "      "+sorted_map[i][1].str;
+        //console.log(sorted_map[i][1].str +" "+    sorted_map[i][1].order);
     }
+
+    if(offset.getOutputVar()){
+        r += "      pos += a_normal * "+offset.getOutputVar()+" * "+displacement_factor+";\n";
+    }
+
     //if (includes["v_pos"])
     r += "      v_pos = (u_model * vec4(pos,1.0)).xyz;\n";
     r += "      gl_Position = u_mvp * vec4(pos,1.0);\n"+
@@ -5177,7 +5187,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     return r;
 }
 
-ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,offset) {
+ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, offset) {
 
 
     var has_gloss = gloss.fragment.getBodyIds().length  > 0;
@@ -5187,21 +5197,8 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_gloss = gloss.fragment.getBodyIds().length  > 0;
     var has_alpha = alpha.fragment.getBodyIds().length  > 0;
 
-    if(has_albedo && has_normal) albedo.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
-   //else normal.fragment.setBody("normal = normalize("+normal.getOutputVar()+".xyz);\n");
 
-    albedo.merge(normal);
-    albedo.merge(emission);
-    albedo.merge(specular);
-    albedo.merge(gloss);
-    albedo.merge(alpha);
-//    this.options = {
-//        gloss:{step:0.01},
-//        displacement_factor:{step:0.01},
-//        light_dir_x:{min:0, max:1, step:0.01},
-//        light_dir_y:{min:0, max:1, step:0.01},
-//        light_dir_z:{min:0, max:1, step:0.01}
-//    };
+
 
     var color = LiteGraph.hexToColor(properties.color);
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
@@ -5217,11 +5214,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     for (var line in alpha.fragment.includes) { includes[line] = 1; }
     for (var line in offset.fragment.includes) { includes[line] = 1; }
 
-    var header = {};
-    for (var line in albedo.fragment.getHeader()) { header[line] = 1; }
-    for (var line in normal.fragment.getHeader()) { header[line] = 1; }
-    for (var line in specular.fragment.getHeader()) { header[line] = 1; }
-    for (var line in gloss.fragment.getHeader()) { header[line] = 1; }
+
 
     // header
     var r = "precision highp float;\n"+
@@ -5237,7 +5230,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
-    for(var i in header)
+    for(var i in albedo.fragment.getHeader())
         r += i;
 //    for(var k in offset.fragment.getHeader())
 //        r += k;
@@ -5280,17 +5273,45 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //    if(ids.length > 0)
 //        r += "      normal = normalize("+offset.getOutputVar()+".xyz);\n";
 
+
+
     ids = albedo.fragment.getBodyIds();
     body_hash = albedo.fragment.getBody();
-    for (var i = 0, l = ids.length; i < l; i++) {
-        r += "      "+body_hash[ids[i]].str;
+    var sorted_map = sortMapByValue(body_hash);
+    for(var i in sorted_map){
+        r += "      "+sorted_map[i][1].str;
     }
+
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//        console.log(body_hash[ids[i]].str +" "+    body_hash[ids[i]].order);
+//    }
+
 
 //    ids = specular.fragment.getBodyIds();
 //    body_hash = specular.fragment.getBody();
 //    for (var i = 0, l = ids.length; i < l; i++) {
 //        r += "      "+body_hash[ids[i]].str;
 //    }
+
+    //    ids = specular.fragment.getBodyIds();
+//    body_hash = specular.fragment.getBody();
+//    for (var i = 0, l = ids.length; i < l; i++) {
+//        r += "      "+body_hash[ids[i]].str;
+//    }
+
+    if(alphaclip.getOutputVar()) {
+        r += "       if ("+alphaclip.getOutputVar()+" < 0.5)\n" +
+            "      {\n" +
+            "           discard;\n" +
+            "      }\n";
+    }
+
+
+
+
+
+
     if(!has_specular){
         r += "      float specular_intensity = 1.0;\n";
     } else{
@@ -5368,12 +5389,18 @@ P1ParamFunc.prototype.getFragmentCode = function (out_var, a, scope, out_type) {
  *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
  *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
  */
-P1ParamFunc.prototype.getCode = function (out_var, a, scope, out_type) {
-    var vertex = new CodePiece();
+P1ParamFunc.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var scope = params.scope;
+    var out_type = params.out_type;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, scope, out_type));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, scope, out_type));
     fragment.setIncludes(this.includes );
 
@@ -5432,12 +5459,19 @@ P2ParamFunc.prototype.getFragmentCode = function (out_var, a, b, scope, out_type
  *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
  *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
  */
-P2ParamFunc.prototype.getCode = function (out_var, a, b, scope, out_type) {
-    var vertex = new CodePiece();
+P2ParamFunc.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var b = params.b;
+    var scope = params.scope;
+    var out_type = params.out_type;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, b, scope, out_type));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, b, scope, out_type));
     fragment.setIncludes(this.includes );
 
@@ -5454,6 +5488,7 @@ LiteGraph.CodeLib["mod"] = new P2ParamFunc (undefined, "mod");
 LiteGraph.CodeLib["min"] = new P2ParamFunc (undefined, "min");
 LiteGraph.CodeLib["max"] = new P2ParamFunc (undefined, "max");
 LiteGraph.CodeLib["step"] = new P2ParamFunc (undefined, "step");
+LiteGraph.CodeLib["pow"] = new P2ParamFunc (undefined, "pow");
 
 
 
@@ -5493,12 +5528,20 @@ P3ParamFunc.prototype.getFragmentCode = function (out_var, a, b, c, scope, out_t
  *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
  *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
  */
-P3ParamFunc.prototype.getCode = function (out_var, a, b, c, scope, out_type) {
-    var vertex = new CodePiece();
+P3ParamFunc.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var b = params.b;
+    var c = params.c;
+    var scope = params.scope;
+    var out_type = params.out_type;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, b, c, scope, out_type));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, b, c, scope, out_type));
     fragment.setIncludes(this.includes );
 
@@ -5546,16 +5589,21 @@ PConstant.prototype.getFragmentCode = function (output_var, value, scope) {
 }
 
 
-PConstant.prototype.getCode = function (output_var, value, scope) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output_var, value, scope));
+PConstant.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode(out_var, a, scope));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output_var, value, scope));
+    var fragment = new CodePiece(order);
+    fragment.setBody(this.getFragmentCode(out_var, a, scope));
     fragment.setIncludes(this.includes );
 
-    return new ShaderCode(vertex, fragment, output_var);
+    return new ShaderCode(vertex, fragment, out_var);
 }
 
 
@@ -5568,23 +5616,24 @@ var PCameraToPixelWS = {};
 PCameraToPixelWS.id = "cameratopixelws";
 PCameraToPixelWS.includes = {v_pos:1, u_eye: 1, camera_to_pixel_ws:1};
 
-PCameraToPixelWS.getVertexCode = function (output, input) {
-    var vertex = new CodePiece();
+PCameraToPixelWS.getVertexCode = function (order) {
+    var vertex = new CodePiece(order);
     vertex.setIncludes(PCameraToPixelWS.includes);
     return vertex;
 }
 
-PCameraToPixelWS.getFragmentCode = function (output, input) {
-    var fragment = new CodePiece();
+PCameraToPixelWS.getFragmentCode = function (order) {
+    var fragment = new CodePiece(order);
     fragment.setBody("");
     fragment.setIncludes(PCameraToPixelWS.includes);
     return fragment;
 }
 
 
-PCameraToPixelWS.getCode = function (output, input) {
-    var fragment = this.getFragmentCode(output, input);
-    var vertex = this.getVertexCode(output, input);
+PCameraToPixelWS.getCode = function (params) {
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var fragment = this.getFragmentCode(order);
+    var vertex = this.getVertexCode(order);
 
     return new ShaderCode(vertex, fragment, "camera_to_pixel_ws");
 }
@@ -5599,23 +5648,24 @@ var PPixelNormalWS = {};
 PPixelNormalWS.id = "pixel_normal_ws";
 PPixelNormalWS.includes = {u_model: 1, a_normal: 1, v_normal: 1};
 
-PPixelNormalWS.getVertexCode = function (output, input) {
+PPixelNormalWS.getVertexCode = function () {
     return "";
 }
 
-PPixelNormalWS.getFragmentCode = function (output, input) {
+PPixelNormalWS.getFragmentCode = function () {
     var code = "vec3 pixel_normal_ws = normal;\n";
     return code;
 }
 
 
-PPixelNormalWS.getCode = function (output, input) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, input));
+PPixelNormalWS.getCode = function (params) {
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode());
     vertex.setIncludes(PPixelNormalWS.includes);
 
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, input));
+    var fragment = new CodePiece(order);
+    fragment.setBody(this.getFragmentCode());
     fragment.setIncludes(PPixelNormalWS.includes);
 
     return new ShaderCode(vertex, fragment, "pixel_normal_ws");
@@ -5648,12 +5698,13 @@ PReflected.prototype.getFragmentCode = function () {
  *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
  *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
  */
-PReflected.prototype.getCode = function () {
-    var vertex = new CodePiece();
+PReflected.prototype.getCode = function (params) {
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode());
     fragment.setIncludes(this.includes );
 
@@ -5675,21 +5726,22 @@ PUVs.id = "uvs";
 PUVs.includes = { v_coord: 1};
 PUVs.already_included = false; // TODO add multiple times same line
 
-PUVs.getVertexCode = function (output, input) {
+PUVs.getVertexCode = function () {
     return "";
 }
 
-PUVs.getFragmentCode = function (output, input) {
+PUVs.getFragmentCode = function () {
     return "";
 }
 
 
-PUVs.getCode = function (output, input) {
-    var fragment = new CodePiece();
+PUVs.getCode = function (params) {
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var fragment = new CodePiece(order);
     fragment.setIncludes(PUVs.includes);
 
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, input));
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode());
     vertex.setIncludes(PUVs.includes);
 
     return new ShaderCode(vertex, fragment, "v_coord");
@@ -5706,21 +5758,22 @@ PVertexPosWS.id = "cameratopixelws";
 PVertexPosWS.includes = {v_pos:1, u_eye: 1};
 PVertexPosWS.already_included = false; // TODO add multiple times same line
 
-PVertexPosWS.getVertexCode = function (output, input) {
-    var vertex = new CodePiece();
+PVertexPosWS.getVertexCode = function (order) {
+    var vertex = new CodePiece(order);
     vertex.setIncludes(PCameraToPixelWS.includes);
     return vertex;
 }
 
-PVertexPosWS.getFragmentCode = function (output, input) {
-    var fragment = new CodePiece();
+PVertexPosWS.getFragmentCode = function (order) {
+    var fragment = new CodePiece(order);
     fragment.setIncludes(PVertexPosWS.includes);
     return fragment;
 }
 
-PVertexPosWS.getCode = function (output, input) {
-    var fragment = this.getFragmentCode(output, input);
-    var vertex = this.getVertexCode(output, input);
+PVertexPosWS.getCode = function (params) {
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var fragment = this.getFragmentCode(order);
+    var vertex = this.getVertexCode(order);
     return new ShaderCode(vertex, fragment, "v_pos");
 }
 
@@ -5760,12 +5813,19 @@ POperation.prototype.getFragmentCode = function (out_var, a, b, scope, out_type)
  *  @param {scope} either CodePiece.BOTH CodePiece.FRAGMENT CodePiece.VERTEX
  *  @param {out_type} in case the output var type has to be defined in run time example "vec3"
  */
-POperation.prototype.getCode = function (out_var, a, b, scope, out_type) {
-    var vertex = new CodePiece();
+POperation.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var b = params.b;
+    var scope = params.scope;
+    var out_type = params.out_type;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, a, b, scope, out_type));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, a, b, scope, out_type));
     fragment.setIncludes(this.includes );
 
@@ -5780,36 +5840,6 @@ LiteGraph.CodeLib["mul"] = new POperation (undefined, "*");
 LiteGraph.CodeLib["div"] = new POperation (undefined, "/");
 
 
-
-
-
-
-
-
-var PMixer = {};
-
-PMixer.id = "mixer";
-PMixer.includes = {v_pos:1, u_eye: 1};
-
-PMixer.getVertexCode = function (output, tex1, tex2, alpha) {
-    return "";
-}
-
-PMixer.getFragmentCode = function (output, tex1, tex2, alpha) {
-    return "vec4 "+output+" = mix("+tex1+","+tex2+","+alpha+"); \n";
-}
-
-PMixer.getCode = function (output, tex1, tex2, alpha) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, tex1, tex2, alpha));
-    vertex.setIncludes(PMixer.includes);
-
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, tex1, tex2, alpha));
-    fragment.setIncludes(PMixer.includes);
-
-    return new ShaderCode(vertex, fragment, output);
-}
 
 
 
@@ -5881,101 +5911,27 @@ PPanner.prototype.getFragmentCode = function (out_var, input, time, dx, dy, scop
 
 
 
-PPanner.prototype.getCode = function (out_var, input, time, dx, dy, scope, out_type) {
-    var vertex = new CodePiece();
+PPanner.prototype.getCode = function ( params) {
+    //out_var, input, time, dx, dy, scope, out_type
+    var out_var = params.out_var;
+    var input = params.input;
+    var time = params.time;
+    var dx = params.dx;
+    var dy = params.dy;
+    var scope = params.scope;
+    var out_type = params.out_type;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var, input, time, dx, dy, scope, out_type));
     vertex.setIncludes(this.includes);
 
-    var fragment = new CodePiece();
+    var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var, input, time, dx, dy, scope, out_type));
     fragment.setIncludes(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
-
-
-
-
-
-
-
-var PReflect = {};
-
-PReflect.id = "reflect";
-PReflect.includes = {};
-
-PReflect.getVertexCode = function(output,incident, normal) {
-//    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
-//        reflect.includes[incident]= 1;
-//
-//    var code = "vec3 "+output+"= reflect("+incident+","+normal+");";
-//    return code;
-    return "";
-}
-
-
-PReflect.getFragmentCode = function(output,incident, normal) {
-
-    var code = "vec3 "+output+"= reflect("+incident+","+normal+");\n";
-    return code;
-}
-
-PReflect.getCode = function (output, incident, normal) {
-    var vertex = new CodePiece();
-    vertex.setIncludes(PReflect.includes);
-
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, incident, normal));
-    fragment.setIncludes(PReflect.includes);
-
-    return new ShaderCode(vertex, fragment, output);
-}
-
-
-
-
-
-
-
-
-
-
-
-var PSmooth = {};
-
-PSmooth.id = "smoothsteep";
-PSmooth.includes = {};
-
-PSmooth.getVertexCode = function(output ,lower, upper, x) {
-//    if(incident == "eye_to_pixel" || incident == "eye_to_vertex")
-//        reflect.includes[incident]= 1;
-//
-//    var code = "vec3 "+output+"= reflect("+incident+","+normal+");";
-//    return code;
-    return "";
-}
-
-
-PSmooth.getFragmentCode = function(output ,lower, upper, x) {
-
-    var code = "float "+output+" = smoothstep("+lower+","+upper+", "+x+");\n";
-    return code;
-}
-
-PSmooth.getCode = function (output ,lower, upper, x) {
-    var vertex = new CodePiece();
-    vertex.setIncludes(PSmooth.includes);
-
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output ,lower, upper, x));
-    fragment.setIncludes(PSmooth.includes);
-
-    return new ShaderCode(vertex, fragment, output);
-}
-
-
-
-
 
 
 
@@ -5999,17 +5955,22 @@ PTextureSampleCube.getFragmentCode = function (output, input, texture_id) {
 }
 
 
-PTextureSampleCube.getCode = function (output, input, texture_id) {
-
-    var vertex = new CodePiece();
+PTextureSampleCube.getCode = function (params) {
+    var out_var = params.out_var;
+    var input = params.input;
+    var texture_id = params.texture_id;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode(out_var, input, texture_id, scope));
     vertex.setIncludes(PTextureSampleCube.includes);
 
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, input, texture_id));
+    var fragment = new CodePiece(order);
+    fragment.setBody(this.getFragmentCode(out_var, input, texture_id, scope));
     fragment.addHeaderLine("uniform samplerCube "+texture_id+";\n");
     fragment.setIncludes(PTextureSampleCube.includes);
 
-    return new ShaderCode(vertex, fragment, output);
+    return new ShaderCode(vertex, fragment, out_var);
 }
 
 
@@ -6024,8 +5985,8 @@ var PTextureSample = {};
 PTextureSample.id = "texture_sample";
 PTextureSample.includes = {v_pos:1, v_coord:1, camera_to_pixel_ws:1, u_eye:1};
 
-PTextureSample.getVertexCode = function (output, input, texture_id, texture_type, scope) {
-    var code = new CodePiece();
+PTextureSample.getVertexCode = function (output, input, texture_id, texture_type, scope, order) {
+    var code = new CodePiece(order);
     var code_str = "";
     if(scope == CodePiece.VERTEX) {
         code.setIncludes(PTextureSample.includes);
@@ -6037,9 +5998,9 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
     return code;
 }
 
-PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope) {
+PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope, order) {
     input = input || "v_coord";
-    var code = new CodePiece();
+    var code = new CodePiece(order);
     code.setIncludes(PTextureSample.includes);
     var code_str = "";
     if(scope == CodePiece.FRAGMENT) {
@@ -6081,13 +6042,20 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
 }
 
 
-PTextureSample.getCode = function (output, input, texture_id, texture_type, scope) {
+PTextureSample.getCode = function (params) {
+    //output, input, texture_id, texture_type, scope
+    var out_var = params.out_var;
+    var input = params.input;
+    var texture_id = params.texture_id;
+    var texture_type = params.texture_type;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
-    var vertex = this.getVertexCode(output, input, texture_id, texture_type, scope);
+    var vertex = this.getVertexCode(out_var, input, texture_id, texture_type, scope , order);
 
-    var fragment = this.getFragmentCode(output, input, texture_id, texture_type, scope);
+    var fragment = this.getFragmentCode(out_var, input, texture_id, texture_type, scope, order);
 
-    return new ShaderCode(vertex, fragment, output);
+    return new ShaderCode(vertex, fragment, out_var);
 }
 
 
@@ -6113,11 +6081,14 @@ PTime.getFragmentCode = function () {
 }
 
 
-PTime.getCode = function () {
-    var fragment = new CodePiece();
+PTime.getCode = function (params) {
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var fragment = new CodePiece(order);
     fragment.setIncludes(PTime.includes);
 
-    var vertex = new CodePiece();
+    var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode());
     vertex.setIncludes(PTime.includes);
 
