@@ -15,8 +15,8 @@ vik.ui = (function () {
 
     module.init = function () {
         loadLayout();
-        loadImageAssetList("assets/textures/texture/",function(ret){ texture_list = ret}  );
-        loadImageAssetList("assets/textures/cubemap/", function(ret){ cubemap_list = ret} );
+        loadImageAssetList(vik.app.TEXTURES_PATH,function(ret){ texture_list = ret}  );
+        loadImageAssetList(vik.app.CUBEMAPS_PATH, function(ret){ cubemap_list = ret} );
         LiteGraph.extendNodeTypeProperties(LGraphTexture, "Texture", selectTexture);
         LiteGraph.extendNodeTypeProperties(LGraphCubemap, "Cubemap", selectCubemap);
     }
@@ -26,7 +26,7 @@ vik.ui = (function () {
         details_gui.width = details_gui.parent_node.width();
         details_gui.domElement.style.height = details_gui.parent_node.height();
         palette_gui.width = palette_gui.parent_node.width();
-        palette_gui.domElement.style.height = palette_gui.parent_node.height();
+        palette_gui.domElement.style.height = palette_gui.parent_node.height() - $(palette_gui.domElement).prev().outerHeight(true);
     };
 
 
@@ -49,10 +49,15 @@ vik.ui = (function () {
                 var min = opts_ctrl ? (opts_ctrl.min) : undefined;
                 var max = opts_ctrl ? (opts_ctrl.max) : undefined;
                 var step = opts_ctrl ? (opts_ctrl.step) : undefined;
+                var reloadonchange = opts_ctrl ? (opts_ctrl.reloadonchange) : undefined;
+                var multichoice = opts_ctrl ? (opts_ctrl.multichoice) : undefined;
+                var hidden = opts_ctrl ? (opts_ctrl.hidden) : undefined;
+                if(hidden)
+                    continue;
 
                 var controller = null;
-                if(node.hasOwnProperty("multichoice") && node.multichoice.hasOwnProperty(property)){
-                    controller = details_gui.add(obj, property, node.multichoice[property] );
+                if(multichoice){
+                    controller = details_gui.add(obj, property, multichoice );
                 }
                 else if( property == "color" ){
                     controller = details_gui.addColor(obj, property );
@@ -62,7 +67,7 @@ vik.ui = (function () {
                 }
 
 
-                if(node.hasOwnProperty("reloadonchange") && node.reloadonchange.hasOwnProperty(property)){
+                if(reloadonchange){
                     controller.onFinishChange(function(value) {
                         module.updateLeftPanel(node);
                     });
@@ -129,6 +134,7 @@ vik.ui = (function () {
         for(var i = list_nodes.length - 1; i>= 0; --i) {
             list_nodes[i].addEventListener("click", function () {
                 that.name = LiteGraph.removeExtension(this.id);
+                that.texture_url = vik.app.TEXTURES_PATH +""+ this.id;
                 w2popup.close();
                 for (var i in details_gui.items) {
                     details_gui.items[i].updateDisplay();
@@ -153,6 +159,7 @@ vik.ui = (function () {
         for(var i = list_nodes.length - 1; i>= 0; --i) {
             list_nodes[i].addEventListener("click", function () {
                 that.name = LiteGraph.removeExtension(this.id);
+                that.texture_url = vik.app.TEXTURES_PATH +""+ this.id;
                 w2popup.close();
                 for (var i in details_gui.items) {
                     details_gui.items[i].updateDisplay();
@@ -269,9 +276,6 @@ vik.ui = (function () {
         });
 
 
-
-
-
         // layout inside main_layout left panel
         // named as layout2
         $('#layout_main_layout_panel_left').w2layout({
@@ -297,17 +301,28 @@ vik.ui = (function () {
                     tabs: {
                         active: 'Details',
                         tabs: [
-                            { id: 'Details', caption: 'Details', closable: true }
+                            { id: 'Details', caption: 'Details', closable: true },
+                            { id: 'Light', caption: 'Light', closable: true }
                         ],
                         onClick: function (event) {
-                            $('#tab-content').html('Tab: ' + event.target);
+                            if(event.tab.id == "Details"){
+                                $('#Light').hide();
+                                $('#Details').show();
+                            } else {
+                                $('#Light').show();
+                                $('#Details').hide();
+                            }
+                            module.onResize();
                         }
                     }
                 }
             ],
             resize_cancel: true
         });
-        w2ui['layout2'].content('left', w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') + w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left') );
+        w2ui['layout2'].content('left',
+            w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') +
+            w2ui['layout2_preview_tabs'].getMaximizeButton('Light', 'left') +
+            w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left') );
 
 
 
@@ -349,6 +364,7 @@ vik.ui = (function () {
         details_gui.width = details_gui.parent_node.width();
 
 
+        details_gui.domElement.id = "Details";
         details_gui.parent_node[0].appendChild(details_gui.domElement);
 
         palette_gui = new dat.GUI({

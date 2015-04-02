@@ -212,6 +212,10 @@ EZ.EMesh.prototype.setTexture = function (channel, texture) {
         this.textures[ channel ] = texture;
 };
 
+EZ.EMesh.prototype.clearTextures = function () {
+    this.textures = {};
+};
+
 EZ.EMesh.prototype.setSkyBox = function (){
     this.flags.depth_write = false;
     this.flags.depth_test = false;

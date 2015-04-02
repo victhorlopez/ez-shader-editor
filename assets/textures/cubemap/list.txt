@@ -1,1 +1,1 @@
-cube2.jpg
+cube_default.jpg

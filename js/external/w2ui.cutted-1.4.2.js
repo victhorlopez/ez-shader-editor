@@ -2183,12 +2183,25 @@ w2utils.event = {
             if (tab === null || tab.disabled) return false;
             var obj = this;
             var panel = w2ui[obj.owner.name].get(obj.panel_owner);
-            panel.hidden = true;
+            obj.hide(id);
+            var some_visible = false;
+            var new_selected = obj.active == id ? null : id;
+            for(var i in obj.tabs){
+                var it_tab = obj.tabs[i];
+                if(!new_selected && it_tab.id != id)
+                    obj.select(it_tab.id);
+                some_visible = some_visible || !it_tab.hidden;
 
-            var parent = obj.box.parentNode;
-            $(parent).css('opacity', '0');
-            obj.storedSize = panel.size;
-            w2ui[obj.owner.name].sizeTo(obj.panel_owner, panel.minSize, true);
+            }
+
+            if(!some_visible){
+                panel.hidden = true;
+                var parent = obj.box.parentNode;
+                $(parent).css('opacity', '0');
+                obj.storedSize = panel.size;
+                w2ui[obj.owner.name].sizeTo(obj.panel_owner, panel.minSize, true);
+            }
+
 
             // to display the maximize button
             var layout = w2ui[obj.owner.name];
@@ -2207,12 +2220,10 @@ w2utils.event = {
                     w2ui[obj.owner.name].show(layout.panel_holder, true);
                 }
 
-
                 // to resize the parent layout if it has one
 
                 var parent_layout = w2ui[layout.parent_layout];
                 var parent_panel = parent_layout.get(layout.panel_holder);
-                console.log(layout);
                 if (w2ui[obj.owner.name].get('preview').hidden && w2ui[obj.owner.name].get('main').hidden) {
                     console.log(parent_panel);
                     parent_panel.storedSize = parent_panel.size;
@@ -2226,6 +2237,8 @@ w2utils.event = {
             var tab = this.get(id);
             if (tab === null || tab.disabled) return false;
             var obj = this;
+            obj.show(id);
+
             var panel = w2ui[obj.owner.name].get(obj.panel_owner);
             panel.hidden = false;
             var parent = obj.box.parentNode;

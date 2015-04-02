@@ -5116,9 +5116,6 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
     shader.vertex_code = vertex_code;
     shader.fragment_code = fragment_code;
     return shader;
-
-
-
 }
 
 ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip,offset) {
@@ -5194,9 +5191,10 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_albedo = albedo.fragment.getBodyIds().length  > 0;
     var has_normal = normal.fragment.getBodyIds().length  > 0;
     var has_specular = specular.fragment.getBodyIds().length  > 0;
+    var has_emission = emission.fragment.getBodyIds().length  > 0;
     var has_gloss = gloss.fragment.getBodyIds().length  > 0;
     var has_alpha = alpha.fragment.getBodyIds().length  > 0;
-
+    var has_alphaclip = alphaclip.fragment.getBodyIds().length  > 0;
 
 
 
@@ -5213,6 +5211,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     for (var line in gloss.fragment.includes) { includes[line] = 1; }
     for (var line in alpha.fragment.includes) { includes[line] = 1; }
     for (var line in offset.fragment.includes) { includes[line] = 1; }
+    albedo.fragment.addHeaderLine("uniform samplerCube u_cube_default_texture;\n");
 
 
 
@@ -5232,21 +5231,11 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r += "uniform vec4 u_color;\n";
     for(var i in albedo.fragment.getHeader())
         r += i;
-//    for(var k in offset.fragment.getHeader())
-//        r += k;
-    // body
-    r += "void main() {\n";
-    r += "      vec3 normal = normalize(v_normal);\n";
 
-    //if (includes["camera_to_pixel_ws"])
-        r += "      vec3 camera_to_pixel_ws = normalize(v_pos - u_eye);\n";
-
-
-    var ids = normal.fragment.getBodyIds();
-    var body_hash = normal.fragment.getBody();
-    if(has_normal){
-        // http://www.thetenthplanet.de/archives/1180
-        r+= "      vec3 dp1 = dFdx( v_pos );\n" +
+    // http://www.thetenthplanet.de/archives/1180
+    if(has_normal) {
+        r+= "\nmat3 computeTBN(){\n" +
+            "      vec3 dp1 = dFdx( v_pos );\n" +
             "      vec3 dp2 = dFdy( v_pos );\n" +
             "      vec2 duv1 = dFdx( v_coord );\n" +
             "      vec2 duv2 = dFdy( v_coord );\n" +
@@ -5255,24 +5244,25 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
             "      vec3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;\n" +
             "      vec3 binormal = dp2perp * duv1.y + dp1perp * duv2.y;\n" +
             "      float invmax = inversesqrt( max( dot(tangent,tangent), dot(binormal,binormal) ) );\n" +
-            "      mat3 TBN = mat3( tangent * invmax, binormal * invmax, v_normal );\n";
+            "      return mat3( tangent * invmax, binormal * invmax, v_normal );\n" +
+            "}\n\n";
     }
 
+    r += "void main() {\n";
+    r += "      vec3 normal = normalize(v_normal);\n";
 
-//    for (var i = 0, l = ids.length; i < l; i++) {
-//        r += "      "+body_hash[ids[i]].str;
-//    }
-//    if(ids.length > 0)
-//        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
+    //if (includes["view_dir"])
+        r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
+            "      vec3 light_dir = normalize("+light_dir+");\n" +
+            "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
-//    ids = offset.fragment.getBodyIds();
-//    body_hash = offset.fragment.getBody();
-//    for (var i = 0, l = ids.length; i < l; i++) {
-//        r += "      "+body_hash[ids[i]].str;
-//    }
-//    if(ids.length > 0)
-//        r += "      normal = normalize("+offset.getOutputVar()+".xyz);\n";
 
+    var ids = normal.fragment.getBodyIds();
+    var body_hash = normal.fragment.getBody();
+    if(has_normal){
+        // http://www.thetenthplanet.de/archives/1180
+        r+= "      mat3 TBN = computeTBN();\n";
+    }
 
 
     ids = albedo.fragment.getBodyIds();
@@ -5282,25 +5272,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r += "      "+sorted_map[i][1].str;
     }
 
-//    for (var i = 0, l = ids.length; i < l; i++) {
-//        r += "      "+body_hash[ids[i]].str;
-//        console.log(body_hash[ids[i]].str +" "+    body_hash[ids[i]].order);
-//    }
-
-
-//    ids = specular.fragment.getBodyIds();
-//    body_hash = specular.fragment.getBody();
-//    for (var i = 0, l = ids.length; i < l; i++) {
-//        r += "      "+body_hash[ids[i]].str;
-//    }
-
-    //    ids = specular.fragment.getBodyIds();
-//    body_hash = specular.fragment.getBody();
-//    for (var i = 0, l = ids.length; i < l; i++) {
-//        r += "      "+body_hash[ids[i]].str;
-//    }
-
-    if(alphaclip.getOutputVar()) {
+    if(has_alphaclip) {
         r += "       if ("+alphaclip.getOutputVar()+" < 0.5)\n" +
             "      {\n" +
             "           discard;\n" +
@@ -5308,43 +5280,61 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
 
-
-
-
-
-    if(!has_specular){
+    if(!has_specular) {
         r += "      float specular_intensity = 1.0;\n";
-    } else{
+    } else {
         r +="      float specular_intensity = "+specular.getOutputVar()+";\n";
     }
 
-//    ids = gloss.fragment.getBodyIds();
-//    body_hash = gloss.fragment.getBody();
-//    for (var i = 0, l = ids.length; i < l; i++) {
-//        r += "      "+body_hash[ids[i]].str;
-//    }
-    if( !has_gloss){
+    if( !has_gloss) {
         r += "      float gloss = "+gloss_prop+";\n";
     } else{
         r +="      float gloss = "+gloss.getOutputVar()+";\n";
     }
 
-//    ids = normal.fragment.getBodyIds();
-//    if(ids.length > 0)
-//        r += "      normal = normalize("+normal.getOutputVar()+".xyz);\n";
-    r +="      float ambient_color = 0.3;\n" +
-        "      vec3 light_dir = normalize("+light_dir+");\n" +
+    // diffuse light
+    r +="      vec3 diffuse_color = "+albedo.getOutputVar()+".xyz;\n" +
         "      float lambertian = max(dot(light_dir,normal), 0.0);\n" +
-        "      vec3 reflect_dir = reflect(light_dir, normal);\n" +
-        "      float spec_angle = max(dot(reflect_dir, camera_to_pixel_ws), 0.0);\n" +
-        "      float specular = pow(spec_angle, gloss);\n" +
-        "      specular = specular * specular_intensity;\n";
+        "      vec3 diffuse_light = lambertian * vec3(1.0);\n"; // vec3(1.0) is the light color
+
+    //ambient light
+    r +="      float ambient_intensity = 0.2;\n" +
+        "      vec3 ambient_light =  vec3(1.0) * ambient_intensity;\n";
 
 
-    r +="      gl_FragColor = vec4(ambient_color*("+albedo.getOutputVar()+").xyz * "+color+" +" +
-        "      lambertian *("+albedo.getOutputVar()+").xyz *  "+color+" +" +
-        "       specular * vec3(1.0) " + // 1.0 means light color
-        "      , 1.0);\n" +
+    //specular color
+    r +="      vec3 reflect_dir = reflect(light_dir, normal);\n" +
+        "      float spec_angle = max(dot(reflect_dir, view_dir), 0.0);\n" +
+        "      float specular_light = pow(spec_angle, gloss) * specular_intensity;\n" +
+        "      vec3 specular_color = vec3(1.0) * specular_light;\n"; // vec3(1.0) is the light color
+
+//    // reflections
+//    r +="      vec3 reflected_vector2 = reflect(view_dir,normal);\n" +
+//        "      float fresnel_dot = dot(normal, -view_dir);\n" +
+//        "      vec4 env_color = textureCube(u_cube_default_texture, reflected_vector2);\n" +
+//        "      float w = pow( 1.0 - clamp(0.0,fresnel_dot,1.0), 5.0);\n" +
+//        "      vec4 reflection_color = env_color * w;\n";
+
+
+    // emission color
+    if( !has_emission){
+        r += "      vec3 emission = vec3(0.0);\n";
+    } else {
+        r +="      vec3 emission = "+emission.getOutputVar()+".xyz;\n";
+    }
+
+//    // specular light
+//    r +="      vec3 pixel_normal_ws = normal;\n" +
+//        "      vec3 reflected_vector = reflect(view_dir,pixel_normal_ws);\n" +
+//        "      vec4 specular_color = textureCube(u_cube_default_texture, reflected_vector);\n" +
+//        "      float w = pow( 1.0 - max(0.0, dot(normal, -view_dir)), 2.0);\n" +
+//
+//        "      vec3 ambient_light = ambient_color * ("+albedo.getOutputVar()+").xyz;\n" +
+//        "      vec3 diffuse_reflection = lambertian *("+albedo.getOutputVar()+").xyz;\n" +
+//        "      vec3 specular_reflection =   mix( diffuse_reflection, vec3(1.0), w) ;\n"; // vec3(1.0 is the light color)
+    //specular_color * specular * specular_intensity
+
+    r +="      gl_FragColor = vec4( emission + "+ /*reflection_color.xyz +*/ " specular_color + (ambient_light + diffuse_light) * diffuse_color, 1.0);\n" +
         "}";
 
     return r;
@@ -5613,7 +5603,7 @@ PConstant.prototype.getCode = function (params) {
 
 var PCameraToPixelWS = {};
 
-PCameraToPixelWS.id = "cameratopixelws";
+PCameraToPixelWS.id = "view_dir";
 PCameraToPixelWS.includes = {v_pos:1, u_eye: 1, camera_to_pixel_ws:1};
 
 PCameraToPixelWS.getVertexCode = function (order) {
@@ -5635,7 +5625,7 @@ PCameraToPixelWS.getCode = function (params) {
     var fragment = this.getFragmentCode(order);
     var vertex = this.getVertexCode(order);
 
-    return new ShaderCode(vertex, fragment, "camera_to_pixel_ws");
+    return new ShaderCode(vertex, fragment, "view_dir");
 }
 
 
@@ -5688,7 +5678,7 @@ PReflected.prototype.getVertexCode = function () {
 
 PReflected.prototype.getFragmentCode = function () {
     return  "vec3 pixel_normal_ws = normal;\n" +
-            "      vec3 reflected_vector = reflect(camera_to_pixel_ws,pixel_normal_ws);\n";
+            "      vec3 reflected_vector = reflect(view_dir,pixel_normal_ws);\n";
 }
 
 /**
@@ -5846,6 +5836,53 @@ LiteGraph.CodeLib["div"] = new POperation (undefined, "/");
 
 
 
+
+
+
+function PFresnel () {
+    this.id = "fresnel";
+    this.includes = {u_model: 1, a_normal: 1, v_normal: 1};
+}
+
+PFresnel.prototype.getVertexCode = function (output_var, value, scope) {
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var code = "";
+        return code;
+    }
+    return "";
+}
+
+PFresnel.prototype.getFragmentCode = function (output_var, value, scope) {
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        var code = this.type+" " +output_var+" = "+value+";\n";
+        return code;
+    }
+    return "";
+}
+
+
+PFresnel.prototype.getCode = function (params) {
+    var out_var = params.out_var;
+    var a = params.a;
+    var scope = params.scope;
+    var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+
+    var vertex = new CodePiece(order);
+    vertex.setBody(this.getVertexCode(out_var, a, scope));
+    vertex.setIncludes(this.includes);
+
+    var fragment = new CodePiece(order);
+    fragment.setBody(this.getFragmentCode(out_var, a, scope));
+    fragment.setIncludes(this.includes );
+
+    return new ShaderCode(vertex, fragment, out_var);
+}
+
+
+
+
+
+
 var POperation = {};
 
 POperation.id = "operation";
@@ -5890,8 +5927,8 @@ PPanner.prototype.getVertexCode = function (out_var, input, time, dx, dy, scope,
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
         var code = out_type+" " +out_var+" = "+input+";\n" +
             "      "+out_var+".x += "+dx+" * "+time+";\n" +
-            "      "+out_var+".y += "+dy+" * "+time+";\n" +
-            "      "+out_var+" = fract("+out_var+");\n";
+            "      "+out_var+".y += "+dy+" * "+time+";\n";// +
+            //"      "+out_var+" = fract("+out_var+");\n";
         return code;
     }
     return "";
@@ -5902,8 +5939,8 @@ PPanner.prototype.getFragmentCode = function (out_var, input, time, dx, dy, scop
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
         var code = out_type+" " +out_var+" = "+input+";\n" +
             "      "+out_var+".x += "+dx+" * "+time+";\n" +
-            "      "+out_var+".y += "+dy+" * "+time+";\n" +
-            "      "+out_var+" = fract("+out_var+");\n";
+            "      "+out_var+".y += "+dy+" * "+time+";\n";// +
+            //"      "+out_var+" = fract("+out_var+");\n";
         return code;
     }
     return "";
