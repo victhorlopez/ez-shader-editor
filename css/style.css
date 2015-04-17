@@ -91,7 +91,7 @@ body .dg.main.taller-than-window .close-button {
 
 body .dg.main .close-button {
     background-color: #444;
-    display:none;
+    display:none !important; /* we want the close button always hidden*/
 }
 
 body .dg.main .close-button:hover {
@@ -230,7 +230,7 @@ body div.w2ui-panel div.w2ui-panel .left_rotated_tab {
     -o-transform-origin: 25% 0%;
     transform-origin: 25% 0%;
     margin: 50px 0px 105px -8px;
-    width: 110px;
+    width: 125px;
     padding: 0;
     background: #222;
 }

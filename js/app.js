@@ -19,9 +19,25 @@ vik.app = (function () {
     var live_update = true;
     var textures = {};
     var canvas2webgl = window.location.href.indexOf('?3d') > -1;
+    //var url_graph = window.location.href.indexOf('?3d') > -1;
 
     module.CUBEMAPS_PATH = "assets/textures/cubemap/";
     module.TEXTURES_PATH = "assets/textures/texture/";
+
+    module.scene_properties = {
+        gloss:4.0,
+        // lighting options
+        light_dir_x: 1.0,
+        light_dir_y: 1.0,
+        light_dir_z: 1.0,
+        light_mode:"phong",
+        // bleding options
+        blend_mode:"opaque",
+        face_culling:"backface culling",
+        // alpha options
+        alpha_clip_threshold:0.5
+    };
+
 
     LiteGraph.current_ctx = LiteGraph.CANVAS_2D;
 
@@ -91,6 +107,7 @@ vik.app = (function () {
 //        module.loadTexture("lee_spec", "assets/textures/texture/lee_spec.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
 //        module.loadCubeMap("cube_default", "assets/textures/cubemap/cube_default.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
         module.loadCubeMap("cube_default", module.CUBEMAPS_PATH +"cube_default.jpg", null, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        renderer.addMesh("torus", GL.Mesh.fromURL("assets/meshes/torus.obj"));
 
         // we read the list of assets and store the filename and its paths into a map
         var request = new XMLHttpRequest();
@@ -129,6 +146,7 @@ vik.app = (function () {
         var scene = new EZ.EScene();
         main_node = new EZ.EMesh();
         main_node.mesh = "lee";
+        main_node.flags.blend = true;
 //        main_node.setTexture("cubemap","cubemap");
         main_node.shader = "phong";
         main_node.position = [0, 0.5, 0];
@@ -188,29 +206,13 @@ vik.app = (function () {
                         console.error(err);
                     }
                 }
-                var data = {callbacksToComplete: 0, callbacksCompleted: 0, callback: gcanvas.draw};
-                var sync_load = {
-                    data:data,
-                    onComplete: function () {
-                        data.callbacksCompleted++;
-                        if (data.callbacksCompleted == data.callbacksToComplete) {
-                            data.callback();
-                        }
-                    }
-                };
+
                 var shader_textures = shader.textures;
                 main_node.clearTextures();
                 for (var i in shader_textures) {
                     var texture_name = shader_textures[i];
-//                    var texture_exist = gl.textures.hasOwnProperty(texture_name);
-//                    // if the texture is wrong loaded or doesnt exist
-//                    if ( !texture_exist || texture_exist && gl.textures[texture_name].width == 1) {
-//                        // we get the real texture path from the map textures
-//                        module.loadTexture(texture_name, textures[texture_name], sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//                    }
                     // we add the texture to our node
                     main_node.setTexture(texture_name, texture_name);
-
                 }
                 main_node.setTexture("cube_default", "cube_default");
                 main_node.shader = "current";
@@ -411,6 +413,17 @@ vik.app = (function () {
                 LiteGraph.current_ctx = LiteGraph.CANVAS_2D;
             }
             module.changeCanvas();
+        });
+
+        var change_layout_but = document.getElementById("change_layout");
+        change_layout_but.addEventListener("click", function () {
+
+            if (this.childNodes[1].nodeValue == "Full Screen") {
+                this.childNodes[1].nodeValue = "Edit Graph";
+            } else {
+                this.childNodes[1].nodeValue = "Full Screen";
+            }
+            vik.ui.changeLayout();
         });
 
         var code_loader = document.getElementById("load_graph");

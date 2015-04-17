@@ -10,8 +10,13 @@ vik.ui = (function () {
     var module = {};
     var details_gui = {};
     var palette_gui = {};
+    var properties_gui = {};
     var texture_list = " ";
     var cubemap_list = " ";
+
+    module.LAYOUT_EDIT = 0;
+    module.LAYOUT_GRAPH = 1;
+    var current_layout = module.LAYOUT_GRAPH;
 
     module.init = function () {
         loadLayout();
@@ -26,7 +31,9 @@ vik.ui = (function () {
         details_gui.width = details_gui.parent_node.width();
         details_gui.domElement.style.height = details_gui.parent_node.height();
         palette_gui.width = palette_gui.parent_node.width();
-        palette_gui.domElement.style.height = palette_gui.parent_node.height() - $(palette_gui.domElement).prev().outerHeight(true);
+        palette_gui.domElement.style.height = palette_gui.parent_node.parent().height() - $(palette_gui.domElement).prev().outerHeight(true);
+        properties_gui.width = properties_gui.parent_node.width();
+        properties_gui.domElement.style.height = properties_gui.parent_node.height();
     };
 
 
@@ -212,15 +219,20 @@ vik.ui = (function () {
         addTopBarButton("apply","fa fa-check-circle","Apply");
         addTopBarButton("clean_graph","fa fa-trash-o","Clean Up");
         addTopBarButton("change_canvas","fa fa-cubes","Canvas", {div_class:"pressed"});
+        addTopBarButton("change_layout","fa fa-desktop","Full Screen");
+
 
         $("#layout_layout2_panel_main .w2ui-panel-content").append('<div id="mesh-changer"></div>');
         addMeshChangerButton("sphere","fa fa-globe","Sphere");
         addMeshChangerButton("box","fa fa-cube","Cube");
         addMeshChangerButton("plane","fa fa-square-o","Plane");
+        addMeshChangerButton("torus","fa fa-circle-o","Torus");
         addMeshChangerButton("lee","fa fa-user","Lee");
         addMeshChangerButton("grid","fa fa-th","Toggle Grid");
         addMeshChangerButton("cubemap","fa fa-file-image-o","Toggle Skybox");
         addMeshChangerButton("","fa fa-folder-open","load");
+
+
 
     }
     function loadImageAssetList(path, callback) {
@@ -242,7 +254,31 @@ vik.ui = (function () {
         request.send();
     }
 
+
+
+
     function loadLayout() {
+
+        createMainLayout();
+
+        createLeftLayout();
+
+        createRightLayout();
+
+        // add top buttons and mesh changers
+        addButtons();
+
+// for debugging panels
+//        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left',true)\">Left</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('preview',true )\">Preview</button>" +
+//            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main' ,true)\">main</button>");
+
+    }
+
+
+    function createMainLayout() {
         // main layout
         $('#layout').w2layout({
             name: 'main_layout',
@@ -253,31 +289,78 @@ vik.ui = (function () {
                         '</div>' }, // so far top not used
                 { type: 'main', content:'<div id="code" style="display:none"></div>',
                     tabs: {
-                    active: 'Graph',
-                    tabs: [
-                        { id: 'Graph', caption: 'Graph', closable: false },
-                        { id: 'Code', caption: 'Code', closable: false }
-                    ],
-                    onClick: function (event) {
-                        if(event.tab.id == "Graph"){
-                            $('#code').hide();
-                            $('#graph').show();
-                        } else {
-                            $('#code').show();
-                            $('#graph').hide();
+                        active: 'Graph',
+                        tabs: [
+                            { id: 'Graph', caption: 'Graph', closable: false },
+                            { id: 'Code', caption: 'Code', closable: false }
+                        ],
+                        onClick: function (event) {
+                            $('#layout_main_layout_panel_main .w2ui-panel-content').children().hide();
+                            var content = $('#layout_main_layout_panel_main #'+event.target);
+                            content.show();
+                            module.onResize();
                         }
-
-                    }
-                } },
+                    } },
                 { type: 'left', size: '25%', resizable: true },
                 { type: 'right', size: '270', resizable: true}
             ],
             resize_cancel: true
         });
+    }
+
+    function createRightLayout() {
+        // layout inside main_layout right panel
+        // named as layout3
+        $('#layout_main_layout_panel_right').w2layout({
+            name: 'layout3',
+            parent_layout:'main_layout',
+            panel_holder:'right',
+            panels: [
+
+                { type: 'right', size: '30', resizable: true, hidden:true },
+
+                { type: 'main', size: '50%', resizable: true,
+                    tabs: {
+                        active: 'Palette',
+                        tabs: [
+                            { id: 'Palette', caption: 'Palette', closable: true },
+                            { id: 'Globals', caption: 'Globals', closable: true }
+                        ],
+                        onClick: function (event) {
+                            $('#layout_layout3_panel_main .w2ui-panel-content > div' ).hide();
+                            var content = $('#layout_layout3_panel_main #'+event.target);
+                            content.show();
+                            module.onResize();
+                        }
+                    }
+                }
+            ],
+            resize_cancel: true
+        });
+        w2ui['layout3'].content('right',
+            w2ui['layout3_main_tabs'].getMaximizeButton('Palette', 'right')+
+            w2ui['layout3_main_tabs'].getMaximizeButton('Globals', 'right')
+        );
+
+        // right panel dat GUI, holds all the nodes that can be dragged to the canvas
+        palette_gui = new dat.GUI({
+            resizable: false,
+            hideable: false,
+            autoPlace: false
+        });
+
+        $("#layout_layout3_panel_main div.w2ui-panel-content").append("<div id='palette'></div>");
+        var palette_div = $("#palette");
+        palette_gui.parent_node = palette_div;
+        palette_gui.width = palette_div.width();
+        module.createRightPanel();
+    }
 
 
+    function createLeftLayout() {
         // layout inside main_layout left panel
         // named as layout2
+        // these tabs contain the nodes, the light, the properties
         $('#layout_main_layout_panel_left').w2layout({
             name: 'layout2',
             parent_layout:'main_layout',
@@ -293,7 +376,6 @@ vik.ui = (function () {
                             { id: 'Preview', caption: 'Preview', closable: true }
                         ],
                         onClick: function (event) {
-                            $('#tab-content').html('Tab: ' + event.target);
                         }
                     }
                 },
@@ -301,17 +383,13 @@ vik.ui = (function () {
                     tabs: {
                         active: 'Details',
                         tabs: [
-                            { id: 'Details', caption: 'Details', closable: true },
-                            { id: 'Light', caption: 'Light', closable: true }
+                            { id: 'Details', caption: 'Node Details', closable: true },
+                            { id: 'Settings', caption: 'Settings', closable: true },
                         ],
                         onClick: function (event) {
-                            if(event.tab.id == "Details"){
-                                $('#Light').hide();
-                                $('#Details').show();
-                            } else {
-                                $('#Light').show();
-                                $('#Details').hide();
-                            }
+                            $('#layout_layout2_panel_preview .w2ui-panel-content  > div' ).hide();
+                            var content = $('#layout_layout2_panel_preview #'+event.target);
+                            content.show();
                             module.onResize();
                         }
                     }
@@ -319,42 +397,14 @@ vik.ui = (function () {
             ],
             resize_cancel: true
         });
+        // we put some hidden buttons for the minimized tabs
         w2ui['layout2'].content('left',
-            w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') +
-            w2ui['layout2_preview_tabs'].getMaximizeButton('Light', 'left') +
-            w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left') );
+                w2ui['layout2_preview_tabs'].getMaximizeButton('Details', 'left') +
+                w2ui['layout2_preview_tabs'].getMaximizeButton('Settings', 'left') +
+                w2ui['layout2_main_tabs'].getMaximizeButton('Preview', 'left')
+        );
 
-
-
-        // layout inside main_layout right panel
-        // named as layout3
-        $('#layout_main_layout_panel_right').w2layout({
-            name: 'layout3',
-            parent_layout:'main_layout',
-            panel_holder:'right',
-            panels: [
-
-                { type: 'right', size: '30', resizable: true, hidden:true },
-
-                { type: 'main', size: '50%', resizable: true,
-                    tabs: {
-                        active: 'Palette',
-                        tabs: [
-                            { id: 'Palette', caption: 'Palette', closable: true }
-                        ],
-                        onClick: function (event) {
-                            $('#tab-content').html('Tab: ' + event.target);
-                        }
-                    }
-                }
-            ],
-            resize_cancel: true
-        });
-        w2ui['layout3'].content('right',w2ui['layout3_main_tabs'].getMaximizeButton('Palette', 'right') );
-
-
-        //+ w2ui['layout2_main_tabs'].getMaximizeButton('Preview')
-
+        // left panel dat gui, it is filled with the nodes info once they are seclected
         details_gui = new dat.GUI({
             resizable: true,
             hideable: false,
@@ -362,32 +412,81 @@ vik.ui = (function () {
         });
         details_gui.parent_node = $("#layout_layout2_panel_preview div.w2ui-panel-content");
         details_gui.width = details_gui.parent_node.width();
-
-
         details_gui.domElement.id = "Details";
         details_gui.parent_node[0].appendChild(details_gui.domElement);
 
-        palette_gui = new dat.GUI({
-            resizable: false,
+        createSettingsGUI();
+    }
+
+
+    function createSettingsGUI(){
+
+        var properties = vik.app.scene_properties;
+
+        properties_gui = new dat.GUI({
+            resizable: true,
             hideable: false,
             autoPlace: false
         });
-        palette_gui.parent_node = $("#layout_layout3_panel_main div.w2ui-panel-content");
-        palette_gui.width = palette_gui.parent_node.width();
+        properties_gui.parent_node = $("#layout_layout2_panel_preview div.w2ui-panel-content");
+        properties_gui.width = properties_gui.parent_node.width();
+        properties_gui.domElement.id = "Settings";
+        properties_gui.parent_node[0].appendChild(properties_gui.domElement);
 
-        module.createRightPanel();
 
 
-        addButtons();
+       // var f1 = properties_gui.addFolder('Properties');
 
-// for debugging panels
-//        $("#layout_main_layout_panel_top div.w2ui-panel-content").append("<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main',true)\">Top</button>" +
-//            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('left',true)\">Left</button>" +
-//            "<button class=\"btn\" onclick=\"w2ui['main_layout'].toggle('right',true)\">Right</button>" +
-//            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('preview',true )\">Preview</button>" +
-//            "<button class=\"btn\" onclick=\"w2ui['layout2'].toggle('main' ,true)\">main</button>");
+        var f2 = properties_gui.addFolder('Lighting');
+        f2.add(properties, 'light_mode', [ 'phong', 'blinn-phong' ]);
+        f2.add(properties, 'light_dir_x', -1, 1, 0.01);
+        f2.add(properties, 'light_dir_y', -1, 1, 0.01);
+        f2.add(properties, 'light_dir_z', -1, 1, 0.01);
+        f2.open();
+
+        var f3 = properties_gui.addFolder('Material');
+        f3.add(properties, 'blend_mode', [ 'opaque', 'alpha blended', 'additive' , 'screen', 'multiplicative'  ]);
+        f3.add(properties, 'face_culling', [ 'backface culling', 'frontface culling', 'double sided']);
+        f3.add(properties, 'alpha_clip_threshold', 0, 1, 0.01);
+        f3.open();
 
     }
+
+
+    var old_left_size = 0;
+    var right_left_size = 0;
+    module.changeLayout = function(  ) {
+
+        if(current_layout == vik.ui.LAYOUT_GRAPH){
+            current_layout = vik.ui.LAYOUT_EDIT;
+            old_left_size = w2ui['main_layout'].get("left").size;
+            right_left_size = w2ui['main_layout'].get("right").size;
+            w2ui["main_layout"].hide('main', true);
+            w2ui["main_layout"].sizeTo("left", "80%", true);
+            w2ui["main_layout"].sizeTo("right", "19%", true);
+
+            for (var i2 = 0; i2 < w2ui['layout2_preview_tabs'].tabs.length; i2++) {
+                w2ui['layout2_preview_tabs'].minimize(w2ui['layout2_preview_tabs'].tabs[i2].id);
+            }
+
+            w2ui['layout3_main_tabs'].minimize("Palette");
+
+        } else {
+            current_layout = vik.ui.LAYOUT_GRAPH;
+            w2ui["main_layout"].show('main', true);
+            w2ui["main_layout"].sizeTo("left", old_left_size, true);
+            w2ui["main_layout"].sizeTo("right", right_left_size, true);
+
+            for (var i2 = 0; i2 < w2ui['layout2_preview_tabs'].tabs.length; i2++) {
+                w2ui['layout2_preview_tabs'].maximize(w2ui['layout2_preview_tabs'].tabs[i2].id);
+            }
+            for (var i2 = w2ui['layout3_main_tabs'].tabs.length -1; i2 >= 0 ; i2--) {
+                w2ui['layout3_main_tabs'].maximize(w2ui['layout3_main_tabs'].tabs[i2].id);
+            }
+
+        }
+    }
+
 
     return module;
 

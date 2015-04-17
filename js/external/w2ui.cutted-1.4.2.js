@@ -2189,7 +2189,7 @@ w2utils.event = {
             for(var i in obj.tabs){
                 var it_tab = obj.tabs[i];
                 if(!new_selected && it_tab.id != id)
-                    obj.select(it_tab.id);
+                    obj.click(it_tab.id);
                 some_visible = some_visible || !it_tab.hidden;
 
             }
@@ -2235,17 +2235,20 @@ w2utils.event = {
         },
         maximize: function (id, event) {
             var tab = this.get(id);
-            if (tab === null || tab.disabled) return false;
+            if (tab === null || tab.disabled ) return false;
             var obj = this;
             obj.show(id);
-
+            obj.click(id);
             var panel = w2ui[obj.owner.name].get(obj.panel_owner);
             panel.hidden = false;
             var parent = obj.box.parentNode;
             $(parent).css('opacity', '1');
             w2ui[obj.owner.name].sizeTo(obj.panel_owner, obj.storedSize, true);
             var layout = w2ui[obj.owner.name];
-            $("#maximize_" + tab.id).toggle();
+
+            var max_but = $("#maximize_" + tab.id);
+            if(max_but.is(":visible"))
+                max_but.toggle();
             if (layout.parent_layout) {
                 // to hide the button panel
                 var button_panel = $("#maximize_" + tab.id).parent();
@@ -2266,10 +2269,10 @@ w2utils.event = {
         },
         getMaximizeButton: function (id, orientation) {
             var tab = this.get(id);
-            var tabHTML = (tab.closable ? '<div style="display:none" id="maximize_' + tab.id + '" class="w2ui-panel-tabs w2ui-reset w2ui-tabs ' + (orientation == "left" ? 'left_rotated_tab' : 'right_rotated_tab') + '"><div class="w2ui-tab-close" onclick="w2ui[\'' + this.name + '\'].maximize(\'' + tab.id + '\', event);"></div>' : '') +
-                '    <div class="w2ui-tab' + (this.active === tab.id ? ' active' : '') + (tab.closable ? ' closable' : '') + '" ' +
+            var tabHTML = (tab.closable ? '<div style="display:none" id="maximize_' + tab.id + '" class="w2ui-panel-tabs w2ui-reset w2ui-tabs ' + (orientation == "left" ? 'left_rotated_tab' : 'right_rotated_tab') + '">' : '') +
+                '    <div class="w2ui-tab active closable" ' +
                 '        title="' + (typeof tab.hint !== 'undefined' ? tab.hint : '') + '" style="' + tab.style + '" ' +
-                '        onclick="w2ui[\'' + this.name + '\'].click(\'' + tab.id + '\', event);">' + tab.text + '</div></div>'
+                '        onclick="w2ui[\'' + this.name + '\'].maximize(\'' + tab.id + '\', event);">' + tab.text + '</div></div>'
             return tabHTML;
         },
 
