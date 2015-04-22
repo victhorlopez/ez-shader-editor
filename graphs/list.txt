@@ -1,6 +1,0 @@
-Lee
-Water
-Material1
-Material2
-Material2_light_enhanced
-Terrain
