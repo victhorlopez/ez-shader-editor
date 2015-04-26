@@ -325,7 +325,7 @@ function LGraphConstColor()
     this.addOutput("color","vec4", {vec4:1});
     this.properties = { color:"#ffffff"};
     this.editable = { property:"value", type:"vec4" };
-
+    this.boxcolor = this.properties.color;
     this.shader_piece = new PConstant("vec4"); // hardcoded for testing
 }
 
@@ -342,6 +342,7 @@ LGraphConstColor.prototype.onDrawBackground = function(ctx)
 LGraphConstColor.prototype.onExecute = function()
 {
     this.processNodePath();
+    this.bgcolor = this.properties.color;
 }
 
 LGraphConstColor.prototype.processNodePath = function()
@@ -1083,7 +1084,7 @@ LGraphTexturePreview.prototype.onDrawBackground = function(ctx)
     ctx.restore();
 }
 
-LiteGraph.registerNodeType("texture/"+LGraphTexturePreview.title, LGraphTexturePreview );
+//LiteGraph.registerNodeType("texture/"+LGraphTexturePreview.title, LGraphTexturePreview );
 window.LGraphTexturePreview = LGraphTexturePreview;
 
 function LGraphTexture()
@@ -1244,10 +1245,10 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
 }
 
 LGraphTexture.prototype.toggleNormalMap = function () {
-    if(that.properties.texture_type == "Normal map") {
-        that.options.normal_map_type.hidden = 0;
+    if(this.properties.texture_type == "Normal map") {
+        this.options.normal_map_type.hidden = 0;
     } else  {
-        that.options.normal_map_type.hidden = 1;
+        this.options.normal_map_type.hidden = 1;
     }
 }
 
@@ -1421,7 +1422,7 @@ LGraphTexture.prototype.processInputCode = function(scope)
     var texture_type = 0;
     if(this.properties.texture_type == "Normal map"  ){
         if(this.properties.normal_map_type == "Tangent space")
-            texture_type =  LiteGraph.TANGENT_MAP
+            texture_type =  LiteGraph.TANGENT_MAP;
         else if(this.properties.normal_map_type == "Model space")
             texture_type = LiteGraph.NORMAL_MAP;
         else if(this.properties.normal_map_type == "Bump map")
@@ -1808,7 +1809,6 @@ function LGraphAbs()
     this.intput_types = null;
     this.in_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
 
-
     LGraph1ParamNode.call( this);
 }
 
@@ -1828,13 +1828,14 @@ LiteGraph.registerNodeType("math/"+LGraphAbs.title, LGraphAbs);
 
 function LGraphCos()
 {
-    this.code_name = "cos";
-    this.output_types = {float:1, vec3:1, vec4:1, vec2:1};
-    this.intput_types = {float:1, vec3:1, vec4:1, vec2:1};
-    this.output_type = "float";
+    this._ctor(LGraphCos.title);
 
+    this.code_name = "cos";
+    this.output_types = null;
+    this.out_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_types = null;
+    this.in_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
     LGraph1ParamNode.call( this);
-    console.log(this);
 }
 
 LGraphCos.prototype = Object.create(LGraph1ParamNode); // we inherit from Entity
@@ -1882,8 +1883,6 @@ function LGraphFrac()
 {
     this._ctor(LGraphFrac.title);
     this.code_name = "fract";
-
-    this.code_name = "sin";
     this.output_types = null;
     this.out_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
     this.intput_types = null;
@@ -2041,7 +2040,7 @@ LGraphAddOp.desc = "Add the inputs";
 
 
 LiteGraph.extendClass(LGraphAddOp,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphAddOp.title, LGraphAddOp);
+LiteGraph.registerNodeType("math/"+LGraphAddOp.title, LGraphAddOp);
 
 
 
@@ -2117,7 +2116,7 @@ LGraphClamp.prototype.onDrawBackground = function(ctx)
 }
 
 LiteGraph.extendClass(LGraphClamp,LGraph3ParamNode);
-LiteGraph.registerNodeType("operations/"+LGraphClamp.title, LGraphClamp);
+LiteGraph.registerNodeType("math/"+LGraphClamp.title, LGraphClamp);
 
 
 
@@ -2139,7 +2138,7 @@ LGraphDivOp.desc = "div the inputs";
 //LGraphMulDiv.prototype = Object.create(LGraphOperation); // we inherit from Entity
 //LGraphMulDiv.prototype.constructor = LGraphMulDiv;
 LiteGraph.extendClass(LGraphDivOp,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphDivOp.title, LGraphDivOp);
+LiteGraph.registerNodeType("math/"+LGraphDivOp.title, LGraphDivOp);
 
 
 
@@ -2161,7 +2160,7 @@ LGraphDot.desc = "Dot product the inputs";
 
 
 LiteGraph.extendClass(LGraphDot,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphDot.title, LGraphDot);
+LiteGraph.registerNodeType("math/"+LGraphDot.title, LGraphDot);
 
 
 
@@ -2225,7 +2224,7 @@ LGraphFresnel.prototype.processInputCode = function(scope)
 //
 //}
 
-LiteGraph.registerNodeType("operations/"+LGraphFresnel.title, LGraphFresnel);
+LiteGraph.registerNodeType("math/"+LGraphFresnel.title, LGraphFresnel);
 
 
 
@@ -2316,7 +2315,7 @@ LGraphIf.prototype.getOutputType = function()
     return string_type;
 }
 
-LiteGraph.registerNodeType("coordinates/"+LGraphIf.title , LGraphIf);
+LiteGraph.registerNodeType("math/"+LGraphIf.title , LGraphIf);
 
 
 
@@ -2366,6 +2365,14 @@ LGraphMix.prototype.infereTypes = function( output_slot, target_slot, node) {
     }
 }
 
+LGraphMix.prototype.disconnectTemplateSlot = function(input_slot){
+    if(input_slot == 2 ) return;
+
+    if(this.in_conected_using_T > 0)
+        this.in_conected_using_T--;
+    this.resetTypes(input_slot);
+}
+
 LGraphMix.prototype.onGetNullCode = function(slot, scope)
 {
     if(slot == 2){
@@ -2389,7 +2396,7 @@ LGraphMix.prototype.onDrawBackground = function(ctx)
 }
 
 LiteGraph.extendClass(LGraphMix,LGraph3ParamNode);
-LiteGraph.registerNodeType("operations/"+LGraphMix.title, LGraphMix);
+LiteGraph.registerNodeType("math/"+LGraphMix.title, LGraphMix);
 
 
 
@@ -2411,16 +2418,16 @@ LGraphMulOp.desc = "Mul the inputs";
 //LGraphMulOp.prototype = Object.create(LGraphOperation); // we inherit from Entity
 //LGraphMulOp.prototype.constructor = LGraphMulOp;
 LiteGraph.extendClass(LGraphMulOp,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphMulOp.title, LGraphMulOp);
+LiteGraph.registerNodeType("math/"+LGraphMulOp.title, LGraphMulOp);
 
 
 
 //UVS
 function LGraphPanner()
 {
-    this.addOutput("output","vec2", {vec2:1, vec3:1});
-    this.addInput("coordinate","vec2", {vec3:1,vec2:1});
-    this.addInput("time","float", {float:1});
+    this.addOutput("output","", {vec2:1});
+    this.addInput("coordinate","", {vec2:1});
+    this.addInput("time","", {float:1});
     this.properties = { SpeedX:1.0,
         SpeedY:1.0 };
     this.options = {    SpeedX:{min:-1.0, max:1.0, step:0.001},
@@ -2484,7 +2491,7 @@ LGraphPanner.prototype.onGetNullCode = function(slot, scope)
 
 }
 
-LiteGraph.registerNodeType("operations/"+LGraphPanner.title, LGraphPanner);
+LiteGraph.registerNodeType("math/"+LGraphPanner.title, LGraphPanner);
 
 
 
@@ -2518,7 +2525,7 @@ LGraphPow.prototype.onDrawBackground = function(ctx)
 //LGraphMulOp.prototype = Object.create(LGraphOperation); // we inherit from Entity
 //LGraphMulOp.prototype.constructor = LGraphMulOp;
 LiteGraph.extendClass(LGraphPow,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphPow.title, LGraphPow);
+LiteGraph.registerNodeType("math/"+LGraphPow.title, LGraphPow);
 
 
 
@@ -2561,7 +2568,7 @@ LGraphReflect.prototype.processInputCode = function()
 
 }
 
-LiteGraph.registerNodeType("texture/"+LGraphReflect.title, LGraphReflect);
+LiteGraph.registerNodeType("math/"+LGraphReflect.title, LGraphReflect);
 
 
 
@@ -2595,18 +2602,31 @@ LGraphSmooth.prototype.constructor = LGraphSmooth;
 LGraphSmooth.title = "SmoothStep";
 LGraphSmooth.desc = "smoothstep of input";
 
-//LGraphSmooth.prototype.infereTypes = function( output, target_slot) {
-//    var output_type = Object.keys(output.types)[0];
-//    if(target_slot == 2 && output_type == "float")
-//        return;
-//
-//    this.in_conected_using_T++;
-//    var input = this.inputs[target_slot];
-//    if (input.use_t && this.in_conected_using_T == 1) {
-//        for (var k in output.types)
-//            this.T_types[k] = output.types[k];
-//    }
-//}
+LGraphSmooth.prototype.infereTypes = function( output_slot, target_slot, node) {
+    var out_types = node.getTypesFromOutputSlot(output_slot);
+    if( (target_slot == 0 || target_slot == 1) && Object.keys(out_types)[0] == "float")
+        return;
+    this.connectTemplateSlot();
+
+
+    var input = this.inputs[target_slot];
+    if (input.use_t && Object.keys(this.T_in_types).length === 0) {
+
+        this.T_in_types["float"] = 1; // we hardcode the float as operation always accept float in one of the inputs
+        for (var k in out_types)
+            this.T_in_types[k] = out_types[k];
+        for (var k in out_types)
+            this.T_out_types[k] = out_types[k];
+    }
+}
+
+LGraphMix.prototype.disconnectTemplateSlot = function(input_slot){
+    if(input_slot == 0 || input_slot == 1 ) return;
+
+    if(this.in_conected_using_T > 0)
+        this.in_conected_using_T--;
+    this.resetTypes(input_slot);
+}
 
 LGraphSmooth.prototype.onGetNullCode = function(slot, scope)
 {
@@ -2645,7 +2665,7 @@ LGraphSmooth.prototype.onDrawBackground = function(ctx)
 }
 
 LiteGraph.extendClass(LGraphSmooth,LGraph3ParamNode);
-LiteGraph.registerNodeType("operations/"+LGraphSmooth.title, LGraphSmooth);
+LiteGraph.registerNodeType("math/"+LGraphSmooth.title, LGraphSmooth);
 
 
 
@@ -2669,5 +2689,5 @@ LGraphSubOp.desc = "Substraction of the inputs";
 
 
 LiteGraph.extendClass(LGraphSubOp,LGraphOperation);
-LiteGraph.registerNodeType("operations/"+LGraphSubOp.title, LGraphSubOp);
+LiteGraph.registerNodeType("math/"+LGraphSubOp.title, LGraphSubOp);
 

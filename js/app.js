@@ -508,6 +508,26 @@ vik.app = (function () {
                     $(this).hide();
             });
         });
+
+        var doc = document.getElementById("layout_layout2_panel_main");
+        doc.ondragover = function () { this.className = 'hover'; return false; };
+        doc.ondragend = function () { this.className = ''; return false; };
+        doc.ondrop = function (event) {
+
+            var file = event.dataTransfer.files[0];
+            var filename = file.name;
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                //console.log(event.target);
+                var data = event.target.result;
+                renderer.addMesh("drop_mesh", GL.Mesh.fromData(filename, data, gl));
+                main_node.mesh = "drop_mesh";
+            };
+            reader.readAsText(file);
+            return false;
+        };
+
+
     }
 
     return module;

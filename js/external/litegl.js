@@ -2812,6 +2812,29 @@
         return mesh;
     }
 
+    /**
+     * Returns am empty mesh and loads a mesh and parses it using the Mesh.parsers
+     * @method Mesh.fromData
+     * @param {Array} meshes array containing all the meshes
+     */
+    Mesh.fromData = function(url, data, gl)
+    {
+        gl = gl || global.gl;
+        var mesh = new GL.Mesh(undefined,undefined,undefined,gl);
+        mesh.ready = false;
+
+
+        var ext = url.substr(url.length - 4).toLowerCase();
+        var parser = Mesh.parsers[ ext ];
+        if(parser)
+            parser.call(null, data, {mesh: mesh});
+        else
+            throw("Mesh.fromURL: no parser found for format " + ext);
+        delete mesh["ready"];
+
+
+        return mesh;
+    }
 
     Mesh.getScreenQuad = function(gl)
     {
@@ -4056,7 +4079,7 @@
     {
         //create simple shader first
         var vs_code = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			attribute vec3 a_vertex;\n\
 			attribute mat4 u_mvp;\n\
 			void main() { \n\
@@ -4064,7 +4087,7 @@
 			}\n\
 		";
         var fs_code = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			void main() {\n\
 				gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n\
 			}\n\
@@ -4276,7 +4299,7 @@
 //**************** SHADERS ***********************************
 
     Shader.SCREEN_VERTEX_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			attribute vec3 a_vertex;\n\
 			attribute vec2 a_coord;\n\
 			varying vec2 v_coord;\n\
@@ -4287,7 +4310,7 @@
 			";
 
     Shader.SCREEN_FRAGMENT_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			uniform sampler2D u_texture;\n\
 			varying vec2 v_coord;\n\
 			void main() {\n\
@@ -4296,7 +4319,7 @@
 			";
 
     Shader.SCREEN_COLORED_FRAGMENT_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			uniform sampler2D u_texture;\n\
 			uniform vec4 u_color;\n\
 			varying vec2 v_coord;\n\
@@ -4306,7 +4329,7 @@
 			";
 
     Shader.SCREEN_FLAT_FRAGMENT_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			uniform vec4 u_color;\n\
 			void main() {\n\
 				gl_FragColor = u_color;\n\
@@ -4315,7 +4338,7 @@
 
 //used to paint quads
     Shader.QUAD_VERTEX_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			attribute vec3 a_vertex;\n\
 			attribute vec2 a_coord;\n\
 			varying vec2 v_coord;\n\
@@ -4336,7 +4359,7 @@
 			";
 
     Shader.QUAD_FRAGMENT_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			uniform sampler2D u_texture;\n\
 			uniform vec4 u_color;\n\
 			varying vec2 v_coord;\n\
@@ -4347,7 +4370,7 @@
 
 //used to render partially a texture
     Shader.QUAD2_FRAGMENT_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			uniform sampler2D u_texture;\n\
 			uniform vec4 u_color;\n\
 			uniform vec4 u_texture_area;\n\
@@ -4359,7 +4382,7 @@
 			";
 
     Shader.PRIMITIVE2D_VERTEX_SHADER = "\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			attribute vec3 a_vertex;\n\
 			uniform vec2 u_viewport;\n\
 			uniform mat3 u_transform;\n\
@@ -4456,7 +4479,7 @@
             return shader;
 
         var shader = new GL.Shader( Shader.SCREEN_VERTEX_SHADER,"\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			varying vec2 v_coord;\n\
 			uniform sampler2D u_texture;\n\
 			uniform vec2 u_offset;\n\
@@ -4491,7 +4514,7 @@
             return shader;
 
         var shader = new GL.Shader( Shader.SCREEN_VERTEX_SHADER,"\n\
-			precision highp float;\n\
+			precision mediump float;\n\
 			varying vec2 v_coord;\n\
 			uniform sampler2D u_texture;\n\
 			uniform vec2 u_viewportSize;\n\

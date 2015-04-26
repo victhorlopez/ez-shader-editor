@@ -37,9 +37,9 @@ var LiteGraph = {
 
     proxy: null, //used to redirect calls
 
-    debug: false,
+    debug: true,
     throw_errors: true,
-    showcode:false,
+    showcode:true,
     registered_node_types: {},
 
     graph_max_steps:0,
@@ -1854,7 +1854,8 @@ LGraphNode.prototype.serialize = function()
         shader_piece: this.shader_piece,
         codes: this.codes,
         T_out_types: this.T_out_types,
-        T_in_types: this.T_in_types
+        T_in_types: this.T_in_types,
+        in_conected_using_T: this.in_conected_using_T
     };
 
     if(this.properties)
@@ -2410,12 +2411,17 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
         {
             var link_id = output.links[i];
             var link_info = this.graph.links[ link_id ];
-
             //is the link we are searching for...
             if( link_info.target_id == target_node.id )
             {
                 output.links.splice(i,1); //remove here
-                target_node.inputs[ link_info.target_slot ].link = null; //remove there
+                var input_slot = target_node.inputs[ link_info.target_slot ];
+                input_slot.link = null; //remove there
+
+                if(input_slot.use_t){
+                    target_node.disconnectTemplateSlot(i);
+                }
+
                 delete this.graph.links[ link_id ]; //remove the link from the links pool
                 break;
             }
@@ -2429,8 +2435,14 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node)
             var link_info = this.graph.links[ link_id ];
 
             var target_node = this.graph.getNodeById( link_info.target_id );
-            if(target_node)
-                target_node.inputs[ link_info.target_slot ].link = null; //remove other side link
+            if(target_node){
+                var input_slot = target_node.inputs[ link_info.target_slot ];
+                input_slot.link = null; //remove other side link
+                if(input_slot.use_t){
+                    target_node.disconnectTemplateSlot(i);
+                }
+            }
+
         }
         output.links = null;
     }
@@ -2472,7 +2484,7 @@ LGraphNode.prototype.disconnectInput = function(slot)
     var input = this.inputs[slot];
     if(!input) return false;
     if(input.use_t){
-        this.disconnectTemplateSlot(input);
+        this.disconnectTemplateSlot(slot);
     }
     var link_id = this.inputs[slot].link;
     this.inputs[slot].link = null;
@@ -2746,23 +2758,15 @@ LGraphNode.prototype.infereTypes = function( output, target_slot)
 
 }
 
-LGraphNode.prototype.resetTypes = function( input )
+LGraphNode.prototype.resetTypes = function( slot )
 {
-//    var out_types = this.getTypesFromOutputSlot(input);
-//    if(this.in_conected_using_T == Object.keys(this.T_in_types).length){
-//        for(var k in out_types){
-//            delete this.T_in_types[k];
-//            delete this.T_out_types[k];
-//        }
-//    }
+
     if( !this.in_conected_using_T ){
         for(var k in this.T_in_types)
             delete this.T_in_types[k];
         for(var k in this.T_out_types)
             delete this.T_out_types[k];
     }
-
-
 }
 
 /** Compares the
@@ -2815,11 +2819,11 @@ LGraphNode.prototype.getTypesFromOutputSlot = function(output_slot){
     return out_types;
 }
 
-LGraphNode.prototype.disconnectTemplateSlot = function(input){
+LGraphNode.prototype.disconnectTemplateSlot = function(slot){
 
     if(this.in_conected_using_T > 0)
         this.in_conected_using_T--;
-    this.resetTypes(input);
+    this.resetTypes(slot);
 }
 
 LGraphNode.prototype.connectTemplateSlot = function(){
@@ -3754,8 +3758,10 @@ LGraphCanvas.prototype.onNodeSelected = function (n) {
 }
 
 LGraphCanvas.prototype.processNodeSelected = function (n, e) {
-    if(LiteGraph.debug)
+    if(LiteGraph.debug){
         console.log(n);
+    }
+
     n.selected = true;
     if (n.onSelected)
         n.onSelected();
@@ -3773,6 +3779,7 @@ LGraphCanvas.prototype.processNodeSelected = function (n, e) {
         this.onNodeSelected(n);
 
     console.log(n);
+    console.log(this.graph);
     //if(this.node_in_panel) this.showNodePanel(n);
 }
 
@@ -5335,9 +5342,10 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 //    for (var line in alpha.vertex.includes) { includes[line] = 1; }
 //    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
 //    for (var line in offset.vertex.includes) { includes[line] = 1; }
+    var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
 
     // header
-    var r = "precision highp float;\n"+
+    var r = "precision mediump float;\n"+
         "attribute vec3 a_vertex;\n"+
         "attribute vec3 a_normal;\n"+
         "attribute vec2 a_coord;\n";
@@ -5354,6 +5362,10 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "uniform mat4 u_mvp;\n"+
          "uniform mat4 u_model;\n" +
         "uniform mat4 u_viewprojection;\n";
+    if (albedo.vertex.isLineIncluded("view_dir"))
+        r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
+            "      vec3 light_dir = normalize("+light_dir+");\n" +
+            "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
     var h = albedo.vertex.getHeader();
     for(var id in h)
@@ -5366,7 +5378,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
         r += "      v_coord = a_coord;\n";
     r += "      v_normal = (u_model * vec4(a_normal, 0.0)).xyz;\n";
     r += "      vec3 pos = a_vertex;\n";
-    if (albedo.fragment.isLineIncluded("depth")){
+    if (albedo.vertex.isLineIncluded("depth")){
         r += "      vec4 pos4 = (u_model * vec4(pos,1.0));\n";
         r += "      float depth = pos4.z / pos4.w;\n";
     }
@@ -5423,7 +5435,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
 
     // header
-    var r = "precision highp float;\n"+
+    var r = "precision mediump float;\n"+
      "#extension GL_OES_standard_derivatives : enable\n";
     if (albedo.fragment.isLineIncluded("v_coord"))
         r += "varying vec2 v_coord;\n";
@@ -5441,7 +5453,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
         r += h[id];
 
     // http://www.thetenthplanet.de/archives/1180
-    if(has_normal) {
+    if(albedo.fragment.isLineIncluded("TBN")) {
         r+= "\nmat3 computeTBN(){\n" +
             "      vec3 dp1 = dFdx( v_pos );\n" +
             "      vec3 dp2 = dFdy( v_pos );\n" +
@@ -5461,17 +5473,21 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 
     if (albedo.fragment.isLineIncluded("depth"))
         r += "      float depth = gl_FragCoord.z / gl_FragCoord.w;\n";
-    //if (includes["view_dir"])
-    r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
-        "      vec3 light_dir = normalize("+light_dir+");\n" +
+
+
+    //if (albedo.fragment.isLineIncluded("view_dir"))
+    r += "      vec3 view_dir = normalize(v_pos - u_eye);\n";
+    // constans for light
+    r +="      vec3 light_dir = normalize("+light_dir+");\n" +
         "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
 
 
-    if(has_normal){
+    if(albedo.fragment.isLineIncluded("TBN")){
         // http://www.thetenthplanet.de/archives/1180
         r+= "      mat3 TBN = computeTBN();\n";
     }
+
 
 
     var body_hash = albedo.fragment.getBody();
@@ -6283,11 +6299,12 @@ LiteGraph.CodeLib["div"] = new POperation (undefined, "/");
 
 function PFresnel () {
     this.id = "fresnel";
-    this.includes = {u_model: 1, a_normal: 1, v_normal: 1};
+    this.includes = {u_model: 1, a_normal: 1, v_normal: 1, view_dir:1};
 }
 
 PFresnel.prototype.getVertexCode = function (output_var,  normal, exp, scope) {
     if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH){
+        var normal = normal || "v_normal";
         var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
         "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
         return code;
@@ -6297,6 +6314,7 @@ PFresnel.prototype.getVertexCode = function (output_var,  normal, exp, scope) {
 
 PFresnel.prototype.getFragmentCode = function (output_var,  normal, exp, scope) {
     if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH){
+        var normal = normal || "normal";
         var code = "float fresnel_"+output_var+" = dot("+normal+", -view_dir);\n" +
             "      float "+output_var+" = pow( 1.0 - clamp(0.0,fresnel_"+output_var+",1.0), "+exp+");\n";
         return code;
@@ -6307,10 +6325,10 @@ PFresnel.prototype.getFragmentCode = function (output_var,  normal, exp, scope) 
 
 PFresnel.prototype.getCode = function (params) {
     var out_var = params.out_var;
-    var normal = params.normal || "normal";
     var exp = params.exp || "1.0";
     var scope = params.scope;
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
+    var normal = params.normal;
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var,  normal, exp, scope));
@@ -6321,39 +6339,6 @@ PFresnel.prototype.getCode = function (params) {
     fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
-}
-
-
-
-
-
-
-var POperation = {};
-
-POperation.id = "operation";
-POperation.includes = {v_pos:1, u_eye: 1};
-
-
-POperation.getVertexCode = function (output, op, input1, input2) {
-    return "";
-}
-
-POperation.getFragmentCode = function (output, op, input1, input2) {
-    return "vec4 "+output+" = "+input1+" "+op+" "+input2+"; \n";
-}
-
-
-POperation.getCode = function (output, op, input1, input2) {
-    var vertex = new CodePiece();
-    vertex.setBody(this.getVertexCode(output, op, input1, input2));
-    vertex.setIncludesFromMap(POperation.includes);
-
-    var fragment = new CodePiece();
-    fragment.setBody(this.getFragmentCode(output, op, input1, input2));
-    fragment.setIncludesFromMap(POperation.includes);
-
-
-    return new ShaderCode(vertex, fragment, output);
 }
 
 
@@ -6483,7 +6468,7 @@ PTextureSample.getVertexCode = function (output, input, texture_id, texture_type
 PTextureSample.getFragmentCode = function (output, input, texture_id, texture_type, scope, order) {
     input = input || "v_coord";
     var code = new CodePiece(order);
-    code.setIncludesFromMap(PTextureSample.includes);
+
     var code_str = "";
     if(scope == CodePiece.FRAGMENT) {
         code.addHeaderLine("uniform sampler2D " + texture_id + ";\n");
@@ -6493,13 +6478,13 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
         }
         else if( texture_type == LiteGraph.TANGENT_MAP){
+            PTextureSample.includes.TBN = 1;
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludesFromMap(PTextureSample.includes);
-        }    else if( texture_type == LiteGraph.TANGENT_MAP){
+        } else if( texture_type == LiteGraph.TANGENT_MAP){
+            PTextureSample.includes.TBN = 1;
             code_str += "      " + output + " = (2.0 * " + output + " )-1.0;\n";
             code_str += "      "+output+" = vec4(TBN * "+output+".xyz, 1.0);\n";
-            code.setIncludesFromMap(PTextureSample.includes);
         }
     }
 //    else if( texture_type == LiteGraph.BUMP_MAP){
@@ -6517,7 +6502,7 @@ PTextureSample.getFragmentCode = function (output, input, texture_id, texture_ty
 //        code.setIncludesFromMap(PTextureSample.includes);
 //    }
 
-
+    code.setIncludesFromMap(PTextureSample.includes);
     code.setBody(code_str);
 
     return code;
@@ -6533,6 +6518,7 @@ PTextureSample.getCode = function (params) {
     var scope = params.scope;
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
+    PTextureSample.includes.TBN = 0;
     var vertex = this.getVertexCode(out_var, input, texture_id, texture_type, scope , order);
 
     var fragment = this.getFragmentCode(out_var, input, texture_id, texture_type, scope, order);
