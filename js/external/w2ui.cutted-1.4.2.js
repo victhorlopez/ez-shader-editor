@@ -646,6 +646,7 @@ w2utils.event = {
             $.extend(object, { handlers: [], panels: [] });
             // add defined panels
             for (var p = 0, len = panels.length; p < len; p++) {
+                panels[p].storedSize = panels[p].size;
                 object.panels[p] = $.extend(true, {}, w2layout.prototype.panel, panels[p]);
                 if ($.isPlainObject(object.panels[p].tabs) || $.isArray(object.panels[p].tabs)) initTabs(object, panels[p].type);
                 if ($.isPlainObject(object.panels[p].toolbar) || $.isArray(object.panels[p].toolbar)) initToolbar(object, panels[p].type);
@@ -2178,9 +2179,11 @@ w2utils.event = {
             this.trigger($.extend(eventData, { phase: 'after' }));
             this.refresh(id);
         },
-        minimize: function (id, event) {
+        minimize: function (id,event, store_size) {
+            store_size = store_size || true;
             var tab = this.get(id);
             if (tab === null || tab.disabled) return false;
+            tab.minimized = true;
             var obj = this;
             var panel = w2ui[obj.owner.name].get(obj.panel_owner);
             obj.hide(id);
@@ -2198,7 +2201,8 @@ w2utils.event = {
                 panel.hidden = true;
                 var parent = obj.box.parentNode;
                 $(parent).css('opacity', '0');
-                obj.storedSize = panel.size;
+                if(panel.size !== panel.minSize && store_size)
+                    obj.storedSize = panel.size ;
                 w2ui[obj.owner.name].sizeTo(obj.panel_owner, panel.minSize, true);
             }
 
@@ -2224,18 +2228,20 @@ w2utils.event = {
 
                 var parent_layout = w2ui[layout.parent_layout];
                 var parent_panel = parent_layout.get(layout.panel_holder);
-                if (w2ui[obj.owner.name].get('preview').hidden && w2ui[obj.owner.name].get('main').hidden) {
-                    console.log(parent_panel);
-                    parent_panel.storedSize = parent_panel.size;
+                if ((w2ui[obj.owner.name].get('preview').hidden && w2ui[obj.owner.name].get('main').hidden) && store_size) {
+                    if(parent_panel.size !== parent_panel.minSize + parent_layout.padding && store_size)
+                        parent_panel.storedSize = parent_panel.size;
                     parent_layout.sizeTo(layout.panel_holder, parent_panel.minSize + parent_layout.padding, true);
                 }
             }
 
 
         },
-        maximize: function (id, event) {
+        maximize: function (id,event, resize) {
+            resize = typeof resize === 'undefined' ?  true : resize;
             var tab = this.get(id);
             if (tab === null || tab.disabled ) return false;
+            tab.minimized = false;
             var obj = this;
             obj.show(id);
             obj.click(id);
@@ -2263,7 +2269,7 @@ w2utils.event = {
 
                 var parent_layout = w2ui[layout.parent_layout];
                 var parent_panel = parent_layout.get(layout.panel_holder);
-                if (w2ui[obj.owner.name].get('preview').hidden || w2ui[obj.owner.name].get('main').hidden)
+                if ((w2ui[obj.owner.name].get('preview').hidden || w2ui[obj.owner.name].get('main').hidden) && resize)
                     parent_layout.sizeTo(layout.panel_holder, parent_panel.storedSize, true);
             }
         },

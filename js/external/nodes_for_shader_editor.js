@@ -12,15 +12,15 @@ LGraph1ParamNode.prototype.constructor = LGraph1ParamNode;
 
 LGraph1ParamNode.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraph1ParamNode.prototype.processNodePath = function()
-{
-    var input = this.getInputNodePath(0);
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraph1ParamNode.prototype.processNodePath = function()
+//{
+//    var input = this.getInputNodePath(0);
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 
 LGraph1ParamNode.prototype.processInputCode = function(scope, priority_modifier)
@@ -99,17 +99,17 @@ LGraph2ParamNode.prototype.constructor = LGraph2ParamNode;
 
 LGraph2ParamNode.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraph2ParamNode.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    this.mergePaths(input1,input2);
-    this.insertIntoPath(input1);
-    this.node_path[0] = input1;
-}
+//LGraph2ParamNode.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    this.mergePaths(input1,input2);
+//    this.insertIntoPath(input1);
+//    this.node_path[0] = input1;
+//}
 
 
 LGraph2ParamNode.prototype.processInputCode = function(scope)
@@ -205,7 +205,7 @@ LGraph3ParamNode.prototype.constructor = LGraph3ParamNode;
 
 LGraph3ParamNode.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
 LGraph3ParamNode.prototype.processInputCode = function(scope)
@@ -242,18 +242,18 @@ LGraph3ParamNode.prototype.processInputCode = function(scope)
 
 }
 
-LGraph3ParamNode.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    var input3 = this.getInputNodePath(2);
-    this.mergePaths(input1,input2);
-    this.mergePaths(input1,input3);
-    this.insertIntoPath(input1);
-
-    this.node_path[0] = input1;
-
-}
+//LGraph3ParamNode.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    var input3 = this.getInputNodePath(2);
+//    this.mergePaths(input1,input2);
+//    this.mergePaths(input1,input3);
+//    this.insertIntoPath(input1);
+//
+//    this.node_path[0] = input1;
+//
+//}
 
 
 LGraph3ParamNode.prototype.getOutputTypes = function()
@@ -341,17 +341,17 @@ LGraphConstColor.prototype.onDrawBackground = function(ctx)
 
 LGraphConstColor.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
     this.bgcolor = this.properties.color;
 }
 
-LGraphConstColor.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-
-}
+//LGraphConstColor.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//
+//}
 
 LGraphConstColor.prototype.processInputCode = function(scope)
 {
@@ -392,17 +392,17 @@ LGraphConstant.prototype.setValue = function(v)
 
 LGraphConstant.prototype.onExecute = function()
 {
-    this.processNodePath();
+//    this.processNodePath();
 
     this.setOutputData(0, parseFloat( this.properties["value"] ) );
 }
 
-LGraphConstant.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphConstant.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphConstant.prototype.processInputCode = function(scope)
 {
@@ -432,6 +432,39 @@ LiteGraph.registerNodeType("constants/"+LGraphConstant.title, LGraphConstant);
 
 
 //Constant
+function LGraphFrameTime()
+{
+    this.addOutput("time","float", {float:1});
+
+    this.shader_piece = PFrameTime;
+}
+
+LGraphFrameTime.title = "FrameTime";
+LGraphFrameTime.desc = "Time between frames";
+
+
+LGraphFrameTime.prototype.onExecute = function()
+{
+//    this.processNodePath();
+}
+//
+//LGraphFrameTime.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
+
+LGraphFrameTime.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode({order:this.order, scope:scope}); // need to check scope
+}
+
+LiteGraph.registerNodeType("constants/"+LGraphFrameTime.title , LGraphFrameTime);
+
+
+
+//Constant
 function LGraphTime()
 {
     this.addOutput("time","float", {float:1});
@@ -445,15 +478,15 @@ LGraphTime.desc = "Time since execution started";
 
 LGraphTime.prototype.onExecute = function()
 {
-    this.processNodePath();
+//    this.processNodePath();
 }
-
-LGraphTime.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//
+//LGraphTime.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphTime.prototype.processInputCode = function(scope)
 {
@@ -493,15 +526,15 @@ LGraphConstVec2.prototype.setValue = function(v1,v2)
 
 LGraphConstVec2.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //    this.processNodePath();
 }
-
-LGraphConstVec2.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//
+//LGraphConstVec2.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphConstVec2.prototype.processInputCode = function(scope)
 {
@@ -559,16 +592,16 @@ LGraphConstVec3.prototype.setValue = function(v1,v2,v3)
 
 LGraphConstVec3.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphConstVec3.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-
-}
+//LGraphConstVec3.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//
+//}
 
 LGraphConstVec3.prototype.processInputCode = function(scope)
 {
@@ -627,12 +660,12 @@ LGraphConstVec4.prototype.setValue = function(v1,v2,v3,v4)
     this.setDirtyCanvas(true);
 };
 
-LGraphConstVec4.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphConstVec4.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphConstVec4.prototype.processInputCode = function(scope)
 {
@@ -699,15 +732,15 @@ LGraphDepth.desc = "Depth of the pixel";
 
 LGraphDepth.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphDepth.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphDepth.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphDepth.prototype.processInputCode = function()
 {
@@ -759,15 +792,15 @@ LGraphUVs.desc = "Texture coordinates";
 
 LGraphUVs.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphUVs.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphUVs.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphUVs.prototype.processInputCode = function(scope)
 {
@@ -808,15 +841,15 @@ LGraphVertexPosWS.desc = "Vertex position in WS";
 
 LGraphVertexPosWS.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphVertexPosWS.prototype.processNodePath = function()
-{
-    var input = {};
-    this.insertIntoPath(input);
-    this.node_path[0] = input;
-}
+//LGraphVertexPosWS.prototype.processNodePath = function()
+//{
+//    var input = {};
+//    this.insertIntoPath(input);
+//    this.node_path[0] = input;
+//}
 
 LGraphVertexPosWS.prototype.processInputCode = function()
 {
@@ -836,6 +869,7 @@ LiteGraph.registerNodeType("coordinates/"+LGraphVertexPosWS.title, LGraphVertexP
 function LGraphShader()
 {
     this.uninstantiable = true;
+    this.clonable = false;
     this.addInput("albedo","vec3", {vec3:1, vec4:1});
     this.addInput("normal","vec3", {vec3:1, vec4:1}); // tangent space normal, if written
     this.addInput("emission","vec3", {vec3:1, vec4:1});
@@ -907,7 +941,9 @@ LGraphShader.prototype.getFullCode = function(slot, scope, modifier) {
     var path = this.getInputNodePath(slot);
     var sorted_map = this.sortPathByOrder(path);
     for(var i = 0; i < sorted_map.length; ++i){
-        sorted_map[i][1].processInputCode(scope);
+        var node = sorted_map[i][1];
+        if (node != this)
+            node.processInputCode(scope);
     }
     var code = this.getInputCode(slot) || LiteGraph.EMPTY_CODE; // 0 it's the color
     return code;
@@ -975,26 +1011,26 @@ LGraphCompsToVec.desc = "Components To Vector";
 
 LGraphCompsToVec.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphCompsToVec.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    var input3 = this.getInputNodePath(2);
-    var input4 = this.getInputNodePath(3);
-
-    this.mergePaths(input1,input2);
-    this.mergePaths(input1,input3);
-    this.mergePaths(input1,input4);
-    this.insertIntoPath(input1);
-
-
-    this.node_path[0] = input1;
-
-
-}
+//LGraphCompsToVec.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    var input3 = this.getInputNodePath(2);
+//    var input4 = this.getInputNodePath(3);
+//
+//    this.mergePaths(input1,input2);
+//    this.mergePaths(input1,input3);
+//    this.mergePaths(input1,input4);
+//    this.insertIntoPath(input1);
+//
+//
+//    this.node_path[0] = input1;
+//
+//
+//}
 
 LGraphCompsToVec.prototype.processInputCode = function(scope)
 {
@@ -1231,7 +1267,7 @@ LGraphTexture.loadTextureFromFile = function(data, filename, file, callback, gl)
         if( typeof(data) == "string" )
             gl.textures[no_ext_name] = texture = GL.Texture.fromURL( data, {wrap: gl.REPEAT}, callback, gl );
         else if( filename.toLowerCase().indexOf(".dds") != -1 )
-            texture = GL.Texture.fromDDSInMemory(data, gl);
+            texture = GL.Texture.fromDDSInMemory(data, { minFilter:  gl.LINEAR_MIPMAP_LINEAR });
         else
         {
             var blob = new Blob([file]);
@@ -1285,7 +1321,7 @@ LGraphTexture.prototype.getExtraMenuOptions = function(graphcanvas)
 
 LGraphTexture.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 
     if(this._drop_texture ){
 
@@ -1388,24 +1424,24 @@ LGraphTexture.generateLowResTexturePreview = function(tex)
     return tex_canvas;
 }
 
-LGraphTexture.prototype.processNodePath = function()
-{
-
-    var input = this.getInputNodePath(0);
-
-    this.insertIntoPath(input);
-
-    this.node_path[1] = input;
-    this.node_path[2] = input;
-    this.node_path[3] = input;
-    this.node_path[4] = input;
-    this.node_path[5] = input;
-//    this.node_path[2] = cloned_input.slice(0);
-//    this.node_path[3] = cloned_input.slice(0);
-//    this.node_path[4] = cloned_input.slice(0);
-//    this.node_path[5] = cloned_input.slice(0);
-
-}
+//LGraphTexture.prototype.processNodePath = function()
+//{
+//
+//    var input = this.getInputNodePath(0);
+//
+//    this.insertIntoPath(input);
+//
+//    this.node_path[1] = input;
+//    this.node_path[2] = input;
+//    this.node_path[3] = input;
+//    this.node_path[4] = input;
+//    this.node_path[5] = input;
+////    this.node_path[2] = cloned_input.slice(0);
+////    this.node_path[3] = cloned_input.slice(0);
+////    this.node_path[4] = cloned_input.slice(0);
+////    this.node_path[5] = cloned_input.slice(0);
+//
+//}
 
 LGraphTexture.prototype.processInputCode = function(scope)
 {
@@ -1558,7 +1594,7 @@ LGraphCubemap.prototype.onDropFile = function(data, filename, file)
 LGraphCubemap.prototype.onExecute = function()
 {
 
-    this.processNodePath();
+    //this.processNodePath();
     if(this._drop_texture)
     {
         this.setOutputData(0, this._drop_texture);
@@ -1593,17 +1629,17 @@ LGraphCubemap.prototype.onDrawBackground = function(ctx)
 
 }
 
-LGraphCubemap.prototype.processNodePath = function()
-{
-    var input = this.getInputNodePath(0);
-    this.insertIntoPath(input);
-    this.node_path[1] = input;
-    this.node_path[2] = input;
-    this.node_path[3] = input;
-    this.node_path[4] = input;
-    this.node_path[5] = input;
-
-}
+//LGraphCubemap.prototype.processNodePath = function()
+//{
+//    var input = this.getInputNodePath(0);
+//    this.insertIntoPath(input);
+//    this.node_path[1] = input;
+//    this.node_path[2] = input;
+//    this.node_path[3] = input;
+//    this.node_path[4] = input;
+//    this.node_path[5] = input;
+//
+//}
 
 LGraphCubemap.prototype.processInputCode = function(scope)
 {
@@ -1659,23 +1695,23 @@ LGraphVecToComps.desc = "Vector To Components";
 
 LGraphVecToComps.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphVecToComps.prototype.processNodePath = function()
-{
-    var input = this.getInputNodePath(0);
-
-    this.insertIntoPath(input);
-
-    this.node_path[0] = input;
-    this.node_path[1] = input;
-    this.node_path[2] = input;
-    this.node_path[3] = input;
-
-
-
-}
+//LGraphVecToComps.prototype.processNodePath = function()
+//{
+//    var input = this.getInputNodePath(0);
+//
+//    this.insertIntoPath(input);
+//
+//    this.node_path[0] = input;
+//    this.node_path[1] = input;
+//    this.node_path[2] = input;
+//    this.node_path[3] = input;
+//
+//
+//
+//}
 
 LGraphVecToComps.prototype.processInputCode = function(scope)
 {
@@ -1719,24 +1755,24 @@ LGraphVecToVec.desc = "VectorX To VectorY";
 
 LGraphVecToVec.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
-
-LGraphVecToVec.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-
-
-    this.insertIntoPath(input1);
-
-
-    this.node_path[0] = input1;
-    this.node_path[1] = input1;
-    this.node_path[2] = input1;
-    this.node_path[3] = input1;
-
-
-}
+//
+//LGraphVecToVec.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//
+//
+//    this.insertIntoPath(input1);
+//
+//
+//    this.node_path[0] = input1;
+//    this.node_path[1] = input1;
+//    this.node_path[2] = input1;
+//    this.node_path[3] = input1;
+//
+//
+//}
 
 LGraphVecToVec.prototype.processInputCode = function(scope)
 {
@@ -1904,6 +1940,33 @@ LiteGraph.registerNodeType("math/"+LGraphFrac.title, LGraphFrac);
 
 
 
+function LGraphNormnalize()
+{
+    this._ctor(LGraphNormnalize.title);
+
+    this.code_name = "normalize";
+    this.output_types = null;
+    this.out_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.intput_types = null;
+    this.in_extra_info = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    LGraph1ParamNode.call( this);
+}
+
+LGraphNormnalize.prototype = Object.create(LGraph1ParamNode); // we inherit from Entity
+
+LGraphNormnalize.prototype.constructor = LGraphNormnalize;
+
+LGraphNormnalize.title = "Normalize";
+LGraphNormnalize.desc = "normalize of input";
+
+
+LiteGraph.extendClass(LGraphNormnalize,LGraph1ParamNode);
+LiteGraph.registerNodeType("math/"+LGraphNormnalize.title, LGraphNormnalize);
+
+
+
+
+
 function LGraphSin()
 {
     this._ctor(LGraphSin.title);
@@ -1934,12 +1997,12 @@ LiteGraph.registerNodeType("math/"+LGraphSin.title, LGraphSin);
 
 function LGraphOperation()
 {
-    this.output_types = null;
-    this.out_extra_info = {types_list: {float:1},   use_t:1};
-    this.intput_typesA = null;
-    this.in_extra_infoA = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
-    this.intput_typesB = null;
-    this.in_extra_infoB = {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
+    this.output_types = this.output_types || null;
+    this.out_extra_info = this.out_extra_info || {types_list: {float:1},   use_t:1};
+    this.intput_typesA = this.intput_typesA || null;
+    this.in_extra_infoA = this.in_extra_infoA || {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1}
+    this.intput_typesB = this.intput_typesB || null;
+    this.in_extra_infoB = this.in_extra_infoB || {types_list: {float:1, vec3:1, vec4:1, vec2:1},   use_t:1};
 //    this.output_types = {vec2:1, float:1, vec3:1,  vec4:1};
 //    this.intput_typesA = {vec2:1, float:1, vec3:1,  vec4:1};
 //    this.intput_typesB = {vec2:1, float:1, vec3:1, vec4:1};
@@ -2149,9 +2212,11 @@ function LGraphDot()
 {
     this._ctor(LGraphDot.title);
     this.code_name = "dot";
+    this.output_types = {float:1};
+    this.out_extra_info = {};
     LGraphOperation.call( this);
 
-    this.output_types = {float:1};
+
 }
 
 
@@ -2181,17 +2246,17 @@ LGraphFresnel.desc = "Fresnel the input";
 
 LGraphFresnel.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphFresnel.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    this.mergePaths(input1,input2);
-    this.insertIntoPath(input1);
-    this.node_path[0] = input1;
-}
+//LGraphFresnel.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    this.mergePaths(input1,input2);
+//    this.insertIntoPath(input1);
+//    this.node_path[0] = input1;
+//}
 
 
 LGraphFresnel.prototype.processInputCode = function(scope)
@@ -2249,28 +2314,28 @@ LGraphIf.desc = "if between A and B";
 
 LGraphIf.prototype.onExecute = function()
 {
-    this.processNodePath();
+    //this.processNodePath();
 }
 
-LGraphIf.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    var input3 = this.getInputNodePath(2);
-    var input4 = this.getInputNodePath(3);
-    var input5 = this.getInputNodePath(4);
-
-    this.mergePaths(input1,input2);
-    this.mergePaths(input1,input3);
-    this.mergePaths(input1,input4);
-    this.mergePaths(input1,input5);
-    this.insertIntoPath(input1);
-
-
-    this.node_path[0] = input1;
-
-
-}
+//LGraphIf.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    var input3 = this.getInputNodePath(2);
+//    var input4 = this.getInputNodePath(3);
+//    var input5 = this.getInputNodePath(4);
+//
+//    this.mergePaths(input1,input2);
+//    this.mergePaths(input1,input3);
+//    this.mergePaths(input1,input4);
+//    this.mergePaths(input1,input5);
+//    this.insertIntoPath(input1);
+//
+//
+//    this.node_path[0] = input1;
+//
+//
+//}
 
 LGraphIf.prototype.processInputCode = function(scope)
 {
@@ -2443,17 +2508,17 @@ LGraphPanner.desc = "Moves the input";
 
 LGraphPanner.prototype.onExecute = function()
 {
-    this.processNodePath();
+   // this.processNodePath();
 }
 
-LGraphPanner.prototype.processNodePath = function()
-{
-    var input1 = this.getInputNodePath(0);
-    var input2 = this.getInputNodePath(1);
-    this.mergePaths(input1,input2);
-    this.insertIntoPath(input1);
-    this.node_path[0] = input1;
-}
+//LGraphPanner.prototype.processNodePath = function()
+//{
+//    var input1 = this.getInputNodePath(0);
+//    var input2 = this.getInputNodePath(1);
+//    this.mergePaths(input1,input2);
+//    this.insertIntoPath(input1);
+//    this.node_path[0] = input1;
+//}
 
 
 LGraphPanner.prototype.processInputCode = function(scope)
@@ -2545,7 +2610,7 @@ LGraphReflect.desc = "To reflect a vector3";
 
 LGraphReflect.prototype.onExecute = function()
 {
-    this.processInputCode();
+    //this.processInputCode();
 }
 
 

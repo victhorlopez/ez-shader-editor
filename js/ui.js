@@ -272,9 +272,6 @@ vik.ui = (function () {
         request.send();
     }
 
-
-
-
     function loadLayout() {
 
         createMainLayout();
@@ -538,35 +535,60 @@ vik.ui = (function () {
 
 
     var old_left_size = 0;
-    var right_left_size = 0;
+    var old_right_size = 0;
+    var layout2_preview_tabs_min = {};// to save the last minimized state
+    var layout2_main_tabs_min = {};//  this is the previsualitzation
+    var layout3_main_tabs_min = {};
     module.changeLayout = function(  ) {
 
         if(current_layout == vik.ui.LAYOUT_GRAPH){
             current_layout = vik.ui.LAYOUT_EDIT;
             old_left_size = w2ui['main_layout'].get("left").size;
-            right_left_size = w2ui['main_layout'].get("right").size;
+            old_right_size = w2ui['main_layout'].get("right").size;
+            layout3_main_tabs_min["Palette"] = w2ui['layout3_main_tabs'].get("Palette").minimized;
+            layout3_main_tabs_min["Properties"] = w2ui['layout3_main_tabs'].get("Properties").minimized;
+            layout2_preview_tabs_min["Details"] = w2ui['layout2_preview_tabs'].get("Details").minimized;
+            layout2_main_tabs_min["Preview"] = w2ui['layout2_main_tabs'].get("Preview").minimized;
+
+            for (var i2 = 0; i2 < w2ui['layout2_preview_tabs'].tabs.length; i2++) {
+                var id = w2ui['layout2_preview_tabs'].tabs[i2].id;
+                layout2_preview_tabs_min[id] = w2ui['layout2_preview_tabs'].tabs[i2].minimized;
+                w2ui['layout2_preview_tabs'].minimize(id);
+            }
+
+
             w2ui["main_layout"].hide('main', true);
             w2ui["main_layout"].sizeTo("left", "80%", true);
             w2ui["main_layout"].sizeTo("right", "19%", true);
 
-            for (var i2 = 0; i2 < w2ui['layout2_preview_tabs'].tabs.length; i2++) {
-                w2ui['layout2_preview_tabs'].minimize(w2ui['layout2_preview_tabs'].tabs[i2].id);
-            }
             w2ui['layout3_main_tabs'].minimize("Palette");
-            w2ui['layout3_main_tabs'].maximize("Properties");
+            w2ui['layout3_main_tabs'].maximize("Properties", undefined, layout3_main_tabs_min["Properties"]);
+            w2ui['layout2_main_tabs'].maximize("Preview", undefined, false);
 
         } else {
             current_layout = vik.ui.LAYOUT_GRAPH;
             w2ui["main_layout"].show('main', true);
             w2ui["main_layout"].sizeTo("left", old_left_size, true);
-            w2ui["main_layout"].sizeTo("right", right_left_size, true);
+            w2ui["main_layout"].sizeTo("right", old_right_size, true);
 
             for (var i2 = 0; i2 < w2ui['layout2_preview_tabs'].tabs.length; i2++) {
-                w2ui['layout2_preview_tabs'].maximize(w2ui['layout2_preview_tabs'].tabs[i2].id);
+                var id = w2ui['layout2_preview_tabs'].tabs[i2].id;
+                if(!layout2_preview_tabs_min[id])
+                    w2ui['layout2_preview_tabs'].maximize(id);
+
             }
+            if(layout2_main_tabs_min["Preview"])
+                w2ui['layout2_main_tabs'].minimize("Preview");
+
             for (var i2 = w2ui['layout3_main_tabs'].tabs.length -1; i2 >= 0 ; i2--) {
-                w2ui['layout3_main_tabs'].maximize(w2ui['layout3_main_tabs'].tabs[i2].id);
+                var id = w2ui['layout3_main_tabs'].tabs[i2].id;
+                if(layout3_main_tabs_min[id])
+                    w2ui['layout3_main_tabs'].minimize(id);
+                else
+                    w2ui['layout3_main_tabs'].maximize(id);
             }
+            w2ui["main_layout"].sizeTo("left", old_left_size, true);
+            w2ui["main_layout"].sizeTo("right", old_right_size, true);
 
         }
     }
