@@ -21,7 +21,7 @@ vik.ui = (function () {
     module.init = function () {
         loadLayout();
         loadImageAssetList(vik.app.TEXTURES_PATH,function(ret){ texture_list = ret}  );
-        loadImageAssetList(vik.app.CUBEMAPS_PATH, function(ret){ cubemap_list = ret} );
+        loadImageAssetList(vik.app.CUBEMAPS_PATH, function(ret){ cubemap_list = ret}, "thumb_" );
         LiteGraph.extendNodeTypeProperties(LGraphTexture, "Texture", selectTexture);
         LiteGraph.extendNodeTypeProperties(LGraphCubemap, "Cubemap", selectCubemap);
     }
@@ -187,7 +187,7 @@ vik.ui = (function () {
         for(var i = list_nodes.length - 1; i>= 0; --i) {
             list_nodes[i].addEventListener("click", function () {
                 that.name = LiteGraph.removeExtension(this.id);
-                that.texture_url = vik.app.TEXTURES_PATH +""+ this.id;
+                that.texture_url = vik.app.CUBEMAPS_PATH +""+ this.id;
                 w2popup.close();
                 vik.app.compile(false,true);
                 module.updateDisplays();
@@ -253,7 +253,7 @@ vik.ui = (function () {
 
     }
 
-    function loadImageAssetList(path, callback) {
+    function loadImageAssetList(path, callback, prefix) {
 
         var request = new XMLHttpRequest();
 
@@ -263,7 +263,7 @@ vik.ui = (function () {
                 var txt = request.responseText.split(/\r?\n/);
                 var html = '<div class="dg texture-popup"><ul id="popup-list">';
                 for (var i in txt) {
-                    html += '<li class="cr function" id="'+ txt[i] +'"><img src="'+path +''+ txt[i] + '" class="texture-selector"> <span class="property-name">' + txt[i] + '</span></li>';
+                    html += '<li class="cr function" id="'+ txt[i] +'"><img src="'+path +'' + prefix+ '' + txt[i] + '" class="texture-selector"> <span class="property-name">'+ txt[i] + '</span></li>';
                 }
                 html += '</ul></div>';
                 if(callback) callback.apply(this, [html]);
@@ -463,8 +463,32 @@ vik.ui = (function () {
         }
     }
 
+    // function to select a texture using a popup
+    function loadEnvironment(){
+
+        w2popup.open({
+            title: 'Load Cubemap',
+            width: 300,
+            height: 700,
+            body: '<div class="w2ui-inner-popup">'+cubemap_list+'</div>'
+        });
+        var that = this;
+        var list_nodes = document.getElementById("popup-list").childNodes;
+        for(var i = list_nodes.length - 1; i>= 0; --i) {
+            list_nodes[i].addEventListener("click", function () {
+                w2popup.close();
+                that.environment_name = LiteGraph.removeExtension(this.id);
+                vik.app.setDefaultCubeMap( that.environment_name , vik.app.CUBEMAPS_PATH +""+ this.id);
+                module.updateFolder(properties_gui.__folders["Environment"]);
+            });
+        }
+
+    }
+
     module.updatePropertiesGUI = function(){
         var properties = vik.app.scene_properties;
+        properties.environment = loadEnvironment;
+        if(properties["environment_name"]=== undefined) properties["environment_name"]= "default";
         var node = vik.app.main_node;
         for(var i in properties_gui.items){
             properties_gui.remove(properties_gui.items[i]);
@@ -495,6 +519,10 @@ vik.ui = (function () {
         f3.add(node.flags, 'two_sided');
         f3.add(properties, 'alpha_threshold', 0, 1, 0.01);
 
+        var f4 = properties_gui.__folders["Environment"];
+        f4.add(properties,'environment')
+        f4.add(properties, 'environment_name');
+
 
         for(var i in f2.__controllers){
             var controller = f2.__controllers[i];
@@ -508,6 +536,7 @@ vik.ui = (function () {
                 vik.app.compile();
             });
         }
+
 
     }
 
@@ -529,6 +558,8 @@ vik.ui = (function () {
         f2.open();
         var f3 = properties_gui.addFolder('Material');
         f3.open();
+        var f4 = properties_gui.addFolder('Environment');
+        f4.open();
         module.updatePropertiesGUI();
 
     }
@@ -593,6 +624,13 @@ vik.ui = (function () {
         }
     }
 
+
+    module.updateFolder = function(f) {
+        for (var i in f.__controllers) {
+            f.__controllers[i].updateDisplay(true);
+        }
+    }
+
     module.updateDisplays = function() {
 
         var props_folders = properties_gui.__folders["Properties"].__folders;
@@ -604,6 +642,8 @@ vik.ui = (function () {
         for (var i in details_gui.__controllers) {
             details_gui.__controllers[i].updateDisplay(true);
         }
+
+
     }
 
     module.reset = function(nodes){

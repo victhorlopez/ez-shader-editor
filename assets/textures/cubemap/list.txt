@@ -1,1 +1,5 @@
-cube_default.jpg
+grimmnight_large.jpg
+miramar_large.jpg
+interstellar_large.jpg
+stormydays_large.jpg
+violentdays_large.jpg

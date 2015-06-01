@@ -491,11 +491,11 @@ EZ.Renderer.prototype = {
 
     addTextureFromURL: function (name, url, params, callback) {
         params = params || {};
-        this.context.textures[name] = GL.Texture.fromURL( url, params, callback, this.context);
+        return this.context.textures[name] = GL.Texture.fromURL( url, params, callback, this.context);
     },
     addCubeMapFromURL: function (name, url, params, callback) {
         params = params || {};
-        this.context.textures[name] = GL.Texture.cubemapFromURL( url, params, callback, this.context);
+        return this.context.textures[name] = GL.Texture.cubemapFromURL( url, params, callback, this.context);
     },
 
     loadAssets: function () {

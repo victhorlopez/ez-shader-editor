@@ -1186,7 +1186,7 @@ LGraphTexture.MODE_VALUES = {
     "default": LGraphTexture.DEFAULT
 };
 
-LGraphTexture.getTexture = function(name, url)
+LGraphTexture.getTexture = function(name, url, is_cube)
 {
     var container =  gl.textures || LGraphTexture.textures_container; // changedo order, otherwise it bugs with the multiple context
 
@@ -1201,7 +1201,7 @@ LGraphTexture.getTexture = function(name, url)
         if(LGraphTexture.loadTextureCallback)
         {
             var loader = LGraphTexture.loadTextureCallback;
-            tex = loader( name, url );
+            tex = loader( name, url, is_cube );
             return tex;
         }
         else
@@ -1515,13 +1515,17 @@ LGraphTexture.prototype.onGetNullCode = function(slot)
 
 }
 
-LGraphTexture.loadTextureCallback = function(name, url)
+LGraphTexture.loadTextureCallback = function(name, url, is_cube)
 {
+    is_cube = is_cube || false;
     function callback(tex){
         LGraphTexture.configTexture(tex);
         LiteGraph.dispatchEvent("graphCanvasChange", null, null);
     }
-    tex = gl.textures[ name ] = GL.Texture.fromURL(url, {}, callback);
+    if(!is_cube)
+        tex = gl.textures[ name ] = GL.Texture.fromURL(url, {}, callback);
+    else
+        tex = gl.textures[ name ] = GL.Texture.cubemapFromURL( url, {temp_color:[80,120,40,255], is_cross:1, minFilter: gl.LINEAR_MIPMAP_LINEAR}, callback);
     return tex;
 }
 
@@ -1604,7 +1608,7 @@ LGraphCubemap.prototype.onExecute = function()
     if(!this.properties.name)
         return;
 
-    var tex = LGraphTexture.getTexture( this.properties.name, this.properties.texture_url );
+    var tex = LGraphTexture.getTexture( this.properties.name, this.properties.texture_url, true );
     if(!tex)
         return;
 
@@ -1668,9 +1672,6 @@ LGraphCubemap.prototype.onGetNullCode = function(slot)
         var code = this.vector_piece.getCode({order:this.order-1});
         return code;
     }
-
-
-
 }
 
 LiteGraph.registerNodeType("texture/"+LGraphCubemap.title, LGraphCubemap );
