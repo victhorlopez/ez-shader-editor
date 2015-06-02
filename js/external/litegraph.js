@@ -4099,6 +4099,8 @@ LGraphCanvas.prototype.computeVisibleNodes = function () {
 }
 
 LGraphCanvas.prototype.draw = function (force_canvas, force_bgcanvas) {
+    if(this.ctx.canvas.width == 0 || this.ctx.canvas.height == 0)
+        return;
     //fps counting
     var now = LiteGraph.getTime();
     this.render_time = (now - this.last_draw_time) * 0.001;

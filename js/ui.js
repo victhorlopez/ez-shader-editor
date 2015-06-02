@@ -24,6 +24,7 @@ vik.ui = (function () {
         loadImageAssetList(vik.app.CUBEMAPS_PATH, function(ret){ cubemap_list = ret}, "thumb_" );
         LiteGraph.extendNodeTypeProperties(LGraphTexture, "Texture", selectTexture);
         LiteGraph.extendNodeTypeProperties(LGraphCubemap, "Cubemap", selectCubemap);
+        module.onResize();
     }
 
 
@@ -576,6 +577,7 @@ vik.ui = (function () {
             current_layout = vik.ui.LAYOUT_EDIT;
             old_left_size = w2ui['main_layout'].get("left").size;
             old_right_size = w2ui['main_layout'].get("right").size;
+
             layout3_main_tabs_min["Palette"] = w2ui['layout3_main_tabs'].get("Palette").minimized;
             layout3_main_tabs_min["Properties"] = w2ui['layout3_main_tabs'].get("Properties").minimized;
             layout2_preview_tabs_min["Details"] = w2ui['layout2_preview_tabs'].get("Details").minimized;
@@ -587,13 +589,13 @@ vik.ui = (function () {
                 w2ui['layout2_preview_tabs'].minimize(id);
             }
 
-
             w2ui["main_layout"].hide('main', true);
             w2ui["main_layout"].sizeTo("left", "80%", true);
             w2ui["main_layout"].sizeTo("right", "19%", true);
 
             w2ui['layout3_main_tabs'].minimize("Palette");
-            w2ui['layout3_main_tabs'].maximize("Properties", undefined, layout3_main_tabs_min["Properties"]);
+            w2ui['layout3_main_tabs'].minimize("Properties");
+            w2ui['layout3_main_tabs'].maximize("Properties");
             w2ui['layout2_main_tabs'].maximize("Preview", undefined, false);
 
         } else {
@@ -642,7 +644,6 @@ vik.ui = (function () {
         for (var i in details_gui.__controllers) {
             details_gui.__controllers[i].updateDisplay(true);
         }
-
 
     }
 

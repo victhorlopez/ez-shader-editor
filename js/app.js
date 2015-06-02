@@ -52,22 +52,12 @@ vik.app = (function () {
     module.loadTexture = function (name, url, sync_load, params) {
 
         sync_load.data.callbacksToComplete++;
-        // canvas2webgl disabled
-//        sync_load.data.callbacksToComplete += 2;
-//        graph_gl.textures[name] = GL.Texture.fromURL( url, params, sync_load.onComplete, graph_gl);
-
-        //renderer.addTextureFromURL(name, url, params, sync_load.onComplete);
-
         renderer.addTextureFromURL(name, url, params, sync_load.onComplete);
 
 
     }
     module.loadCubeMap = function (name, url, sync_load, params) {
-        //sync_load.data.callbacksToComplete++;
-        // canvas2webgl disabled
-//        sync_load.data.callbacksToComplete += 2;
-//        graph_gl.textures[name] = GL.Texture.cubemapFromURL( url, params, sync_load.onComplete, graph_gl);
-        //renderer.addCubeMapFromURL(name, url, params, sync_load.onComplete);
+
         return renderer.addCubeMapFromURL(name, url, params);
     }
     module.setDefaultCubeMap = function (name, url, sync_load, params) {
@@ -79,41 +69,7 @@ vik.app = (function () {
     }
 
     module.loadTextures = function (name, url) {
-
-//        var data =  {
-//            callbacksToComplete: 0,
-//            callbacksCompleted: 0,
-//            callback: module.changeGraph
-//        };
-//        var sync_load = {
-//            data: data,
-//            onComplete: function( ){
-//                data.callbacksCompleted++;
-//                if(data.callbacksCompleted == data.callbacksToComplete) {
-//                    data.callback("lee.json");
-//                }
-//            }
-//        };
-//        module.loadTexture("ball", "assets/textures/texture/ball.jpg", sync_load);
-//        module.loadTexture("noise", "assets/textures/texture/noise.png", sync_load);
-//        module.loadTexture("NewTennisBallColor", "assets/textures/texture/NewTennisBallColor.jpg", sync_load);
-//        module.loadTexture("BasketballColor", "assets/textures/texture/BasketballColor.jpg", sync_load);
-
-
-//        module.loadTexture("small_waves_normal", "assets/textures/texture/small_waves_normal.png", sync_load, {minFilter: gl.LINEAR});
-//        module.loadTexture("small_waves2_DISP", "assets/textures/texture/small_waves2_DISP.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("grass1", "assets/textures/texture/grass1.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("snow", "assets/textures/texture/snow.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("CobblesDiffuse", "assets/textures/texture/CobblesDiffuse.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("CobblesGloss", "assets/textures/texture/CobblesGloss.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("CobblesNormal", "assets/textures/texture/CobblesNormal.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("Cobbles_DISP", "assets/textures/texture/Cobbles_DISP.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("CobblesNormal_SPEC", "assets/textures/texture/Cobbles_SPEC.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("lee", "assets/textures/texture/lee.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("lee_normal", "assets/textures/texture/lee_normal.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadTexture("lee_spec", "assets/textures/texture/lee_spec.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-//        module.loadCubeMap("cube_default", "assets/textures/cubemap/cube_default.jpg", sync_load, {minFilter: gl.LINEAR_MIPMAP_LINEAR});
-        module.setDefaultCubeMap("grimmnight_large", module.CUBEMAPS_PATH +"grimmnight_large.jpg", null, {temp_color:[80,120,40,255], is_cross:1, minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.setDefaultCubeMap("miramar_large", module.CUBEMAPS_PATH +"miramar_large.jpg", null, {temp_color:[80,120,40,255], is_cross:1, minFilter: gl.LINEAR_MIPMAP_LINEAR});
         renderer.addMesh("torus", GL.Mesh.fromURL("assets/meshes/torus.obj"));
 
         // we read the list of assets and store the filename and its paths into a map
@@ -131,31 +87,25 @@ vik.app = (function () {
         request.send();
     }
 
-//    module.loadGraph = function(graph_url) {
-//
-//        graph.loadFromURL(graph_url, vik.app.compile, [true,true]);
-//        vik.ui.updateLeftPanel( null );
-//
-//    }
+
 
     function loadContent() {
 
         // ez render
         var container = $("#layout_layout2_panel_main div.w2ui-panel-content");
         renderer = new EZ.Renderer();
-        renderer.createCanvas(container.width(), container.height(), "preview_canvas");
+        var w = container.width();
+        var h = container.height();
+        renderer.createCanvas(w, h, "preview_canvas");
         renderer.append(container[0]);
         renderer.color = [0.2, 0.2, 0.2];
 
-        var camera = new EZ.ECamera(45, renderer.context.width / renderer.context.height, 0.1, 1000);
+        var camera = new EZ.ECamera(45, w / h, 0.1, 1000);
         camera.position = [0, 0.5, 2];
         camera.target = [0, 0.5, 0];
-//        camera.position = [20, 0.5, 380];
-//        camera.target = [0, 0.5, 400];
         var scene = new EZ.EScene();
         main_node.mesh = "lee";
         main_node.flags.blend = false;
-//        main_node.setTexture("cubemap","cubemap");
         main_node.shader = "phong";
         main_node.position = [0, 0.5, 0];
         main_node.render_priority = EZ.PRIORITY_ALPHA;
@@ -201,6 +151,7 @@ vik.app = (function () {
             renderer.render(scene, camera);
         }
         render();
+
     }
 
     module.compile = function (force_compile, draw) {
