@@ -254,7 +254,7 @@ vik.ui = (function () {
     }
 
     function loadImageAssetList(path, callback, prefix) {
-
+        prefix = prefix  || "" ;
         var request = new XMLHttpRequest();
 
         request.open('GET',path+"list.txt");

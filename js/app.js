@@ -506,7 +506,7 @@ vik.app = (function () {
 
         $(".search").on("input", function () {
             var value = $(this).val().toLowerCase();
-            $("#layout_layout3_panel_main .property-name").each(function (index) {
+            $("#layout_layout3_panel_main #palette .property-name").each(function (index) {
                 if ($(this).html().toLowerCase().indexOf(value) >= 0 || value == "") {
                     $(this).parent().parent().show();
                 }
@@ -515,7 +515,7 @@ vik.app = (function () {
                 }
             });
 
-            $("#layout_layout3_panel_main .folder ul").each(function (index) {
+            $("#layout_layout3_panel_main #palette .folder ul").each(function (index) {
                 $(this).show();
                 if ($(this).children(':visible').length <= 1)
                     $(this).hide();
