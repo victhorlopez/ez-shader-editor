@@ -904,10 +904,53 @@ LGraph.prototype.updateExecutionOrder = function()
         else
             this._nodes_in_order = this.computeExecutionOrder();
 
+
+        this.checkLinksIntegrity();
         LiteGraph.dispatchEvent("contentChange", null, null);
+
+
+
     }
 }
 
+/**
+ * Checks if all links have the correct vars in each side
+ * @method checkLinksIntegrity
+ */
+LGraph.prototype.checkLinksIntegrity = function() {
+
+    for (var id in this._nodes_in_order) {
+        var node = this._nodes_in_order[id];
+        if(node.in_conected_using_T > 0){
+            node.in_conected_using_T = 0;
+            node.resetTypes();
+        }
+        for (var i = 0; node.inputs != undefined && i <  node.inputs.length; i++) {
+            if(node.inputs[i].use_t){
+                var link_id = node.inputs[i].link;
+                if(!link_id) continue;
+                var link = this.links[link_id];
+                if (link) {
+                    var input_node = this.getNodeById(link.origin_id);
+                    node.infereTypes(input_node.outputs[link.origin_slot], link.target_slot, input_node); // skip_autoinc
+                }
+            }
+        }
+    }
+
+    for (var i in this.links) {
+        var link = this.links[i];
+        var input_node = this.getNodeById( link.origin_id );
+        var output_node = this.getNodeById( link.target_id );
+
+        if(output_node && input_node && !output_node.compareNodeTypes(input_node, input_node.outputs[link.origin_slot], link.target_slot)){
+            link.color = "#FF0000";
+        } else {
+            link.color = null;
+        }
+    }
+
+}
 
 //This is more internal, it computes the order and returns it
 LGraph.prototype.computeExecutionBFS = function()
@@ -2466,7 +2509,8 @@ LGraphNode.prototype.connect = function(slot, node, target_slot)
     }
     else if( //!output.type ||  //generic output
         //!node.inputs[target_slot].type || //generic input
-        output.type == node.inputs[target_slot].type || //same type
+        ((output.type !=  "" &&   node.inputs[target_slot].type != "") &&
+        output.type == node.inputs[target_slot].type) || //same type
         node.compareNodeTypes(this,output,target_slot)) //compare with multiple types
     {
         //info: link structure => [ 0:link_id, 1:start_node_id, 2:start_slot, 3:end_node_id, 4:end_slot ]
@@ -2890,16 +2934,31 @@ LGraphNode.prototype.infereTypes = function( output, target_slot)
 {
     this.in_conected_using_T++;
     var input = this.inputs[target_slot];
-    var out_types = this.getTypesFromOutputSlot(output)
     if(input.use_t && this.in_conected_using_T == 1){
+        var out_types = this.getTypesFromOutputSlot(output);
         for(var k in out_types){
             this.T_in_types[k] = out_types[k];
             this.T_out_types[k] = out_types[k];
         }
     }
+}
 
-
-
+/**
+ * @method recomputeTypes
+ **/
+LGraphNode.prototype.recomputeTypes = function( output, target_slot)
+{
+    if(this.id == 13 || this.id == 11)
+   console.log("hola");
+    var input = this.inputs[target_slot];
+    if(input.use_t && this.in_conected_using_T == 1){
+        this.resetTypes(target_slot);
+        var out_types = this.getTypesFromOutputSlot(output);
+        for(var k in out_types){
+            this.T_in_types[k] = out_types[k];
+            this.T_out_types[k] = out_types[k];
+        }
+    }
 }
 
 LGraphNode.prototype.resetTypes = function( slot )
@@ -2919,14 +2978,14 @@ LGraphNode.prototype.resetTypes = function( slot )
  * @param slot_id the id of the slot where we are connecting our input node
  * @method compareNodeTypes
  **/
-LGraphNode.prototype.compareNodeTypes = function(connecting_node, connection_slot, slot_id)
+LGraphNode.prototype.compareNodeTypes = function(input_node, connection_slot, slot_id)
 {
     var input_slot = this.inputs[slot_id];
     var out_types = null;
     var in_types = null;
     var ret = false;
     if(connection_slot.use_t){
-        out_types = Object.keys(connecting_node.T_out_types) == 0 ? null : connecting_node.T_out_types;
+        out_types = Object.keys(input_node.T_out_types) == 0 ? null : input_node.T_out_types;
     }
 
     if(out_types === null) {
@@ -3648,6 +3707,8 @@ LGraphCanvas.prototype.processMouseMove = function (e) {
                         (this.connecting_output.type == n.inputs[slot].type ||
                         n.compareNodeTypes(this.connecting_node, this.connecting_output,  slot)))
                             this._highlight_input = pos;
+
+
                 }
                 else
                     this._highlight_input = null;
@@ -4716,6 +4777,8 @@ LGraphCanvas.prototype.drawConnections = function (ctx) {
                 var color = LGraphCanvas.link_type_colors[node.inputs[i].type];
                 if (color == null)
                     color = LGraphCanvas.link_colors[node.id % LGraphCanvas.link_colors.length];
+                if(link.color != null)
+                    color = link.color;
                 this.renderLink(ctx, start_node_slotpos, node.getConnectionPos(true, i), color);
             }
     }
@@ -6293,7 +6356,7 @@ PVecToVec.prototype.getCastedVar = function(output_var, out_type, in_type, value
             return value +".xyzw;\n";
     } else {
         var r = out_type +"("+value;
-        for(var i = 0; i < in_vec - out_vec; ++i){
+        for(var i = 0; i < (out_vec - in_vec); ++i){
             r +=", 0.0";
         }
         r +=");\n";

@@ -64,12 +64,12 @@ vik.app = (function () {
         if(gl.textures[name]){
             gl.textures["cube_default"] = gl.textures[name];
         } else {
-            gl.textures["cube_default"] = gl.textures[name] = module.loadCubeMap(name, url, null, {temp_color:[80,120,40,255], is_cross:1, minFilter: gl.LINEAR_MIPMAP_LINEAR});;
+            gl.textures["cube_default"] = gl.textures[name] = module.loadCubeMap(name, url, null, {temp_color:[34,34,34,255], is_cross:1, minFilter: gl.LINEAR_MIPMAP_LINEAR});;
         }
     }
 
     module.loadTextures = function (name, url) {
-        module.setDefaultCubeMap("miramar_large", module.CUBEMAPS_PATH +"miramar_large.jpg", null, {temp_color:[80,120,40,255], is_cross:1, minFilter: gl.LINEAR_MIPMAP_LINEAR});
+        module.setDefaultCubeMap("miramar_large", module.CUBEMAPS_PATH +"miramar_large.jpg", null, {temp_color:[34,34,34,255], is_cross:1, minFilter: gl.LINEAR_MIPMAP_LINEAR});
         renderer.addMesh("torus", GL.Mesh.fromURL("assets/meshes/torus.obj"));
 
         // we read the list of assets and store the filename and its paths into a map
@@ -208,7 +208,7 @@ vik.app = (function () {
     module.createCodeHighlighted = function (shader) {
         // code creation
         var code_div = $("#code");//document.getElementById("code");
-        code_div.height(code_div.parent().height());
+        code_div.height(code_div.parent().parent().height() - 30);
         if (graph.shader_output) {
             code_div[0].innerHTML = '<div class="dg"><ul>' +
                 '<li class="code-title">Vertex Code</li>' +
@@ -378,20 +378,20 @@ vik.app = (function () {
 
         });
 
-        var change_canvas_but = document.getElementById("change_canvas");
-        change_canvas_but.addEventListener("click", function () {
-//            var div = this.parentNode;
-//            if (!canvas2webgl) {
-//                canvas2webgl = true;
-//                this.childNodes[1].nodeValue = "WebGL";
-//                LiteGraph.current_ctx = LiteGraph.CANVAS_WEBGL;
-//            } else {
-//                canvas2webgl = false;
-//                this.childNodes[1].nodeValue = "Canvas";
-//                LiteGraph.current_ctx = LiteGraph.CANVAS_2D;
-//            }
-//            module.changeCanvas();
-        });
+//        var change_canvas_but = document.getElementById("change_canvas");
+//        change_canvas_but.addEventListener("click", function () {
+////            var div = this.parentNode;
+////            if (!canvas2webgl) {
+////                canvas2webgl = true;
+////                this.childNodes[1].nodeValue = "WebGL";
+////                LiteGraph.current_ctx = LiteGraph.CANVAS_WEBGL;
+////            } else {
+////                canvas2webgl = false;
+////                this.childNodes[1].nodeValue = "Canvas";
+////                LiteGraph.current_ctx = LiteGraph.CANVAS_2D;
+////            }
+////            module.changeCanvas();
+//        });
 
         var change_layout_but = document.getElementById("change_layout");
         change_layout_but.addEventListener("click", function () {

@@ -238,7 +238,7 @@ vik.ui = (function () {
         addTopBarButton("live_update","fa fa-refresh fa-spin","Live Update", {div_class:"pressed"});
         addTopBarButton("apply","fa fa-check-circle","Apply");
         addTopBarButton("clean_graph","fa fa-trash-o","Clean Up");
-        addTopBarButton("change_canvas","fa fa-cubes","Canvas", {div_class:"pressed"});
+        //addTopBarButton("change_canvas","fa fa-cubes","Canvas", {div_class:"pressed"});
         addTopBarButton("change_layout","fa fa-desktop","Full Screen");
 
 
