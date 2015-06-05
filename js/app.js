@@ -425,6 +425,7 @@ vik.app = (function () {
                 }
             }
 
+
             var request = new XMLHttpRequest();
             request.open('GET', "graphs/list.txt");
             request.onreadystatechange = function () {
@@ -439,6 +440,15 @@ vik.app = (function () {
                 }
             }
             request.send();
+        });
+
+        var info_but = document.getElementById("about");
+        info_but.addEventListener("click", function () {
+
+            w2popup.load({ url: 'readme.html', showMax: true,
+                width     : 800,
+                height    : 600});
+
         });
 
 

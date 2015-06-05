@@ -240,7 +240,7 @@ vik.ui = (function () {
         addTopBarButton("clean_graph","fa fa-trash-o","Clean Up");
         //addTopBarButton("change_canvas","fa fa-cubes","Canvas", {div_class:"pressed"});
         addTopBarButton("change_layout","fa fa-desktop","Full Screen");
-
+        addTopBarButton("about","fa fa-info","About");
 
         $("#layout_layout2_panel_main .w2ui-panel-content").append('<div id="mesh-changer"></div>');
         addMeshChangerButton("sphere","fa fa-globe","Sphere");
