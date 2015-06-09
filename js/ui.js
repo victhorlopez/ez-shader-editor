@@ -100,12 +100,18 @@ vik.ui = (function () {
         controller.onChange(function(value) {
             if(this.callback)
                 node[this.callback]();
-            if(this.property == "is_global")
+            if(this.property == "is_global"){
                 if(value == true)
                     module.addGlobalNode(node);
                 else
                     module.removeGlobalNode(node);
-            vik.app.compile(false, true);
+                vik.app.compile(false, true);
+            } else if(properties["is_global"] !== true){
+                vik.app.compile(false, true);
+            } else {
+                vik.app.draw();
+            }
+
         });
 
     }

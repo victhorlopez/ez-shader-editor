@@ -165,6 +165,7 @@ vik.app = (function () {
             {
                 try {
                     gl.shaders["current"] = new GL.Shader(shader.vertex_code, shader.fragment_code);
+                    gl.shaders["current"].globals = shader.globals;
                 }
                 catch (err) {
                     gl.shaders["current"] = gl.shaders["phong"];
@@ -204,6 +205,9 @@ vik.app = (function () {
         }
     }
 
+    module.draw = function () {
+        gcanvas.draw(true, true);
+    }
 
     module.createCodeHighlighted = function (shader) {
         // code creation

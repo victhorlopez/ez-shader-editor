@@ -637,7 +637,7 @@ LiteGraph.removeExtension = function(name){
     return no_ext_name;
 }
 
-LiteGraph.hexToColor = function( color_hex)
+LiteGraph.hexToColor = function( color_hex, array)
 {
     // http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
     function hexToRgb(hex) {
@@ -649,7 +649,10 @@ LiteGraph.hexToColor = function( color_hex)
         ] : null;
     };
     var color = hexToRgb(color_hex);
-    return "vec4("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+", 1.0)";
+    if(!array)
+        return "vec4("+(color[0]/255).toFixed(3)+","+(color[1]/255).toFixed(3)+","+(color[2]/255).toFixed(3)+", 1.0)";
+    else
+        return [(color[0]/255).toFixed(3),(color[1]/255).toFixed(3),(color[2]/255).toFixed(3), 1.0];
 }
 
 LiteGraph.getOtputTypeFromMap = function( map)
@@ -722,6 +725,7 @@ LGraph.prototype.clear = function()
     this._nodes_by_id = {};
     this._nodes_in_order = [];
 
+    this.globals = {}; // for the global vars in shaders
 
     //links
     this.last_link_id = 1; // u need to start by 1 otherwise it fails some if's
@@ -5476,6 +5480,10 @@ CodePiece.prototype.clone = function()
 };
 
 
+CodePiece.prototype.isCodeUsed = function() {
+    return Object.keys(this.getBody()).length  > 0 || Object.keys(this.getHeader()).length  > 0;
+}
+
 LiteGraph.CodeLib = {};
 
 /**
@@ -5672,15 +5680,15 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset) {
 
 
-    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
-    var has_albedo = Object.keys(albedo.fragment.getBody()).length  > 0;
-    var has_normal = Object.keys(normal.fragment.getBody()).length  > 0;
-    var has_specular = Object.keys(specular.fragment.getBody()).length  > 0;
-    var has_emission = Object.keys(emission.fragment.getBody()).length  > 0;
-    var has_gloss = Object.keys(gloss.fragment.getBody()).length  > 0;
-    var has_alpha = Object.keys(alpha.fragment.getBody()).length  > 0;
-    var has_alphaclip = Object.keys(alphaclip.fragment.getBody()).length  > 0;
-    var has_refraction = Object.keys(refraction.fragment.getBody()).length  > 0;
+    var has_gloss = gloss.fragment.isCodeUsed();
+    var has_albedo = albedo.fragment.isCodeUsed();
+    var has_normal = normal.fragment.isCodeUsed();
+    var has_specular = specular.fragment.isCodeUsed();
+    var has_emission = emission.fragment.isCodeUsed();
+    var has_gloss = gloss.fragment.isCodeUsed();
+    var has_alpha = alpha.fragment.isCodeUsed();
+    var has_alphaclip = alphaclip.fragment.isCodeUsed();
+    var has_refraction = refraction.fragment.isCodeUsed();
 
     var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
     var light_color = LiteGraph.hexToColor(properties.color);
@@ -5694,7 +5702,8 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
 //    for (var line in gloss.fragment.includes) { includes[line] = 1; }
 //    for (var line in alpha.fragment.includes) { includes[line] = 1; }
 //    for (var line in offset.fragment.includes) { includes[line] = 1; }
-    albedo.fragment.addHeaderLine("uniform samplerCube u_cube_default_texture;\n");
+    if(albedo.fragment !== LiteGraph.EMPTY_CODE.fragment)
+        albedo.fragment.addHeaderLine("uniform samplerCube u_cube_default_texture;\n");
 
 
 
@@ -6116,16 +6125,24 @@ PConstant.prototype.getFragmentCode = function (output_var, value, scope) {
 PConstant.prototype.getCode = function (params) {
     var out_var = params.out_var;
     var a = params.a;
+    var is_global = params.hasOwnProperty("is_global") ? params.is_global : false;
     var scope = params.scope;
     var order = params.hasOwnProperty("order") ? params.order : Number.MAX_VALUE;
 
     var vertex = new CodePiece(order);
-    vertex.setBody(this.getVertexCode(out_var, a, scope));
-    vertex.setIncludesFromMap(this.includes);
-
     var fragment = new CodePiece(order);
-    fragment.setBody(this.getFragmentCode(out_var, a, scope));
+    if(!is_global){
+        vertex.setBody(this.getVertexCode(out_var, a, scope));
+        fragment.setBody(this.getFragmentCode(out_var, a, scope));
+    } else {
+        var id = {};
+        var s = "uniform "+this.type+" " +out_var+";\n";
+        id[s] = 1;
+        vertex.setHeaderFromMap(id);
+        fragment.setHeaderFromMap(id);
+    }
     fragment.setIncludesFromMap(this.includes );
+    vertex.setIncludesFromMap(this.includes);
 
     return new ShaderCode(vertex, fragment, out_var);
 }

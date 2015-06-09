@@ -276,6 +276,7 @@ EZ.EMesh.prototype.render = function (renderer) {
     }
     [GL.SRC_ALPHA, GL.ONE],
 
+    this.setExtraUniforms(shader);// for the editor
     shader.uniforms(this.uniforms);
     shader.uniforms(renderer.uniforms);
     shader.draw(this.mesh_obj , this.flags.primitive === undefined ? gl.TRIANGLES : this.flags.primitive);
@@ -287,6 +288,15 @@ EZ.EMesh.prototype.render = function (renderer) {
     if (this.flags.depth_write === false)
         gl.depthMask(true);
 };
+
+EZ.EMesh.prototype.setExtraUniforms = function (shader) {
+    var unis = {};
+    for (var i in shader.globals) {
+        unis[shader.globals[i].name] = shader.globals[i].getValue();
+    }
+    shader.uniforms(unis);
+};
+
 /**
  * Created by vik on 17/01/2015.
  */
