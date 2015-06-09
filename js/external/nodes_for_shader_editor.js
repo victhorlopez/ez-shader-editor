@@ -449,7 +449,7 @@ LGraphConstant.prototype.callbackIsGlobal = function(  )
     if(this.id in this.graph.globals)
         delete this.graph.globals[this.id];
     else{
-        this.graph.globals[this.id] = {name:"float_"+this.id, value: this.properties , getValue:function(){return [this.value.value]}};
+        this.graph.globals[this.id] = {name:"float_"+this.id, value: this.properties , getValue:function(){return this.value.value}};
     }
 
 
@@ -782,9 +782,15 @@ LGraphCamToPixelWS.desc = "The vector from camera to pixel";
 
 LGraphCamToPixelWS.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode({order:this.order}); // I need to check texture id
+
 }
 
+LGraphCamToPixelWS.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode({order:this.order,
+        scope:scope
+    }); // I need to check texture id
+}
 
 LiteGraph.registerNodeType("coordinates/"+ LGraphCamToPixelWS.title , LGraphCamToPixelWS);
 
@@ -837,9 +843,15 @@ LGraphPixelNormalWS.desc = "The normal in world space";
 
 LGraphPixelNormalWS.prototype.onExecute = function()
 {
-    this.codes[0] = this.shader_piece.getCode({order:this.order}); // I need to check texture id
+
 }
 
+LGraphPixelNormalWS.prototype.processInputCode = function(scope)
+{
+    this.codes[0] = this.shader_piece.getCode({order:this.order,
+        scope:scope
+    }); // I need to check texture id
+}
 
 LiteGraph.registerNodeType("coordinates/"+LGraphPixelNormalWS.title, LGraphPixelNormalWS);
 
@@ -1628,7 +1640,7 @@ function LGraphCubemap()
 {
     this.addOutput("Cubemap","Cubemap");
     this.addOutput("Color","vec4", {vec4:1});
-    this.addInput("vec3","vec3");
+    this.addInput("vec3","vec3", {vec3:1});
     this.properties =  this.properties || {};
     this.properties.name = "";
 
@@ -2687,7 +2699,7 @@ LGraphReflect.prototype.onExecute = function()
 }
 
 
-LGraphReflect.prototype.processInputCode = function()
+LGraphReflect.prototype.processInputCode = function(scope)
 {
 
     var code_normal = this.getInputCode(0); // normal
@@ -2695,8 +2707,14 @@ LGraphReflect.prototype.processInputCode = function()
 
     // (output, incident, normal)
     if(code_incident && code_normal){
-        var output_code = this.codes[0] = this.shader_piece.getCode("reflect_"+this.id, code_incident.getOutputVar(), code_normal.getOutputVar(), CodePiece.FRAGMENT, "vec3"); // output var must be fragment
-        output_code.order = this.order;
+        var output_code = this.codes[0] = this.shader_piece.getCode(
+            { out_var: "reflect_" + this.id,
+                a: code_incident.getOutputVar(),
+                b: code_normal.getOutputVar(),
+                scope: scope,
+                out_type: "vec3",
+                order: this.order
+            });
 
         output_code.merge(code_normal);
         output_code.merge(code_incident);

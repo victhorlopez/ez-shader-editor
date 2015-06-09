@@ -1,4 +1,4 @@
-body{
+body #layout{
     background-color: #222222;
     margin: 0px;
 }
@@ -15,11 +15,11 @@ body{
     border-bottom-color: #555 !important;
 }
 
-body .dg .c,
-body .dg .cr.function,
-body .dg .c select,
-body .dg .property-name,
-body .dg .title {
+body #layout .dg .c,
+body #layout .dg .cr.function,
+body #layout .dg .c select,
+body #layout .dg .property-name,
+body #layout .dg .title {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -30,30 +30,30 @@ body .dg .title {
 
 
 /* only for the right column panel of dat guio */
-body #palette .property-name{
+body #layout #palette .property-name{
     width :100%;
 }
 
-body .dg .property-name{
+body #layout .dg .property-name{
     padding-left: 12px;
 }
 
-body .dg.main {
+body #layout .dg.main {
     /*box-shadow: 0 0 8px rgba(0,0,0,0.7);*/
     overflow: auto;
 }
 
 @media only screen and (max-width : 1350px) {
-    body.gui-auto-hide .dg.ac {
+    body #layout.gui-auto-hide .dg.ac {
         right: -233px;
     }
 
-    body .dg.ac:hover,
-    body.gui-show .dg.ac {
+    body #layout .dg.ac:hover,
+    body #layout.gui-show .dg.ac {
         right: 0px;
     }
 
-    body.gui-auto-hide.gui-transitions .dg.ac {
+    body #layout.gui-auto-hide.gui-transitions .dg.ac {
         -webkit-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
         -moz-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
         -o-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
@@ -68,8 +68,8 @@ body .dg.main {
         -webkit-transition-delay: 3s;
     }
 
-    body.gui-transitions .dg.ac:hover,
-    body.gui-show.gui-transitions .dg.ac {
+    body #layout.gui-transitions .dg.ac:hover,
+    body #layout.gui-show.gui-transitions .dg.ac {
         -webkit-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
         -moz-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
         -o-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
@@ -85,26 +85,26 @@ body .dg.main {
     }
 }
 
-body .dg.main.taller-than-window .close-button {
+body #layout .dg.main.taller-than-window .close-button {
     border-top: 1px solid #444;
     border-right: 4px solid #444;
 }
 
-body .dg.main .close-button {
+body #layout .dg.main .close-button {
     background-color: #444;
     display:none !important; /* we want the close button always hidden*/
 }
 
-body .dg.main .close-button:hover {
+body #layout .dg.main .close-button:hover {
     background-color: #555;
 }
 
-body .dg.main::-webkit-scrollbar {
+body #layout .dg.main::-webkit-scrollbar {
     background: #3d3d3d;
     width: 11px;
 }
 
-body .dg.main::-webkit-scrollbar-thumb {
+body #layout .dg.main::-webkit-scrollbar-thumb {
     background: transparent;
     width: 5px;
     border-left: 5px solid rgba(0,0,0,0.2);
@@ -112,37 +112,38 @@ body .dg.main::-webkit-scrollbar-thumb {
     border-radius: 0;
 }
 
-body .dg {
+body #layout .dg {
     color: #aaa;
     text-shadow: none !important;
 }
 
-body .dg ul{
+body #layout .dg ul{
     padding: 0px 4px 0px 0px;
 }
 
-body .dg li:not(.folder) {
+body #layout .dg li:not(.folder) {
     background: #3d3d3d;
     border-bottom: 0px;
     /*padding: 0 0 0 12px;*/
     padding: 0;
 }
 
-body .dg li.save-row .button {
+body #layout .dg li.save-row .button {
     text-shadow: none !important;
 }
 
-body .dg li.title {
+body #layout .dg li.title {
     padding-left: 22px;
     border-bottom: 1px solid #555;
     background: #444 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 10px 10px no-repeat;
 }
 
-body .dg .cr.boolean:hover {
+body #layout .dg ul .boolean:hover {
     background: #3d3d3d;
 }
 
-body .dg .cr.function {
+body  #w2ui-popup .dg .cr.function,
+body #layout .dg .cr.function {
     border-top: 1px solid #444;
     background: #333;
     color: #aaa;
@@ -150,76 +151,78 @@ body .dg .cr.function {
     border-left: none;
 }
 
-body .dg .cr.function:hover {
+body  #w2ui-popup .dg ul .function:hover,
+body  #layout .dg ul .function:hover {
     background: #3a3a3a;
     border-bottom: 1px solid #2fa1d6;
 }
 
-body .dg .cr.function:active {
+body #w2ui-popup .dg .cr.function:active
+body #layout .dg .cr.function:active {
     border-top: 2px solid #444;
     border-bottom: 0;
     background: #2e2e2e;
 }
 
-body .dg .c select {
+body #layout .dg .c select {
     margin-top: 2px;
     margin-left: 3px;
     padding: 3px 5px;
 }
 
-body .dg .c select,
-body .dg .c input[type=text],
-body .dg .cr.number input[type=text] {
+body #layout .dg .c select,
+body #layout .dg .c input[type=text],
+body #layout .dg .cr.number input[type=text] {
     background: #333;
     color: #999;
     border: 0;
     font-size: 10px;
 }
 
-body .dg .c select,
-body .dg .c select:focus {
+body #layout .dg .c select,
+body #layout .dg .c select:focus {
     width: 99%;
     outline: 0;
 }
 
-body .dg .c input[type=text]:hover {
+body #layout .dg .c input[type=text]:hover {
     background: #444;
 }
 
-body .dg .c input[type=text]:focus {
+body #layout .dg .c input[type=text]:focus {
     background: #444;
     color: #fff;
 }
 
-body .dg .c .slider {
+body #layout .dg .c .slider {
     background: #555;
 }
 
-body .dg .c .slider:hover {
+body #layout .dg .c .slider:hover {
     background: #666;
 }
 
-body .dg .c .slider-fg {
+body #layout .dg .c .slider-fg {
     background: #777;
 }
 
-body .dg .c .slider:hover .slider-fg {
+body #layout .dg .c .slider:hover .slider-fg {
     background: #999;
 }
 
-body .dg li.folder {
+body #layout .dg li.folder {
     border-left: 0;
 }
-body .dg .folder .folder{
+body #layout .dg .folder .folder{
     padding-left:20px;
 }
 
-body .dg.a {
+body #layout .dg.a {
     border-right:4px solid #3d3d3d;
     margin: 0;
 }
 
-body div.w2ui-panel div.w2ui-panel .left_rotated_tab {
+body #layout div.w2ui-panel div.w2ui-panel .left_rotated_tab {
     display: block;
     position: relative;
     z-index: 125;
@@ -239,7 +242,7 @@ body div.w2ui-panel div.w2ui-panel .left_rotated_tab {
     background: #222;
 }
 
-body div.w2ui-panel div.w2ui-panel .right_rotated_tab {
+body #layout div.w2ui-panel div.w2ui-panel .right_rotated_tab {
     display: block;
     position: relative;
     z-index: 125;
@@ -259,7 +262,7 @@ body div.w2ui-panel div.w2ui-panel .right_rotated_tab {
     background: #222;
 }
 
-body .dg .selector {
+body #layout .dg .selector {
     margin-top: 20px;
 }
 
@@ -307,7 +310,7 @@ body .dg .selector {
     text-align: center;
     display: block;
 }
-body .dg li.code-title {
+body #layout .dg li.code-title {
     padding-left: 22px;
     border-bottom: 1px solid #555;
     background-color: #444;

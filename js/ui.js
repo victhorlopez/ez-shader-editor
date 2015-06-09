@@ -465,8 +465,14 @@ vik.ui = (function () {
     module.setProperties = function(nodes) {
         for(var i in nodes){
             var node = nodes[i];
-            if(node.properties.is_global)
+            if(node.properties.is_global){
                 module.addGlobalNode(node);
+                var opts_ctrl = node.options ? node.options["is_global"] : undefined;
+                var cb = opts_ctrl ? (opts_ctrl.callback) : undefined;
+                if(cb)
+                    node[cb]();
+            }
+
         }
     }
 

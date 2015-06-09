@@ -5634,10 +5634,6 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "uniform mat4 u_mvp;\n"+
          "uniform mat4 u_model;\n" +
         "uniform mat4 u_viewprojection;\n";
-    if (albedo.vertex.isLineIncluded("view_dir"))
-        r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
-            "      vec3 light_dir = normalize("+light_dir+");\n" +
-            "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
     var h = albedo.vertex.getHeader();
     for(var id in h)
@@ -5655,6 +5651,10 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
         r += "      float depth = pos4.z / pos4.w;\n";
     }
 
+    if (albedo.vertex.isLineIncluded("view_dir"))
+        r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
+            "      vec3 light_dir = normalize("+light_dir+");\n" +
+            "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
     var body_hash = albedo.vertex.getBody();
     var sorted_map = sortMapByValue(body_hash);
@@ -6650,11 +6650,13 @@ PFresnel.prototype.getCode = function (params) {
 
     var vertex = new CodePiece(order);
     vertex.setBody(this.getVertexCode(out_var,  normal, exp, scope));
-    vertex.setIncludesFromMap(this.includes);
+    if(scope == CodePiece.VERTEX || scope == CodePiece.BOTH)
+        vertex.setIncludesFromMap(this.includes);
 
     var fragment = new CodePiece(order);
     fragment.setBody(this.getFragmentCode(out_var,  normal, exp, scope));
-    fragment.setIncludesFromMap(this.includes );
+    if(scope == CodePiece.FRAGMENT || scope == CodePiece.BOTH)
+        fragment.setIncludesFromMap(this.includes );
 
     return new ShaderCode(vertex, fragment, out_var);
 }
