@@ -88,7 +88,6 @@ vik.app = (function () {
     }
 
 
-
     function loadContent() {
 
         // ez render
@@ -153,6 +152,12 @@ vik.app = (function () {
         render();
 
     }
+    function addEnvironmentGlobals(shader) {
+
+        shader.globals["light_dir"] = {name:"u_light_dir", value: module.scene_properties , getValue:function(){return [this.value.light_dir_x,this.value.light_dir_y,this.value.light_dir_z]}};
+        shader.globals["light_color"] = {name:"u_light_color", value: module.scene_properties , getValue:function(){return LiteGraph.hexToColor(this.value["color"], true)}};
+        shader.globals["alpha_threshold"] = {name:"u_alpha_threshold", value: module.scene_properties , getValue:function(){return this.value.alpha_threshold}};
+    }
 
     module.compile = function (force_compile, draw) {
         if (live_update || force_compile) {
@@ -166,6 +171,7 @@ vik.app = (function () {
                 try {
                     gl.shaders["current"] = new GL.Shader(shader.vertex_code, shader.fragment_code);
                     gl.shaders["current"].globals = shader.globals;
+                    addEnvironmentGlobals(shader);
                 }
                 catch (err) {
                     gl.shaders["current"] = gl.shaders["phong"];

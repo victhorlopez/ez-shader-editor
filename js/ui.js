@@ -111,7 +111,7 @@ vik.ui = (function () {
             } else {
                 vik.app.draw();
             }
-
+            module.updateDisplays();
         });
 
     }
@@ -540,13 +540,13 @@ vik.ui = (function () {
         for(var i in f2.__controllers){
             var controller = f2.__controllers[i];
             controller.onChange(function(value) {
-                vik.app.compile();
+                //vik.app.compile();
             });
         }
         for(var i in f3.__controllers){
             var controller = f3.__controllers[i];
             controller.onChange(function(value) {
-                vik.app.compile();
+                //vik.app.compile();
             });
         }
 

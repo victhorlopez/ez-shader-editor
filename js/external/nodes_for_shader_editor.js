@@ -92,6 +92,7 @@ function LGraph2ParamNode()
     this.addInput("B","", this.getInputTypesB(), this.getInputExtraInfoB());
     this.shader_piece = LiteGraph.CodeLib[this.getCodeName()];
 
+
 }
 
 LGraph2ParamNode.prototype.constructor = LGraph2ParamNode;
@@ -325,6 +326,8 @@ function LGraphConstColor()
     this.addOutput("color","vec4", {vec4:1});
     this.properties = { color:"#ffffff"};
     this.editable = { property:"value", type:"vec4" };
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.boxcolor = this.properties.color;
     this.shader_piece = new PConstant("vec4"); // hardcoded for testing
     this.global_var = {name:"vec4_"+this.id, value: this.properties , getValue:function(){return LiteGraph.hexToColor(this.value["color"], true)}};
@@ -531,8 +534,10 @@ function LGraphConstVec2()
     this.addOutput("value","vec2", {vec2:1});
     this.properties = { v1:1.0,
                         v2:1.0 };
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     //this.editable = { property:"value", type:"vec2" };
-
+    this.size = [115,20];
     this.shader_piece = new PConstant("vec2"); // hardcoded for testing
 }
 
@@ -611,7 +616,10 @@ function LGraphConstVec3()
     this.properties = { v1:1.0,
                         v2:1.0,
                         v3:1.0};
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.editable = { property:"value", type:"vec3" };
+    this.size = [147,20];
     this.shader_piece = new PConstant("vec3"); // hardcoded for testing
 }
 
@@ -692,9 +700,13 @@ function LGraphConstVec4()
                         v2:1.0,
                         v3:1.0,
                         v4:1.0};
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
+
     this.editable = { property:"value", type:"vec4" };
 
     this.shader_piece = new PConstant("vec4");
+    this.size = [181,20];
 }
 
 LGraphConstVec4.title = "ConstVec4";
@@ -864,6 +876,8 @@ function LGraphUVs()
 
     this.properties = { UTiling:1.0,
                         VTiling:1.0 };
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.options = {    UTiling:{ step:0.01},
                         VTiling:{step:0.01}
     };
@@ -1226,6 +1240,7 @@ function LGraphTexture()
 
 
     this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.options.texture_url = {hidden:1};
     var that = this;
     this.options.texture_type = {multichoice:[ 'Color', 'Normal map'], reloadonchange:1,
@@ -1647,6 +1662,8 @@ function LGraphCubemap()
     this.properties =  this.properties || {};
     this.properties.name = "";
     this.properties.texture_url = "";
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.options = {    texture_url:{hidden:1}};
 
 
@@ -2580,6 +2597,8 @@ function LGraphPanner()
     this.addInput("time","", {float:1});
     this.properties = { SpeedX:1.0,
         SpeedY:1.0 };
+    this.options =  this.options || {};
+    this.options.is_global = {hidden:false};
     this.options = {    SpeedX:{min:-1.0, max:1.0, step:0.001},
         SpeedY:{min:-1.0, max:1.0, step:0.001}
     };

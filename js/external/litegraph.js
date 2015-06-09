@@ -1907,8 +1907,13 @@ LGraphNode.prototype.addBasicProperties = function(  )
     var that = this;
     this.properties.is_global = false;
     this.properties.global_name = this.title;
+    this.options =  this.options || {};
     this.options.global_name = {hidden:true};
-    this.options.is_global = {reloadonchange:1, callback: "callbackIsGlobal"};
+    this.options.is_global =  this.options.is_global || {};
+    this.options.is_global.reloadonchange = 1;
+    this.options.is_global.callback  = "callbackIsGlobal";
+    this.options.is_global.hidden = this.options.is_global.hasOwnProperty("hidden") ? this.options.is_global.hidden  : true;
+
 }
 
 LGraphNode.prototype.callbackIsGlobal = function(  )
@@ -5602,18 +5607,6 @@ ShaderConstructor.createShader = function (properties , albedo,normal,emission,s
 
 ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emission,specular,gloss,alpha,alphaclip, refraction, offset) {
 
-
-//    var includes = {};
-//    for (var line in albedo.vertex.includes) { includes[line] = 1; }
-//    for (var line in normal.vertex.includes) { includes[line] = 1; }
-//    for (var line in emission.vertex.includes) { includes[line] = 1; }
-//    for (var line in specular.vertex.includes) { includes[line] = 1; }
-//    for (var line in gloss.vertex.includes) { includes[line] = 1; }
-//    for (var line in alpha.vertex.includes) { includes[line] = 1; }
-//    for (var line in alphaclip.vertex.includes) { includes[line] = 1; }
-//    for (var line in offset.vertex.includes) { includes[line] = 1; }
-    var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
-
     // header
     var r = "precision mediump float;\n"+
         "attribute vec3 a_vertex;\n"+
@@ -5634,6 +5627,9 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
     r += "uniform mat4 u_mvp;\n"+
          "uniform mat4 u_model;\n" +
         "uniform mat4 u_viewprojection;\n";
+    r += "uniform vec3 u_light_dir;\n";
+    r += "uniform vec4 u_light_color;\n";
+    r += "uniform float u_alpha_threshold;\n";
 
     var h = albedo.vertex.getHeader();
     for(var id in h)
@@ -5653,7 +5649,7 @@ ShaderConstructor.createVertexCode = function (properties ,albedo,normal,emissio
 
     if (albedo.vertex.isLineIncluded("view_dir"))
         r += "      vec3 view_dir = normalize(v_pos - u_eye);\n" +
-            "      vec3 light_dir = normalize("+light_dir+");\n" +
+             "      vec3 light_dir = normalize(u_light_dir);\n" +
             "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
     var body_hash = albedo.vertex.getBody();
@@ -5690,9 +5686,6 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     var has_alphaclip = alphaclip.fragment.isCodeUsed();
     var has_refraction = refraction.fragment.isCodeUsed();
 
-    var light_dir = "vec3("+properties.light_dir_x+","+properties.light_dir_y+","+properties.light_dir_z+")";
-    var light_color = LiteGraph.hexToColor(properties.color);
-    var alpha_threshold = properties.alpha_threshold;
 
 //    var includes = albedo.fragment.includes;
 //    for (var line in albedo.fragment.includes) { includes[line] = 1; }
@@ -5723,6 +5716,9 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     //if (includes["u_eye"])
         r += "uniform vec3 u_eye;\n";
     r += "uniform vec4 u_color;\n";
+    r += "uniform vec3 u_light_dir;\n";
+    r += "uniform vec4 u_light_color;\n";
+    r += "uniform float u_alpha_threshold;\n";
     var h = albedo.fragment.getHeader();
     for(var id in h)
         r += h[id];
@@ -5753,7 +5749,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     //if (albedo.fragment.isLineIncluded("view_dir"))
     r += "      vec3 view_dir = normalize(v_pos - u_eye);\n";
     // constans for light
-    r +="      vec3 light_dir = normalize("+light_dir+");\n" +
+    r +="      vec3 light_dir = normalize(u_light_dir);\n" +
         "      vec3 half_dir = normalize(view_dir + light_dir);\n";
 
 
@@ -5772,7 +5768,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     }
 
     if(has_alphaclip) {
-        r += "       if ("+alphaclip.getOutputVar()+" < "+alpha_threshold.toFixed(3)+")\n" +
+        r += "       if ("+alphaclip.getOutputVar()+" < u_alpha_threshold)\n" +
             "      {\n" +
             "           discard;\n" +
             "      }\n";
@@ -5806,7 +5802,7 @@ ShaderConstructor.createFragmentCode = function (properties, albedo,normal,emiss
     r +="      vec3 reflect_dir = reflect(light_dir, normal);\n" +
         "      float spec_angle = max(dot(reflect_dir, view_dir), 0.0);\n" +
         "      float specular_light = pow(spec_angle, gloss) * specular_intensity;\n" +
-        "      vec3 specular_color = "+light_color+".xyz * specular_light;\n"; // vec3(1.0) is the light color
+        "      vec3 specular_color = u_light_color.xyz * specular_light;\n"; // vec3(1.0) is the light color
 
 //    // reflections
 //    r +="      vec3 reflected_vector2 = reflect(view_dir,normal);\n" +

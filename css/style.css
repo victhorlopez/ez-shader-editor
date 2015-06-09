@@ -15,18 +15,18 @@ body #layout{
     border-bottom-color: #555 !important;
 }
 
-body #layout .dg .c,
-body #layout .dg .cr.function,
-body #layout .dg .c select,
-body #layout .dg .property-name,
-body #layout .dg .title {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
+/*body #layout .dg .c,*/
+/*body #layout .dg .cr.function,*/
+/*body #layout .dg .c select,*/
+/*body #layout .dg .property-name,*/
+/*body #layout .dg .title {*/
+    /*-webkit-touch-callout: none;*/
+    /*-webkit-user-select: none;*/
+    /*-khtml-user-select: none;*/
+    /*-moz-user-select: none;*/
+    /*-ms-user-select: none;*/
+    /*user-select: none;*/
+/*}*/
 
 
 /* only for the right column panel of dat guio */
@@ -38,52 +38,52 @@ body #layout .dg .property-name{
     padding-left: 12px;
 }
 
-body #layout .dg.main {
-    /*box-shadow: 0 0 8px rgba(0,0,0,0.7);*/
+body #layout #palette .dg.main {
+    box-shadow: 0 0 8px rgba(0,0,0,0.7);
     overflow: auto;
 }
 
-@media only screen and (max-width : 1350px) {
-    body #layout.gui-auto-hide .dg.ac {
-        right: -233px;
-    }
+/*@media only screen and (max-width : 1350px) {*/
+    /*body #layout.gui-auto-hide .dg.ac {*/
+        /*right: -233px;*/
+    /*}*/
 
-    body #layout .dg.ac:hover,
-    body #layout.gui-show .dg.ac {
-        right: 0px;
-    }
+    /*body #layout .dg.ac:hover,*/
+    /*body #layout.gui-show .dg.ac {*/
+        /*right: 0px;*/
+    /*}*/
 
-    body #layout.gui-auto-hide.gui-transitions .dg.ac {
-        -webkit-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
-        -moz-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
-        -o-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
-        transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
+    /*body #layout.gui-auto-hide.gui-transitions .dg.ac {*/
+        /*-webkit-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
+        /*-moz-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
+        /*-o-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
+        /*transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
 
-        -webkit-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);
-        -moz-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);
-        -o-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);
-        transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);
+        /*-webkit-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
+        /*-moz-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
+        /*-o-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
+        /*transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);*/
 
-        transition-delay: 3s;
-        -webkit-transition-delay: 3s;
-    }
+        /*transition-delay: 3s;*/
+        /*-webkit-transition-delay: 3s;*/
+    /*}*/
 
-    body #layout.gui-transitions .dg.ac:hover,
-    body #layout.gui-show.gui-transitions .dg.ac {
-        -webkit-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
-        -moz-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
-        -o-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
-        transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
+    /*body #layout.gui-transitions .dg.ac:hover,*/
+    /*body #layout.gui-show.gui-transitions .dg.ac {*/
+        /*-webkit-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
+        /*-moz-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
+        /*-o-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
+        /*transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
 
-        -webkit-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);
-        -moz-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);
-        -o-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);
-        transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);
+        /*-webkit-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
+        /*-moz-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
+        /*-o-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
+        /*transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);*/
 
-        transition-delay: 0;
-        -webkit-transition-delay: 0;
-    }
-}
+        /*transition-delay: 0;*/
+        /*-webkit-transition-delay: 0;*/
+    /*}*/
+/*}*/
 
 body #layout .dg.main.taller-than-window .close-button {
     border-top: 1px solid #444;
@@ -92,7 +92,7 @@ body #layout .dg.main.taller-than-window .close-button {
 
 body #layout .dg.main .close-button {
     background-color: #444;
-    display:none !important; /* we want the close button always hidden*/
+    display:none !important;  we want the close button always hidden
 }
 
 body #layout .dg.main .close-button:hover {
@@ -117,14 +117,13 @@ body #layout .dg {
     text-shadow: none !important;
 }
 
-body #layout .dg ul{
-    padding: 0px 4px 0px 0px;
-}
+/*body #layout .dg ul{*/
+    /*padding: 0px 4px 0px 0px;*/
+/*}*/
 
 body #layout .dg li:not(.folder) {
     background: #3d3d3d;
     border-bottom: 0px;
-    /*padding: 0 0 0 12px;*/
     padding: 0;
 }
 
@@ -164,11 +163,11 @@ body #layout .dg .cr.function:active {
     background: #2e2e2e;
 }
 
-body #layout .dg .c select {
-    margin-top: 2px;
-    margin-left: 3px;
-    padding: 3px 5px;
-}
+/*body #layout .dg .c select {*/
+    /*margin-top: 2px;*/
+    /*margin-left: 3px;*/
+    /*padding: 3px 5px;*/
+/*}*/
 
 body #layout .dg .c select,
 body #layout .dg .c input[type=text],
