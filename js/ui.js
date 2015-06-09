@@ -512,7 +512,7 @@ vik.ui = (function () {
         }
 
         var f2 = properties_gui.__folders["Lighting"];
-        f2.add(properties, 'light_mode', [ 'phong', 'blinn-phong' ]);
+        f2.add(properties, 'light_mode', [ 'phong' ]);
         f2.addColor(properties, 'color');
         f2.add(properties, 'light_dir_x', -1, 1, 0.01);
         f2.add(properties, 'light_dir_y', -1, 1, 0.01);

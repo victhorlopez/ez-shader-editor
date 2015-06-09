@@ -28,6 +28,7 @@ body .dg .title {
     user-select: none;
 }
 
+
 /* only for the right column panel of dat guio */
 body #palette .property-name{
     width :100%;
@@ -261,6 +262,7 @@ body div.w2ui-panel div.w2ui-panel .right_rotated_tab {
 body .dg .selector {
     margin-top: 20px;
 }
+
 
 #layout_layout2_panel_left div.w2ui-panel-content, #layout_layout3_panel_right div.w2ui-panel-content{
     background: #222;
