@@ -6,3 +6,4 @@ Material
 Lava
 Rim_lighting
 Stripes
+Stripes2
