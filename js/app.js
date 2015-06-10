@@ -297,7 +297,7 @@ vik.app = (function () {
                 vik.ui.reset();
             } else {
                 var gl = canvas2webgl ? renderer.context : graph_gl;
-                var tex = LGraphTexture.loadTextureFromFile(data, filename, file, null, gl);
+                //var tex = LGraphTexture.loadTextureFromFile(data, filename, file, null, gl);
             }
         }
         module.compile(true, true);

@@ -30,14 +30,14 @@ var LiteGraph = {
     NODE_DEFAULT_BGCOLOR: "#444",
     NODE_DEFAULT_BOXCOLOR: "#AEF",
     NODE_SELECTED_COLOR: "#FFF",
-    NODE_DEFAULT_SHAPE: "box", // round circle box
+    NODE_DEFAULT_SHAPE: "round", // round circle box
     MAX_NUMBER_OF_NODES: 1000, //avoid infinite loops
     DEFAULT_POSITION: [100,100],//default node position
     node_images_path: "",
 
     proxy: null, //used to redirect calls
 
-    debug: true,
+    debug: false,
     throw_errors: true,
     showcode:true,
     registered_node_types: {},
@@ -203,7 +203,7 @@ var LiteGraph = {
                 categories[ this.registered_node_types[i].category ] = 1;
         var result = [];
         for(var i in categories)
-           // if(i != "core")
+           if(i != "core")
                 result.push(i);
         return result;
     },
@@ -1908,16 +1908,17 @@ LGraphNode.prototype.addBasicProperties = function(  )
     this.properties.is_global = false;
     this.properties.global_name = this.title;
     this.options =  this.options || {};
-    this.options.global_name = {hidden:true};
     this.options.is_global =  this.options.is_global || {};
     this.options.is_global.reloadonchange = 1;
     this.options.is_global.callback  = "callbackIsGlobal";
     this.options.is_global.hidden = this.options.is_global.hasOwnProperty("hidden") ? this.options.is_global.hidden  : true;
+    this.options.global_name = {hidden:!this.properties.is_global};
 
 }
 
 LGraphNode.prototype.callbackIsGlobal = function(  )
 {
+    this.setGlobalColor();
     this.options.global_name.hidden = !this.options.global_name.hidden
 }
 
@@ -3042,7 +3043,14 @@ LGraphNode.prototype.connectTemplateSlot = function(){
     this.in_conected_using_T++;
 }
 
+LGraphNode.prototype.setGlobalColor = function() {
+    if(this.properties.is_global){
+        this.color = "#AFA";
+    } else {
+        delete this.color ;
+    }
 
+}
 
 
 
