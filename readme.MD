@@ -13,7 +13,7 @@ The project includes some other libraries to fulfill other requirements
 
  For the UI:
  * Dat.gui (https://code.google.com/p/dat-gui/)  
- * w2ui (https://code.google.com/p/dat-gui/)
+ * w2ui (http://w2ui.com/web/)
  For the icons:
  * Font-awesome: (http://fortawesome.github.io/Font-Awesome/)
  General utility:
@@ -24,7 +24,7 @@ The project includes some other libraries to fulfill other requirements
 The assets for the project all are extracted from the following links.
 
 * http://artsaucebyjesse.blogspot.com.es/2015/02/zbrush-tiling-seamless-texture.html
-* http://www.cgfeedback.com/cgfeedback/showthread.php?t=751
+* http://graphics.cs.williams.edu/data/meshes.xml
 * https://forums.epicgames.com/threads/506748-My-skies-and-and-cliff-textures-(large-images
 * http://www.humus.name/index.php?page=Textures
 * http://irrlicht.sourceforge.net/forum//viewtopic.php?t=21057
