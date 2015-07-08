@@ -10,3 +10,4 @@ cloud.png
 ocean_waves_normal1.jpg
 ocean_waves_normal2.jpg
 perlin_noise.png
+leaf.png

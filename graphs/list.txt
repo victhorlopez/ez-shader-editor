@@ -5,5 +5,5 @@ Glass
 Material
 Lava
 Rim_lighting
-Stripes
-Stripes2
+Animated_Material
+Leaf
