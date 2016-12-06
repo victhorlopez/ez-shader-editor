@@ -210,6 +210,8 @@ vik.ui = (function () {
         div.className ="top-button " + (options.div_class || "");
         var anchor = document.createElement("a");
         anchor.id = id;
+        if(options.anchor_href)
+            anchor.setAttribute('href', options.anchor_href);
         var content = document.createTextNode(text);
         var icon = document.createElement("i");
         icon.className  = icon_class;
@@ -247,6 +249,7 @@ vik.ui = (function () {
         //addTopBarButton("change_canvas","fa fa-cubes","Canvas", {div_class:"pressed"});
         addTopBarButton("change_layout","fa fa-desktop","Full Screen");
         addTopBarButton("about","fa fa-info","About");
+        addTopBarButton("contact","fa fa-envelope","victhorlopezz@gmail.com", {div_class:"contact", anchor_href:"mailto:victhorlopezz@gmail.com"});
 
         $("#layout_layout2_panel_main .w2ui-panel-content").append('<div id="mesh-changer"></div>');
         addMeshChangerButton("sphere","fa fa-globe","Sphere");
