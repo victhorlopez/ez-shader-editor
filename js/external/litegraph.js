@@ -5425,7 +5425,7 @@ CodePiece.prototype.setIncludesFromMap = function(map)
 
 CodePiece.prototype.isLineIncluded = function(s)
 {
-    var id = s.hashCode();
+    var id = ""+s.hashCode();
     return this.includes.hasOwnProperty(id);
 };
 
