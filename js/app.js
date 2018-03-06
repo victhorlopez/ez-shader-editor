@@ -46,7 +46,8 @@ vik.app = (function () {
         window.addEventListener("load", vik.ui.init());
         loadContent();
         loadListeners();
-        module.changeGraph("lee.json");
+        var graph = getGraphFromURL() || 'lee.json';
+        module.changeGraph(graph);
     }
 
     module.loadTexture = function (name, url, sync_load, params) {
@@ -87,6 +88,21 @@ vik.app = (function () {
         request.send();
     }
 
+    function getGraphFromURL() {
+        var qs = document.location.search;
+        console.log("qs "+qs);
+        qs = qs.split('+').join(' ');
+    
+        var params = {},
+            tokens,
+            re = /[?&]?([^=]+)=([^&]*)/g;
+    
+        while (tokens = re.exec(qs)) {
+            params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+        }
+    
+        return params.graph;
+    }
 
     function loadContent() {
 
