@@ -3275,10 +3275,10 @@ LGraphCanvas.prototype.setCanvas = function (canvas) {
     //if( 'touchstart' in document.documentElement )
 //    {
 //        //alert("doo");
-//        canvas.addEventListener("touchstart", this.touchHandler.bind(this), true);
-//        canvas.addEventListener("touchmove", this.touchHandler.bind(this), true);
-//        canvas.addEventListener("touchend", this.touchHandler.bind(this), true);
-//        canvas.addEventListener("touchcancel", this.touchHandler.bind(this), true);
+       canvas.addEventListener("touchstart", this.touchHandler.bind(this), true);
+       canvas.addEventListener("touchmove", this.touchHandler.bind(this), true);
+       canvas.addEventListener("touchend", this.touchHandler.bind(this), true);
+       canvas.addEventListener("touchcancel", this.touchHandler.bind(this), true);
 //    }
 
     //this.canvas.onselectstart = function () { return false; };
